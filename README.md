@@ -1,4 +1,4 @@
-![WELA Logo](https://drive.google.com/open?id=1QOdbm6zyt-2VVo0bIFeWnLc1zm7TOiX7)</br>
+![WELA Logo](Wela-logo-small.png)</br>
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.md)
 
 # Wela
