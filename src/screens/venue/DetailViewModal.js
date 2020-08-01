@@ -1,3 +1,4 @@
+/* @flow */
 import React from "react";
 import {
     StyleSheet,
@@ -24,17 +25,12 @@ import { updateVenueProfile } from '../../network/PostDataPayloads';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
-
-// import { ScrollView } from "react-native-gesture-handler";
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
 var textInputLimit = null
 var textInputPeople = null
 
-// const [time, setTime] = useState(new Date());
-
-class DetailViewModal extends React.Component {
-
+export default class DetailViewModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -57,16 +53,23 @@ class DetailViewModal extends React.Component {
             longtitudeEdit: 11.000,
             zip_code: '',
             zip_codeEdit: '',
-            timesToEdit: []
+            timesToEdit: [],
+            businessEmail: '',
+            streetNumber: '',
+            streetAddress: '',
+            city: '',
+            province: '',
+            country: '',
         }
     }
-
 
     async loadUpdatedData() {
         let user = await Helper.venueUserObject
         Helper.DEBUG_LOG("user lat -> " + user.latitude)
         Helper.DEBUG_LOG("user longt -> " + user.longitude)
         this.setState({ loggedInVenue: user, dataSource: Helper.venueProfiles })
+        console.log('loadUpdatedData : ', user);
+        //streetNumber, streetAddress, province, country
         this.setState({
             total_capacity: user.total_capacity,
             limit_group: user.limit_group,
@@ -77,9 +80,13 @@ class DetailViewModal extends React.Component {
             latitudeEdit: user.latitude,
             longtitudeEdit: user.longitude,
             zip_code: user.zip_code,
-
+            businessEmail: user.business_email,
+            streetNumber: user.street_number,
+            streetAddress: user.street_name,
+            city: user.city,
+            province: user.province,
+            country: user.country,
         })
-
         this.state.dataSource.forEach(profile => {
             var data = {
                 id: profile.id,
@@ -91,9 +98,9 @@ class DetailViewModal extends React.Component {
         })
         Helper.DEBUG_LOG(this.state.timesToEdit)
     }
-    async componentDidMount() {
-        this.loadUpdatedData()
 
+    async componentDidMount() {
+        await this.loadUpdatedData()
     }
 
     showDatePicker() {
@@ -107,7 +114,6 @@ class DetailViewModal extends React.Component {
     handleConfirm = (date) => {
         this.hideDatePicker()
         var time = date.toLocaleTimeString('en-US')
-       
         var spilted = time.split(':')
         var hr = spilted[0]
         var minutes = spilted[1]
@@ -120,15 +126,12 @@ class DetailViewModal extends React.Component {
             hours = hours - 12;
           }
         }
-        
+
         if(hours == 0){
             hours = 12;
         }
 
         var time = `${hours}:${minutes} ${am_pm}`
-        //alert(time)
-        
-
         let itemsArr = this.state.timesToEdit
         if (this.state.isOpenTime == true) {
             itemsArr[this.state.selectedIndex]['open_time'] = time
@@ -138,8 +141,6 @@ class DetailViewModal extends React.Component {
 
         this.setState({ timesToEdit: itemsArr })
         setTimeout(() => { this.hideDatePicker()}, 1000)
-        //console.warn("time ", time);
-       
     };
 
     cancelVenueDetailView() {
@@ -151,17 +152,14 @@ class DetailViewModal extends React.Component {
             zip_code: this.state.loggedInVenue.zip_code,
             limit_group: this.state.loggedInVenue.limit_group,
             total_capacity: this.state.loggedInVenue.total_capacity
-
         })
     }
 
     async onAddManualQueueRequest() {
-
         const { loggedInVenue, timesToEdit } = this.state;
-        const { address, latitude, longtitude, zip_code, total_capacity, limit_group } = this.state;
+        const { latitude, longtitude, zip_code, total_capacity, limit_group } = this.state;
 
         var _id = loggedInVenue.id
-        var _location = address
         var _latitude = ""
         var _longitude = ""
         var _zip_code = zip_code
@@ -187,13 +185,11 @@ class DetailViewModal extends React.Component {
             }
         })
 
-
         var message
         var error = false
 
-
-        if (_location.trim() == '') {
-            message = 'Please enter location!'
+        if (this.state.streetAddress.trim() == '') {
+            message = 'Please enter street name!'
             error = true
         } else if (_zip_code.toString().trim() == '') {
             message = 'Please enter zip code!'
@@ -216,7 +212,12 @@ class DetailViewModal extends React.Component {
 
             const PAYLOAD = await updateVenueProfile(
                 _id,
-                _location,
+                this.state.businessEmail,
+                this.state.streetAddress,
+                this.state.streetNumber,
+                this.state.city,
+                this.state.province,
+                this.state.country,
                 _latitude,
                 _longitude,
                 _zip_code,
@@ -233,17 +234,14 @@ class DetailViewModal extends React.Component {
                     Helper.venueUserObject = jsonObject.apiResponse.data
                     this.setState({ dataSource: jsonObject.apiResponse.profile })
                     this.loadUpdatedData()
-                    setTimeout(() => { this.cancelVenueDetailView() }, 4000)
-
+                    this.cancelVenueDetailView()
                 }
-                setTimeout(() => { this.setState({ isLoading: false }) }, 4000)
+                this.setState({ isLoading: false })
                 showToastMessage("", jsonObject.apiResponse.message)
-
             })
-
         }
-
     }
+
     cancelVenueDetailView() {
         this.props.cancelVenueDetailView()
     }
@@ -254,11 +252,9 @@ class DetailViewModal extends React.Component {
     onAddAddress() {
         this.setState({ addressViewOpened: false })
         let { addressEdit} = this.state
-        this.setState({
-            address: addressEdit,
-
-        })
+        this.setState({address: addressEdit})
     }
+
     CancelAddressModification() {
         this.setState({ addressViewOpened: false })
         let { address, latitude, longtitude } = this.state
@@ -266,18 +262,15 @@ class DetailViewModal extends React.Component {
             addressEdit: address,
             latitudeEdit: latitude,
             longtitudeEdit: longtitude,
-
         })
     }
-
-
 
     getDay(day) {
         return day.length ? day.charAt(0).toUpperCase() + day.slice(1) : day
     }
+
     ADDRESS_VIEW() {
         return (
-
             <Modal
                 onRequestClose={() => this.setState({ addressViewOpened: false })}
                 animationType={'fade'}
@@ -299,7 +292,6 @@ class DetailViewModal extends React.Component {
                             borderRadius: 5,
                             alignItems: 'center',
                             padding: 10,
-
                         }}>
                         <ScrollView>
                             <UserInput
@@ -319,28 +311,6 @@ class DetailViewModal extends React.Component {
                                 multiline={true}
 
                             />
-                            {/* <UserInput
-                                width={'90%'}
-                                placeholderTextColor={colors.black}
-                                placeholder="Location Latitude"
-                                autoCapitalize={'none'}
-                                returnKeyType={'next'}
-                                keyboardType='decimal-pad'
-                                autoCorrect={false}
-                                value={this.state.latitudeEdit.toString()}
-                                onChangeText={text => this.setState({ latitudeEdit: text })}
-                            />
-                            <UserInput
-                                width={'90%'}
-                                placeholderTextColor={colors.black}
-                                placeholder="Location Longtitude"
-                                autoCapitalize={'none'}
-                                returnKeyType={'done'}
-                                keyboardType='decimal-pad'
-                                autoCorrect={false}
-                                value={this.state.longtitudeEdit.toString()}
-                                onChangeText={text => this.setState({ longtitudeEdit: text })}
-                            /> */}
 
                             <Button
                                 width={(DEVICE_WIDTH / 4) * 3}
@@ -360,12 +330,9 @@ class DetailViewModal extends React.Component {
                 </View>
                 {/* </Card> */}
             </Modal>
-
         )
     }
-    onCloseDateChange(index) {
 
-    }
     onOpenDate(index, isOpenTime) {
         this.setState({ selectedIndex: index, isOpenTime: isOpenTime })
         this.showDatePicker()
@@ -373,7 +340,6 @@ class DetailViewModal extends React.Component {
 
     render() {
         return (
-
             <Modal
                 animationType={'fade'}
                 onRequestClose={() => { this.props.cancelVenueDetailView(); }}
@@ -402,7 +368,7 @@ class DetailViewModal extends React.Component {
 
                         }}>
                         <ScrollView>
-                            {/* 
+                            {/*
                         *
                         * VENUE NAME VIEW ...............
                         */}
@@ -413,18 +379,18 @@ class DetailViewModal extends React.Component {
                             }}>
                                 <Text style={{
                                     justifyContent: 'flex-start',
+                                    fontFamily: 'Rubik-Light',
                                     alignContent: 'flex-start',
                                     alignSelf: 'flex-start',
                                     color: colors.black,
                                     flex: 1
-                                }}>{this.state.loggedInVenue.name}</Text>
+                                }}>{this.state.loggedInVenue.business_name}</Text>
 
                                 <Image
                                     style={{
                                         justifyContent: 'center',
                                         alignContent: 'center',
                                         alignSelf: 'center',
-                                        textAlignVertical: 'center',
                                         width: 22, height: 22, marginRight: 15
                                     }}
                                     source={require('../../screens/images/ic_profile.png')}
@@ -432,8 +398,23 @@ class DetailViewModal extends React.Component {
 
                             </View>
 
+                            <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
+                              <TextInput
+                                  style={[styles.inputStyle, {width: '100%'}]}
+                                  keyboardType={'default'}
+                                  placeholder={"Business Email"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ businessEmail: text })}
+                                  value={this.state.businessEmail}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                              />
+                            </View>
 
-                            {/* 
+
+                            {/*
                         *
                         * CAPACITY VIEW ...............
                         */}
@@ -445,6 +426,7 @@ class DetailViewModal extends React.Component {
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
                                         justifyContent: 'center',
+                                        fontFamily: 'Rubik-Light',
                                         alignContent: 'center',
                                         alignSelf: 'center',
                                         textAlignVertical: 'center',
@@ -500,6 +482,7 @@ class DetailViewModal extends React.Component {
                                             onPress={() => { textInputPeople.focus() }}>
                                             <Text style={{
                                                 width: '100%',
+                                                fontFamily: 'Rubik-Light',
                                                 paddingLeft: 5,
                                                 color: colors.black,
                                                 textAlign: 'left',
@@ -516,6 +499,7 @@ class DetailViewModal extends React.Component {
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
                                         justifyContent: 'center',
+                                        fontFamily: 'Rubik-Light',
                                         alignContent: 'center',
                                         alignSelf: 'center',
                                         textAlignVertical: 'center',
@@ -570,6 +554,7 @@ class DetailViewModal extends React.Component {
                                             onPress={() => { textInputLimit.focus() }}>
                                             <Text style={{
                                                 width: '100%',
+                                                fontFamily: 'Rubik-Light',
                                                 paddingLeft: 5,
                                                 color: colors.black,
                                                 textAlign: 'left',
@@ -583,19 +568,16 @@ class DetailViewModal extends React.Component {
 
                                     </View>
                                 </View>
-
-
-
                             </View>
 
-
-                            {/* 
+                            {/*
                         *
                         * ADDRESS VIEW ...............
                         */}
 
                             <Text style={{
                                 justifyContent: 'center',
+                                fontFamily: 'Rubik-Light',
                                 alignContent: 'center',
                                 alignSelf: 'center',
                                 textAlignVertical: 'center',
@@ -603,92 +585,99 @@ class DetailViewModal extends React.Component {
                                 marginTop: 20
                             }}>Business Address</Text>
 
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignContent: 'center',
-                                alignSelf: 'center',
-                                marginTop:8,
-                                alignItems: 'center'
-                            }}>
-                                <View style={{
-                                    borderRadius: 4,
-                                    flex: 2,
-                                    backgroundColor: colors.input_box_grey,
-                                    marginRight:5,
-                                    marginLeft:5,
-                                    height: 45,
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignContent: 'center',
-                                    alignSelf: 'center',
-                                    textAlignVertical: 'center',
-                                }}>
-                                    <TouchableOpacity
-                                        style={{
-                                            justifyContent: 'center',
-                                            textAlignVertical: 'center',
-                                            alignSelf: 'center',
-                                            alignContent: 'center',
-                                            alignItems: 'center'
-                                        }}
-                                        onPress={() => this.setState({ addressViewOpened: true })}>
-                                        <Text
-                                            numberOfLines={1}
-                                            ellipsizeMode='tail'
+                            <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
+                              <TextInput
+                                  style={[styles.inputStyle, {width: '100%'}]}
+                                  keyboardType={'default'}
+                                  placeholder={"Street Number"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ streetNumber: text })}
+                                  value={this.state.streetNumber}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                              />
+                            </View>
 
-                                            style={{
-                                                paddingLeft: 5,
-                                                color: colors.black,
-                                                textAlign: 'center',
-                                                justifyContent: 'center',
-                                                textAlignVertical: 'center',
-                                                alignSelf: 'center',
-                                                alignContent: 'center',
-                                                alignItems: 'center'
-                                            }}>{this.state.addressEdit}</Text>
-                                    </TouchableOpacity>
-                                </View>
+                            <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
+                              <TextInput
+                                  style={[styles.inputStyle, {width: '100%'}]}
+                                  keyboardType={'default'}
+                                  placeholder={"Street Name"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ streetAddress: text })}
+                                  value={this.state.streetAddress}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                              />
+                            </View>
 
-                                <View style={{
-                                    flex: 1,
-                                    borderRadius: 4,
-                                    backgroundColor: colors.input_box_grey,
-                                    marginLeft: 5,
-                                    height: 45,
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignContent: 'center',
-                                    alignSelf: 'center',
-                                    textAlignVertical: 'center',
-                                }}>
-                                    <TextInput
-                                        style={{
-                                            flex: 1,
-                                            width: '100%',
-                                            color: colors.black,
-                                            justifyContent: 'center',
-                                            textAlignVertical: 'center',
-                                            alignSelf: 'center',
-                                            alignContent: 'center',
-                                            alignItems: 'center',
-                                            textAlign: 'center'
-                                        }}
-                                        placeholder={''}
-                                        autoCorrect={false}
-                                        autoCapitalize={'none'}
-                                        keyboardType='default'
-                                        returnKeyType={'done'}
-                                        onChangeText={text => this.setState({ zip_code: text })}
-                                        value={this.state.zip_code}
-                                        placeholderTextColor={colors.black}
-                                        underlineColorAndroid="transparent"
-                                    />
-                                </View>
+                            <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
+                              <TextInput
+                                  ref="four"
+                                  style={[styles.inputStyle, {width: '65%'}]}
+                                  keyboardType={'default'}
+                                  placeholder={"City"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ city: text })}
+                                  value={this.state.city}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                                  onSubmitEditing={() => {this.refs['five'].focus();}}
+                              />
+
+                              <TextInput
+                                  ref="five"
+                                  style={[styles.inputStyle, {width: '32%', marginLeft: 10}]}
+                                  keyboardType={'default'}
+                                  placeholder={"Zip"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ zip_code: text })}
+                                  value={this.state.zip_code}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                                  onSubmitEditing={() => {this.refs['six'].focus();}}
+                              />
+                            </View>
+
+                            <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
+                              <TextInput
+                                  style={[styles.inputStyle, {width: '50%'}]}
+                                  keyboardType={'default'}
+                                  placeholder={"Province"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ province: text })}
+                                  value={this.state.province}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                              />
+
+                              <TextInput
+                                  style={[styles.inputStyle, {width: '47%', marginLeft: 10}]}
+                                  keyboardType={'default'}
+                                  placeholder={"Country"}
+                                  autoCorrect={false}
+                                  autoCapitalize={'none'}
+                                  returnKeyType={'next'}
+                                  onChangeText={text => this.setState({ country: text })}
+                                  value={this.state.country}
+                                  placeholderTextColor={colors.black}
+                                  underlineColorAndroid="transparent"
+                              />
                             </View>
 
                             <Text style={{
                                 justifyContent: 'center',
+                                fontFamily: 'Rubik-Light',
                                 alignContent: 'center',
                                 alignSelf: 'center',
                                 textAlignVertical: 'center',
@@ -709,7 +698,7 @@ class DetailViewModal extends React.Component {
                                         marginTop:8,
                                         paddingHorizontal: 10,
                                     }}>
-                                        <Text style={{ width: '50%' }}>{this.getDay(item.day)}</Text>
+                                        <Text style={{ fontFamily: 'Rubik-Light', width: '50%' }}>{this.getDay(item.day)}</Text>
 
                                         <View style={{ width: '50%', flexDirection: 'row' }}>
 
@@ -736,6 +725,7 @@ class DetailViewModal extends React.Component {
                                                     onPress={() => this.onOpenDate(index, true)}>
                                                     <Text style={{
                                                         width: '100%',
+                                                        fontFamily: 'Rubik-Light',
                                                         paddingLeft: 5,
                                                         color: colors.black,
                                                         textAlign: 'center',
@@ -771,6 +761,7 @@ class DetailViewModal extends React.Component {
                                                     onPress={() => this.onOpenDate(index, false)}>
                                                     <Text style={{
                                                         width: '100%',
+                                                        fontFamily: 'Rubik-Light',
                                                         paddingLeft: 5,
                                                         color: colors.black,
                                                         textAlign: 'center',
@@ -825,10 +816,6 @@ class DetailViewModal extends React.Component {
     }
 } // end of class
 
-export default DetailViewModal;
-
-
-
 const styles = StyleSheet.create({
     listItem: {
         flex: 1,
@@ -838,4 +825,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#00ff00',
         padding: 100
     },
+    inputStyle: {
+        backgroundColor: colors.input_box_grey,
+        maxHeight: 45,
+        height: 45,
+        color: colors.black,
+        borderRadius: 4
+    }
 });

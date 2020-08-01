@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 import GetLocation from 'react-native-get-location';
 import Constants from './Constants'
 
-
 class Helper {
     static DEBUG = false
     static HARDCODED_LOCATION_SHOW = false
@@ -14,7 +13,9 @@ class Helper {
 
     static user
     static userFavouritesVenue
-    static userQueList
+    static userQueList = { data: [] }
+
+    static VenueSignUp
 
     static venueQueueDataOfCustomers
     static venueUserObject
@@ -23,7 +24,7 @@ class Helper {
     static DEVICE_TOKEN
     /**
      * Log only when app is in debug mode
-     * @param {*} message 
+     * @param {*} message
      */
     static DEBUG_LOG(message) {
         if (this.DEBUG) {
@@ -33,7 +34,7 @@ class Helper {
 
     /**
      * Email validation
-     * @param {*} text 
+     * @param {*} text
      */
     static isValidEmail(text) {
         let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -62,8 +63,8 @@ class Helper {
     ////////////////////////////////////////////////////////////////////
 
     /**
-     * 
-     * @param {*} data 
+     *
+     * @param {*} data
      */
     static async saveUser(data) {
         this.storeData(Constants.KEY_USER, data)
@@ -107,6 +108,7 @@ class Helper {
      * GET CATEGORIES
      */
     static async getVenueCategories() {
+        console.log('Helper getVenueCategories IN.');
         let user = await this.getUser()
         var types = user.venue_type.type
         var venues = user.venue_type.venues
@@ -115,57 +117,33 @@ class Helper {
 
         types.map((category, index) => {
             var data = {
-                isVenue:false,
+                isVenue: false,
                 id: index,
                 name: category,
                 url: icons[index]
             }
             categories.push(data)
         })
-
-        // venues.map((venueItem, index) => {
-        //     var data = {
-        //         isVenue:true,
-        //         id: venueItem.id,
-        //         name: venueItem.name,
-        //         url: "https://image.flaticon.com/icons/png/512/2702/2702342.png"
-        //     }
-        //     categories.push(data)
-        // })
-
         return categories
     }
 
     static async getVenueCategoriesByLocation(nearestVenues) {
-       // let user = await this.getUser()
-        //var types = user.venue_type.type
-        // var venues = user.venue_type.venues
-        //var icons = user.venue_type.icons
+        // console.log('Helper getVenueCategoriesByLocation IN.');
         var categories = []
-
-        // types.map((category, index) => {
-        //     var data = {
-        //         isVenue:false,
-        //         id: index,s
-        //         name: category,
-        //         url: icons[index]
-        //     }
-        //     categories.push(data)
-        // })
-
-        if(nearestVenues){
+        if (nearestVenues) {
+            // console.log('Helper getVenueCategoriesByLocation nearestVenues: ', nearestVenues);
             nearestVenues.map((venueItem, index) => {
                 var data = {
-                    isVenue:true,
+                    isVenue: true,
                     id: venueItem.id,
                     name: venueItem.name,
-                    url: "https://image.flaticon.com/icons/png/512/2702/2702342.png"
+                    url: "https://image.flaticon.com/icons/png/512/2702/2702342.png",
+                    latitude: venueItem.latitude,
+                    longitude: venueItem.longitude
                 }
                 categories.push(data)
             })
         }
-       
-
         return categories
     }
 
@@ -214,10 +192,10 @@ class Helper {
     static async getFilteredVenues(venue_type) {
         let location = await this.getUserCurrentLocation()
         let nearestVenues = await Helper.getNearestVenues(location)
-        this.DEBUG_LOG(nearestVenues)
+        //this.DEBUG_LOG(nearestVenues)
         let filtered = await nearestVenues.filter(data => data.type.toUpperCase() === venue_type.toUpperCase());
-        this.DEBUG_LOG('---------')
-        this.DEBUG_LOG(nearestVenues)
+        // this.DEBUG_LOG('---------')
+        // this.DEBUG_LOG(nearestVenues)
         return filtered
     }
 
@@ -257,22 +235,23 @@ class Helper {
 
         }
         return nearestVenues
-
     }
 
     static async getUserCurrentLocation() {
+      console.log('getUserCurrentLocation');
         return GetLocation.getCurrentPosition({
             enableHighAccuracy: true,
             timeout: 150000,
         })
             .then(location => {
-                Helper.DEBUG_LOG(`currentLocation ->`)
-                Helper.DEBUG_LOG(location)
+                //Helper.DEBUG_LOG(`currentLocation ->`)
+                //Helper.DEBUG_LOG(location)
                 return location
             })
             .catch(ex => {
+              console.log('Helper getUserCurrentLocation: ', ex);
                 const { code, message } = ex;
-                Helper.DEBUG_LOG('currentLocation' + message)
+                //Helper.DEBUG_LOG('currentLocation' + message)
                 if (code === 'CANCELLED') {
                     //alert('Location cancelled by user or by another request');
                 }
@@ -287,12 +266,11 @@ class Helper {
                 }
                 return null
             });
-
     }
 
 
     static async isVenueFavourited(venue_id) {
-        Helper.DEBUG_LOG(venue_id)
+        //Helper.DEBUG_LOG(venue_id)
 
         if (Array.isArray(this.userFavouritesVenue)) {
             if (this.userFavouritesVenue.length < 1) {
@@ -311,10 +289,9 @@ class Helper {
         } else {
             return false
         }
-
     }
-    static async isAlreadyInQueue(venue_id) {
 
+    static async isAlreadyInQueue(venue_id) {
         if (this.userQueList) {
             if (this.userQueList.data) {
 
@@ -342,9 +319,6 @@ class Helper {
         } else {
             return false
         }
-
-
-
     }
 
     static async calculateSingleVenueDistance(venue_latitude, venue_longitude) {
@@ -358,6 +332,7 @@ class Helper {
         )
         return distance
     }
+
     static async getFavSatutsesForWaitingList() {
         var favStatuses = []
         if (this.waitingsAvailable() == true) {
@@ -376,13 +351,13 @@ class Helper {
                         this.UNIT
                     )
 
-                    this.DEBUG_LOG('<------------------>')
-                    this.DEBUG_LOG(location.latitude)
-                    this.DEBUG_LOG(location.longitude)
-                    this.DEBUG_LOG(queue.venue[0].latitude)
-                    this.DEBUG_LOG(queue.venue[0].longitude)
-                    this.DEBUG_LOG(distance)
-                    this.DEBUG_LOG('<-------------------->')
+                    // this.DEBUG_LOG('<------------------>')
+                    // this.DEBUG_LOG(location.latitude)
+                    // this.DEBUG_LOG(location.longitude)
+                    // this.DEBUG_LOG(queue.venue[0].latitude)
+                    // this.DEBUG_LOG(queue.venue[0].longitude)
+                    // this.DEBUG_LOG(distance)
+                    // this.DEBUG_LOG('<-------------------->')
                 } catch (error) {
 
                 }
@@ -460,7 +435,7 @@ class Helper {
         }
 
     }
-    
+
 
 
     static favouritesAvailable() {
@@ -483,9 +458,9 @@ class Helper {
     ////////////////////////////////////////////////////////////////////
 
     /**
-     * SAVING TO CACHE 
-     * @param {*} key 
-     * @param {*} value 
+     * SAVING TO CACHE
+     * @param {*} key
+     * @param {*} value
      */
     static storeData = async (key, value) => {
         try {
@@ -497,8 +472,8 @@ class Helper {
     }
 
     /**
-     * FETCHING DATA FROM CACHE 
-     * @param {*} key 
+     * FETCHING DATA FROM CACHE
+     * @param {*} key
      */
     static getSroedData = async (key) => {
         try {

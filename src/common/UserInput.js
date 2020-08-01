@@ -1,3 +1,4 @@
+/* @flow */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { colors } from '../common/AppColors'
@@ -26,6 +27,7 @@ export default class UserInput extends Component {
                         paddingHorizontal: 10,
                         color: colors.black
                     }}
+                    keyboardType={this.props.keyboardType ? this.props.keyboardType:'default'}
                     numberOfLines={this.props.numberOfLines ? this.props.numberOfLines:1}
                     placeholder={this.props.placeholder}
                     secureTextEntry={this.props.secureTextEntry}
@@ -47,7 +49,7 @@ export default class UserInput extends Component {
 }
 
 UserInput.propTypes = {
-    source: PropTypes.number.isRequired,
+    source: PropTypes.number,
     placeholder: PropTypes.string.isRequired,
     secureTextEntry: PropTypes.bool,
     autoCorrect: PropTypes.bool,

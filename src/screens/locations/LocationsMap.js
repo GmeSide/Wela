@@ -1,5 +1,5 @@
+/* @flow */
 import React, { Component } from 'react';
-// import MapView from 'react-native-maps';
 import {
     StyleSheet,
     Text,
@@ -13,18 +13,18 @@ import {
     Platform,
     PermissionsAndroid,
     Animated,
-    Picker
+    Picker,
+    BackHandler
 } from 'react-native';
 import { colors } from '../../common/AppColors';
 import { Card } from 'react-native-shadow-cards';
 import Button from '../../common/BlackButton';
 import MapView, { PROVIDER_GOOGLE, Marker, LatLng, MAP_TYPES, PROVIDER_DEFAULT, LocalTile } from 'react-native-maps';
-// import messaging from '@react-native-firebase/messaging';
 import Geolocation from '@react-native-community/geolocation';
 import Helper from '../../utils/Helper.js'
 import PushNotification from 'react-native-push-notification';
 import ContactsList from './ContactsList'
-import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
+import { PostRequest, showToastMessage, getVenues } from '../../network/ApiRequest.js';
 import { GET_FAVOURITE, ADD_RQUEST_TO_VENUE, ADD_TO_FAVOUITE, REGISTER_DEVICE, GET_USER_WAITING_LIST } from '../../network/EndPoints';
 import { getAllFavourite, addVenueToQueueList, addToFavourite, removeFavourite, registerDeviceToken, getUserWaitingListWithHistory } from '../../network/PostDataPayloads';
 import Contacts from 'react-native-contacts';
@@ -33,9 +33,11 @@ import NotifService from '../venue/NotifService';
 import { NavigationEvents } from "react-navigation";
 import WaitingList from '../waiting/WaitingList.js';
 import IHAKPicker from "./ihakpicker";
-var refWaitList = null
-const HIGHT_SCREEN = (Dimensions.get('window').height);
+import ProgressDialog from '../../utils/ProgressDialog';
+import messaging from '@react-native-firebase/messaging';
+import firebase from '@react-native-firebase/app';
 
+const HIGHT_SCREEN = (Dimensions.get('window').height);
 
 const customStyle = [
     {
@@ -198,13 +200,46 @@ const customStyle = [
     }
 ]
 
+// const onRemoteNotification = (notification) => {
+//     const result = `
+//       Title:  ${notification.getTitle()};\n
+//       Message: ${notification.getMessage()};\n
+//       badge: ${notification.getBadgeCount()};\n
+//       sound: ${notification.getSound()};\n
+//       category: ${notification.getCategory()};\n
+//       content-available: ${notification.getContentAvailable()}.`;
+
+//     Alert.alert('Push Notification Received', result, [
+//         {
+//             text: 'Dismiss',
+//             onPress: null,
+//         },
+//     ]);
+// };
+const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+    // console.log('remoteMessage->',remoteMessage);
+    alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
+   // alert('kuch our')
+
+    if (remoteMessage.notification) {
+        if (remoteMessage.notification.data) {
+            if (remoteMessage.notification.data.type) {
+                if (remoteMessage.notification.data.type === 'notify') {
+                    this.FetchDataWhenNotified()
+                }
+            }
+        }
+    }
+});
+
 export default class LocationsMap extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            refreshh: true,
             isLoading: false,
-            currentLat: Helper.HARDCODED_LATS,
-            currentLongt: Helper.HARDCODED_LONGTS,
+            currentLat: '',
+            currentLongt: '',
             confirm_view: false,
             selectedMarkerIndex: 0,
             detailView: false,
@@ -257,15 +292,194 @@ export default class LocationsMap extends Component {
                 label: '6',
                 value: '6',
             }
-
-            ]
+          ]
         }
 
         this.notif = new NotifService(
             this.onRegister.bind(this),
-            this.onNotif.bind(this),
+            // this.onNotif.bind(this),
         );
+        this.props.navigation.addListener('willFocus', this.componentWillFocus)
+    }
 
+    componentDidMount = async () => {
+      this.messageListener = firebase.messaging().onMessage(async(message: RemoteMessage) => {
+          // Process your message as required
+          console.log('Notification onMessage: ', message)
+          if (message.data.type === 'toggle') {
+            let user = await Helper.getUser()
+            let stateVenues = this.state.markers
+            let msgVenue = JSON.parse(message.data.moredata)
+            let index = stateVenues.findIndex(marker => marker.id === msgVenue.id);
+            console.log('index: ', index);
+            console.log('message.data.moredata.id: ', msgVenue.id);
+            console.log('stateVenues: ', stateVenues);
+            if (index > -1) {
+              stateVenues[index].toggle = msgVenue.toggle
+              console.log('Marker State Updated.');
+            }
+
+            let allVenues = user.venue_type.venues
+            let aindex = allVenues.findIndex(marker => marker.id === msgVenue.id);
+            console.log('aindex: ', aindex);
+            if (aindex > -1) {
+              allVenues[aindex].toggle = msgVenue.toggle
+              user.venue_type.venues = allVenues
+              Helper.saveUser(user)
+              console.log('Marker State Updated.');
+            }
+            this.setState({refreshh: !this.state.refreshh})
+          }
+      })
+
+      await this.fetchData()
+
+      await this.reloadCurrentLocation()
+
+      let user = await Helper.getUser()
+      const updatedVenues = await this.gettingVenues(user.id)
+      if (updatedVenues.data.success) {
+        user.venue_type.venues = updatedVenues.data.data.venues
+        Helper.saveUser(user)
+      }
+
+      await this.fetchData()
+
+      // Add listener for push notifications
+      //PushNotificationIOS.addEventListener('notification', onRemoteNotification);
+      // onMessage(async remoteMessage => {
+      //     console.log('notificaiton', remoteMessage)
+      //     alert('A new FCM ');
+      // });
+      // messaging().setBackgroundMessageHandler(async remoteMessage => {
+      //     alert('A new remoteMessage ');
+      // });
+    }
+
+    gettingVenues = async (userId) => {
+      try {
+        console.log('gettingVenues');
+        const data = await getVenues(userId)
+        console.log('data: ', data);
+        return data
+      } catch (e) {
+        console.log('ERROR gettingVenues: ', e);
+        return null
+      }
+    }
+
+    componentWillFocus = async () => {
+        console.log('LocationsMap FOCUSED.');
+
+        if (Platform.OS == 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+        }
+
+        if (Platform.OS == 'ios') {
+            //PushNotificationIOS.getInitialNotification();
+            await messaging().registerDeviceForRemoteMessages();
+            //alert('han bhai aayaa?')
+            this.requestUserPermission()
+            //alert('han bhai nahi aya?')
+            // console.log('fcmToken->')
+            // const enabled =
+            //     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            //     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+            // if (enabled) {
+            //     onMessage(async remoteMessage => {
+            //         console.log('notificaiton', remoteMessage)
+            //         alert('A new FCM ');
+            //     });
+            //     messaging().setBackgroundMessageHandler(async remoteMessage => {
+            //         alert('remoteMessage ');
+            //         console.log('Message handled in the background!', remoteMessage);
+            //     });
+            //     // firebase.notifications().onNotification((notification) => {
+            //     //     console.log('Message handled!', notification);
+            //     // })
+            // }
+        }
+
+        // onRemoteNotification (notification => {
+        //     const result = `
+        //       Title:  ${notification.getTitle()};\n
+        //       Message: ${notification.getMessage()};\n
+        //       badge: ${notification.getBadgeCount()};\n
+        //       sound: ${notification.getSound()};\n
+        //       category: ${notification.getCategory()};\n
+        //       content-available: ${notification.getContentAvailable()}.`;
+
+        //     Alert.alert('Push Notification Received', result, [
+        //       {
+        //         text: 'Dismiss',
+        //         onPress: null,
+        //       },
+        //     ]);
+        //   });
+    }
+
+    handleBackButton() {
+        BackHandler.exitApp();
+    }
+    // _onNotification(notification) {
+    //     AlertIOS.alert(
+    //         'Push Notification Received',
+    //         'Alert message: ' + notification.getMessage(),
+    //         [{
+    //             text: 'Dismiss',
+    //             onPress: null,
+    //         }]
+    //     );
+    // }
+    async requestUserPermission() {
+        // await messaging.APNSConfig(
+        //     headers = {
+        //         ':method': 'POST',
+        //         'apns-priority': '10',
+        //         'apns-push-type': 'alert',
+        //     },
+        //     payload = messaging.APNSPayload(aps = messaging.Aps(content_available = True))
+        // )
+        const authStatus = await messaging().requestPermission({
+            sound: false,
+            announcement: true,
+            alert: true,
+            badge: true
+        });
+        const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+            console.log('Authorization status:', authStatus);
+            if (Platform.OS == 'ios') {
+                console.log('fcmToken->')
+                messaging()
+                    .getToken()
+                    .then(token => {
+                        console.log(token)
+                        //alert(token)
+                        this.postDeviceToken(token)
+                    });
+                //     // messaging().getAPNSToken().then(token => {
+                //     //     this.postDeviceToken(token.token)
+                //     // });
+                messaging().onTokenRefresh(token => {
+                    console.log('refresh->', token)
+                    //alert(token)
+                    this.postDeviceToken(token)
+                });
+                //    // alert('test')
+                //     onMessage(async remoteMessage => {
+                //         console.log('notificaiton', remoteMessage)
+                //         //alert('A new FCM ');
+                //     });
+                //     messaging().setBackgroundMessageHandler(async remoteMessage => {
+                //        // alert('A new remoteMessage ');
+                //     });
+            }
+        }
     }
 
     async getFavListIfEmpty() {
@@ -284,6 +498,7 @@ export default class LocationsMap extends Component {
 
         }
     }
+
     async getWaitingListIfEmpty() {
         try {
             let empty = await Helper.waitingListEmpty()
@@ -297,14 +512,15 @@ export default class LocationsMap extends Component {
                     }
                 })
             }
-
         } catch (error) {
 
         }
     }
 
-    async reloadCurrentLocation() {
+    reloadCurrentLocation = async () => {
+      console.log('reloadCurrentLocation IN.');
         let location = await Helper.getUserCurrentLocation()
+        console.log('location: ', location);
         try {
             this.setState({ userCurrentLocationText: '' })
             this.getTextAddress(location.latitude, location.longitude)
@@ -316,6 +532,12 @@ export default class LocationsMap extends Component {
                 currentLat: location.latitude,
                 currentLongt: location.longitude
             });
+            this.map.animateToRegion({
+              latitude: location.latitude,
+              longitude: location.longitude,
+              latitudeDelta: 0.0100,
+              longitudeDelta: 0.0100
+            })
         }
     }
 
@@ -334,20 +556,18 @@ export default class LocationsMap extends Component {
                     } catch (error) {
 
                     }
-
                 }
             })
         } catch (error) {
 
         }
-
     }
 
     onContactListRequest() {
         try {
             const mMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
             this.setState({ venuePersonsLimit: mMarker.limit_group })
-            Helper.DEBUG_LOG(this.state.venuePersonsLimit)
+            //Helper.DEBUG_LOG(this.state.venuePersonsLimit)
             var peoplelimit = []
             for (let i = 1; i <= this.state.venuePersonsLimit; i++) {
                 var data = {
@@ -376,7 +596,6 @@ export default class LocationsMap extends Component {
         } catch (error) {
 
         }
-
     }
 
     requestPermission() {
@@ -395,7 +614,6 @@ export default class LocationsMap extends Component {
         } catch (error) {
 
         }
-
     }
 
     requestCameraPermission = async () => {
@@ -423,7 +641,6 @@ export default class LocationsMap extends Component {
         }
     };
 
-
     async fetchData() {
         this.getFavListIfEmpty()
         this.getWaitingListIfEmpty()
@@ -439,14 +656,17 @@ export default class LocationsMap extends Component {
             } else {
                 this.requestCameraPermission()
             }
-
         } else {
             Geolocation.requestAuthorization()
-
         }
-        Geocoder.fallbackToGoogle('AIzaSyCb3txixm6dLD7YTal0QsPEUV64XbxtXo0');
+        if (Platform.OS == 'android') {
+            Geocoder.fallbackToGoogle('AIzaSyCb3txixm6dLD7YTal0QsPEUV64XbxtXo0');
+        } else {
+            Geocoder.fallbackToGoogle('AIzaSyBqUL0roNWsCTLBaH5H3CGItExoT9J5vhQ');
+        }
+
         this.onRegister()
-        // this.requestUserPermission()
+        console.log('fetchData progress 1.');
         if (this.state.detailView == true) {
             const currentMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
             let isFav = await Helper.isVenueFavourited(currentMarker.id)
@@ -456,28 +676,19 @@ export default class LocationsMap extends Component {
             let isQueued = await Helper.isAlreadyInQueue(currentMarker.id)
             this.setState({ isSelectedAlreadyQueued: isQueued })
         }
-
-
-        //Helper.DEBUG_LOG(categories)
-
-        this.findNeares()
-
-
-
+        await this.findNeares()
     }
 
     async getTextAddress(latitude, longitude) {
         try {
             if (latitude && longitude) {
-
-
                 var NY = {
                     lat: latitude,
                     lng: longitude
                 };
                 const res = await Geocoder.geocodePosition(NY);
-                Helper.DEBUG_LOG('--Geocoder--')
-                Helper.DEBUG_LOG(res)
+                //Helper.DEBUG_LOG('--Geocoder--')
+                //Helper.DEBUG_LOG(res)
                 if (res) {
                     if (Array.isArray(res)) {
                         if (res.length > 0) {
@@ -489,41 +700,45 @@ export default class LocationsMap extends Component {
                             if (res[0].subAdminArea) {
                                 subAdminArea = res[0].subAdminArea
                             }
-
                             var formattedAddress = `${feature}, ${subAdminArea}`
                             this.setState({ userCurrentLocationText: formattedAddress })
                         }
-
                     }
                 }
             }
         } catch (error) {
 
         }
-
     }
 
-    async findNeares() {
+    findNeares = async () => {
+        console.log('findNeares IN.');
         let location = await Helper.getUserCurrentLocation()
-        try {
-            this.getTextAddress(location.latitude, location.longitude)
-        } catch (error) {
-
+        console.log('findNeares location: ', location);
+        if (location == null) {
+            console.log('stuck');
+            await this.findNeares()
+            return
         }
-
+        try {
+            await this.getTextAddress(location.latitude, location.longitude)
+            if (this.state.userCurrentLocationText == '') {
+                this.getTextAddress(location.latitude, location.longitude)
+            }
+        } catch (error) {
+            console.log('ERROR findNeares: ', error);
+        }
         let categories = await Helper.getVenueCategories()
         this.setState({ categoriesList: categories, allCategories: categories })
         if (location && location != null) {
-            if (Helper.HARDCODED_LOCATION_SHOW == false) {
+            if (!this.state.currentLat && !this.state.currentLongt) {
                 this.setState({
                     currentLat: location.latitude,
                     currentLongt: location.longitude
                 });
             }
-
-
             let nearestVenues = await Helper.getNearestVenues(location)
-            Helper.DEBUG_LOG(nearestVenues)
+            //Helper.DEBUG_LOG(nearestVenues)
             if (nearestVenues && nearestVenues.length > 0) {
                 this.setState({
                     markers: nearestVenues
@@ -534,33 +749,18 @@ export default class LocationsMap extends Component {
         }
     }
 
-    async onConfirmAction(marker) {
-        // var detail = this.state.persons_detail
-
-        // if (this.state.personsCount == 1) {
-        //     let user = await Helper.getUser()
-        //     detail = user.name + ":" + user.phone
-        // } else {
-        //     let user = await Helper.getUser()
-        //     var loggedInUser = user.name + ":" + user.phone
-        //     detail = loggedInUser + "," + detail
-        // }
-        //this.setState({ isLoading: true })
-        this.setState({ isLoading: false, detailView: false, gpsRequestSent: false })
+    onConfirmAction = async (marker) => {
+        this.setState({ isLoading: true, detailView: false, gpsRequestSent: false })
         const PAYLOAD = await addVenueToQueueList(marker.id, this.state.personsCount)
-        PostRequest(ADD_RQUEST_TO_VENUE, PAYLOAD).then((jsonObject) => {
-            //this.setState({ isLoading: false })
+        PostRequest(ADD_RQUEST_TO_VENUE, PAYLOAD).then(async (jsonObject) => {
             if (jsonObject.success) {
                 showToastMessage("", jsonObject.apiResponse.message)
                 Helper.updateUserQueList(jsonObject.apiResponse)
-                // Helper.DEBUG_LOG(jsonObject.apiResponse)
-                //Helper.updateUserQueList(jsonObject.apiResponse)
+                this.setState({ isLoading: false, searchText: '', openedVenueMarkerName: '' })
+                await this.findNeares()
             }
-
         })
     }
-
-
 
     changeStatus() {
         if (this.state.isFavouriteOpendMarker == true) {
@@ -571,26 +771,22 @@ export default class LocationsMap extends Component {
             return true
         }
     }
+
     async addToFavourite(venue_id) {
         let nextStatus = await this.changeStatus()
         this.setIconColor(nextStatus)
-
-
         var PAYLOAD
         if (nextStatus == true) {
             PAYLOAD = await addToFavourite(venue_id)
         } else {
             PAYLOAD = await removeFavourite(venue_id)
         }
-
         PostRequest(ADD_TO_FAVOUITE, PAYLOAD).then((jsonObject) => {
             if (jsonObject.success) {
                 Helper.userFavouritesVenue = jsonObject.apiResponse.data
             }
         })
     }
-
-
 
     getLatLong(marker) {
         if (marker) {
@@ -603,99 +799,121 @@ export default class LocationsMap extends Component {
                 }
             }
         }
-
     }
 
     customMarkerView = (marker) => {
-        if (!this.state.detailView) {
-            return (
-
-                <Card
-                    elevation={24}
-                    style={{ padding: 8, width: 200 }}>
-                    <TouchableOpacity
-                    // onPress={() => this.setState({ detailView: true })}
-                    >
-                        <View style={{
-                            flexDirection: 'column',
-                        }}>
-
-                            <View style={{
-                                flexDirection: 'row',
-                                alignContent: 'center',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                alignSelf: 'center',
-                            }}>
-
-
-                                <Text
-                                    style={{
-                                        fontSize: 16,
-                                        color: colors.black,
-                                        fontFamily: "Verdana",
-                                        fontWeight: 'bold',
-                                        paddingLeft: 4,
-                                        flex: 1,
-                                        alignContent: 'center',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        alignSelf: 'center',
-                                    }}>
-                                    {marker.name}
-                                </Text>
-                                {/* {this.shareAndFavOptions(item)} */}
-
-                            </View>
-                            <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.getAverageWaitTimeByMarker(marker)}</Text>
-                            {/* {this.innerViewOfRow(item)} */}
-                        </View>
-                    </TouchableOpacity>
-                </Card>
-            );
+      if (!this.state.detailView) {
+        if (marker.toggle) {
+          return (
+              <Card
+                  elevation={24}
+                  style={{ padding: 8, width: 200 }}>
+                  <TouchableOpacity
+                  // onPress={() => this.setState({ detailView: true })}
+                  >
+                      <View style={{
+                          flexDirection: 'column',
+                      }}>
+                          <View style={{
+                              flexDirection: 'row',
+                              alignContent: 'center',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              alignSelf: 'center',
+                          }}>
+                              <Text
+                                  style={{
+                                      fontSize: 16,
+                                      fontFamily: 'Rubik-Light',
+                                      color: colors.black,
+                                      fontWeight: 'bold',
+                                      paddingLeft: 4,
+                                      flex: 1,
+                                      alignContent: 'center',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      alignSelf: 'center',
+                                  }}>
+                                  {marker.business_name}
+                              </Text>
+                          </View>
+                          <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTimeByMarker(marker)}</Text>
+                      </View>
+                  </TouchableOpacity>
+              </Card>
+          );
+        } else {
+          return (
+              <Card
+                  elevation={24}
+                  style={{ padding: 8, width: 200 }}>
+                  <TouchableOpacity>
+                      <View style={{flexDirection: 'column'}}>
+                          <View style={{
+                              flexDirection: 'row',
+                              alignContent: 'center',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              alignSelf: 'center',
+                          }}>
+                              <Text
+                                  style={{
+                                      fontSize: 16,
+                                      fontFamily: 'Rubik-Light',
+                                      color: colors.lightGray,
+                                      fontWeight: 'bold',
+                                      paddingLeft: 4,
+                                      flex: 1,
+                                      alignSelf: 'center',
+                                  }}>
+                                  {marker.business_name}
+                              </Text>
+                          </View>
+                          <Text style={{ fontFamily: 'Rubik-Light', fontSize: 11, color: colors.lightGray, paddingLeft: 4 }}>{'Not Available'}</Text>
+                      </View>
+                  </TouchableOpacity>
+              </Card>
+          );
         }
-
+      }
     };
 
-
     setIconColor(isFav) {
-        Helper.DEBUG_LOG(isFav)
+        //Helper.DEBUG_LOG(isFav)
         if (isFav == true) {
             this.setState({ faveIconColorCode: colors.black })
         } else {
             this.setState({ faveIconColorCode: colors.lightGray })
         }
     }
+
     async handleMarkerPress(event) {
-        if (this.state.searchesListOpened === true) {
+        if (this.state.searchesListOpened) {
             this.setState({ searchesListOpened: false })
         }
-
-        // this.setState({ searchesListOpened: false })
-        if (
-            event.nativeEvent.action === 'marker-press'
-        ) {
+        if (event.nativeEvent.action === 'marker-press') {
             console.log('onMarker->')
             const markerID = event.nativeEvent.id
-            console.log(markerID)
             const currentMarker = this.state.markers[parseInt(markerID)]
-            this.setState({
-                openedVenueMarkerName: currentMarker.name,
-                detailView: true,
-                selectedMarkerIndex: markerID,
-                confirm_view: false
-            })
-            let isFav = await Helper.isVenueFavourited(currentMarker.id)
-
-            this.setState({ isFavouriteOpendMarker: isFav })
-            this.setIconColor(isFav)
-
-            let isQueued = await Helper.isAlreadyInQueue(currentMarker.id)
-            this.setState({ isSelectedAlreadyQueued: isQueued })
-
-            Helper.DEBUG_LOG(isFav)
+            // console.log('currentMarker: ', currentMarker);
+            if (currentMarker.toggle) {
+              this.fetchUserDistance(currentMarker)
+              this.setState({
+                  openedVenueMarkerName: currentMarker.name,
+                  detailView: true,
+                  selectedMarkerIndex: markerID,
+                  confirm_view: false,
+                  currentLat: currentMarker.latitude,
+                  currentLongt: currentMarker.longitude
+              })
+              let isFav = await Helper.isVenueFavourited(currentMarker.id)
+              this.setState({ isFavouriteOpendMarker: isFav })
+              this.setIconColor(isFav)
+              let isQueued = await Helper.isAlreadyInQueue(currentMarker.id)
+              this.setState({ isSelectedAlreadyQueued: isQueued })
+            }
         } else {
-            console.log('onMap->')
+            console.log('onMap-> ')
             // this.setState({ gpsRequestSent: false })
             if (this.state.detailView) {
                 this.setState({
@@ -703,31 +921,33 @@ export default class LocationsMap extends Component {
                     confirm_view: false,
                     searchesListOpened: false,
                     personsCount: 1,
-                    persons_detail: ''
+                    persons_detail: '',
+                    searchText: '',
+                    openedVenueMarkerName: ''
                 })
             }
-
         }
-
     }
+
     getAverageWaitTime() {
         let time = this.state.markers[parseInt(this.state.selectedMarkerIndex)].average_wait_time
         return `${time} minute wait`
-
     }
+
     getAverageWaitTimeByMarker(marker) {
         let time = marker.average_wait_time
         return `${time} minute wait`
-
     }
+
     async getFavStatus() {
         let status = await Helper.isVenueFavourited()
         return status
     }
+
     async favStyle() {
         const _id = this.state.markers[parseInt(this.state.selectedMarkerIndex)].id
         let status = await Helper.isVenueFavourited(_id)
-        Helper.DEBUG_LOG(status)
+        //Helper.DEBUG_LOG(status)
         if (status == true) {
             return {
                 alignContent: 'center',
@@ -751,32 +971,29 @@ export default class LocationsMap extends Component {
                 marginLeft: 10
             }
         }
-
     }
 
     favIconColor = async (favourite) => {
         let status = await Helper.isVenueFavourited(id)
-        Helper.DEBUG_LOG(status)
+        //Helper.DEBUG_LOG(status)
         this.setState({ faveIconColorCode: colors.black })
     }
-    async fetchUserDistance(mMarker) {
+
+    fetchUserDistance = async (mMarker) => {
         try {
+            this.setState({ currentMarkerDistance: '... km away'})
             let distance = await Helper.calculateSingleVenueDistance(mMarker.latitude, mMarker.longitude)
-            Helper.DEBUG_LOG(mMarker)
-            Helper.DEBUG_LOG(distance)
             this.setState({ currentMarkerDistance: `${Number(distance).toFixed(2)} km away` })
         } catch (error) {
-
+          console.log('ERROR fetchUserDistance: ', error);
         }
     }
-    showDetailMarker() {
+
+    showDetailMarker = (obj) => {
         if (this.state.detailView) {
             if (this.state.markers && this.state.markers.length > 0) {
                 const mMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
-                // this.setState({ venuePersonsLimit: mMarker.limit_group })
-                //this.favIconColor(mMarker.favourite)
                 return (
-
                     <Card
                         elevation={4}
                         style={{ padding: 8 }}>
@@ -786,7 +1003,6 @@ export default class LocationsMap extends Component {
                             <View style={{
                                 flexDirection: 'column',
                             }}>
-
                                 <View style={{
                                     flexDirection: 'row',
                                     alignContent: 'center',
@@ -794,13 +1010,11 @@ export default class LocationsMap extends Component {
                                     justifyContent: 'center',
                                     alignSelf: 'center',
                                 }}>
-
-
                                     <Text
                                         style={{
                                             fontSize: 16,
+                                            fontFamily: 'Rubik-Light',
                                             color: colors.black,
-                                            fontFamily: "Verdana",
                                             fontWeight: 'bold',
                                             paddingLeft: 4,
                                             flex: 1,
@@ -809,7 +1023,7 @@ export default class LocationsMap extends Component {
                                             justifyContent: 'center',
                                             alignSelf: 'center',
                                         }}>
-                                        {mMarker.name}
+                                        {mMarker.business_name}
                                     </Text>
                                     <TouchableOpacity
                                         onPress={() => { this.addToFavourite(mMarker.id) }}
@@ -829,7 +1043,7 @@ export default class LocationsMap extends Component {
                                         />
                                     </TouchableOpacity>
                                 </View>
-                                <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.getAverageWaitTime()}</Text>
+                                <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTime()}</Text>
                                 {this.innerViewOfRow(mMarker)}
                             </View>
                         </TouchableOpacity>
@@ -838,53 +1052,45 @@ export default class LocationsMap extends Component {
             }
         }
     };
+
     innerViewOfRow(mMarker) {
-        if (!this.state.gpsRequestSent) {
-            this.setState({ gpsRequestSent: true })
-            this.fetchUserDistance(mMarker)
-        }
         if (this.state.lineUped) {
             return (
                 <View style={{
                     flexDirection: 'column',
                     marginTop: 10
-
                 }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ flex: 1, fontSize: 12, color: colors.black, fontFamily: "Verdana", paddingLeft: 4 }}>{this.state.markers[parseInt(this.state.selectedMarkerIndex)].location}</Text>
-                        <Text style={{ fontSize: 12, color: colors.lightGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.state.currentMarkerDistance}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{this.state.markers[parseInt(this.state.selectedMarkerIndex)].location}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 4 }}>{this.state.currentMarkerDistance}</Text>
                     </View>
-                    {this.lineUpView()}
+                    {this.lineUpView(mMarker)}
                     {this.confirmView()}
-
                 </View>
-
-
             )
         }
     }
 
-    requestToLineUp() {
-        if (this.state.isSelectedAlreadyQueued != true) {
-            if (Helper.totalInCurrentWaitingList() < 3) {
+    requestToLineUp(mMarker) {
+      console.log('requestToLineUp mMarker: ', mMarker);
+        if (this.state.isSelectedAlreadyQueued === false && mMarker.toggle) {
+            if (Helper.totalInCurrentWaitingList() < 2) {
                 this.setState({ confirm_view: true })
             }
-
         }
-
     }
+
     getOpacity() {
         if (this.state.isSelectedAlreadyQueued === true) {
             return 0.5
-
         } else if (Helper.totalInCurrentWaitingList() > 1) {
             return 0.5
         } else {
             return 1
         }
     }
-    lineUpView() {
 
+    lineUpView(mMarker) {
         if (!this.state.confirm_view) {
             return (
                 <View style={{
@@ -896,16 +1102,17 @@ export default class LocationsMap extends Component {
                 }}>
                     <Button
                         width={'100%'}
-                        onButtonPress={() => this.requestToLineUp()}
+                        onButtonPress={() => this.requestToLineUp(mMarker)}
                         text={'Line Up'} />
                 </View>
             )
         }
-
     }
+
     setPeopleSelectedValue(itemValue, itemIndex) {
         this.setState({ people_selected_count: itemValue })
     }
+
     increaseCount() {
         const mMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
         // this.setState({ venuePersonsLimit: mMarker.limit_group })
@@ -914,12 +1121,14 @@ export default class LocationsMap extends Component {
             this.setState({ personsCount: enteredPersons + 1 })
         }
     }
+
     decreaseCount() {
         var enteredPersons = this.state.personsCount
         if (this.state.personsCount > 1) {
             this.setState({ personsCount: enteredPersons - 1 })
         }
     }
+
     confirmView() {
         const mMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
         if (this.state.confirm_view) {
@@ -930,12 +1139,9 @@ export default class LocationsMap extends Component {
                         <Button
                             width={'100%'}
                             onButtonPress={() => this.onConfirmAction(mMarker)}
-                            text={'Confirm'} />
+                            text={'Confirm'}
+                        />
                     </View>
-
-
-                    {/* <TouchableOpacity onPress={() => { this.onContactListRequest() }}> */}
-
                     <View style={{
                         flexWrap: 'wrap',
                         height: 50,
@@ -948,13 +1154,23 @@ export default class LocationsMap extends Component {
                         backgroundColor: colors.input_box_grey,
                         alignSelf: 'center',
                     }}>
+                        <TouchableOpacity
+                            onPress={() => this.decreaseCount()}
+                            style={{ height: 50, marginRight: 5, backgroundColor: 'black', borderRadius: 4, justifyContent: 'center' }}>
+                            <Text style={{
+                                fontSize: 24,
+                                fontFamily: 'Rubik-Light',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                paddingHorizontal: 4
+                            }}>-</Text>
+                        </TouchableOpacity>
                         <Text style={{
                             fontSize: 16,
+                            fontFamily: 'Rubik-Light',
                             fontWeight: 'bold',
                             color: colors.black,
-                            fontFamily: "Verdana",
                             paddingLeft: 4,
-
                         }}>{this.state.personsCount}</Text>
                         <Image
                             style={{
@@ -969,57 +1185,18 @@ export default class LocationsMap extends Component {
                             }}
                             source={require('../images/users.png')}
                         />
-                        <View style={{
-                            height: 50,
-                            marginRight: 5,
-                            flexDirection: 'column',
-
-
-                        }}>
-                            <TouchableOpacity
-                                onPress={() => this.increaseCount()}
-                            >
-                                <Text style={{
-                                    fontSize: 20,
-                                    fontWeight: 'bold',
-                                    color: this.getPlusButtonColor(),
-                                    fontFamily: "Verdana",
-                                    paddingLeft: 4,
-                                    height: 25,
-                                    alignItems: "flex-start",
-                                    justifyContent: 'flex-start',
-                                    alignContent: 'flex-start',
-                                    alignSelf: 'flex-start'
-                                }}>+</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => this.decreaseCount()}
-                            >
-                                <Text style={{
-                                    fontSize: 24,
-                                    fontWeight: 'bold',
-                                    color: this.getMinusButtonColor(),
-                                    fontFamily: "Verdana",
-                                    paddingLeft: 4,
-                                    height: 25,
-                                    alignItems: "flex-end",
-                                    justifyContent: 'flex-end',
-                                    alignContent: 'flex-end',
-                                    alignSelf: 'flex-end'
-                                }}>-</Text>
-                            </TouchableOpacity>
-
-                        </View>
-                        {/* <Text style={{
-                                fontSize: 16,
+                        <TouchableOpacity
+                            onPress={() => this.increaseCount()}
+                            style={{ height: 50, marginLeft: 5, backgroundColor: 'black', borderRadius: 4, justifyContent: 'center' }}>
+                            <Text style={{
+                                fontSize: 20,
+                                fontFamily: 'Rubik-Light',
                                 fontWeight: 'bold',
-                                color: colors.black,
-                                fontFamily: "Verdana",
-                                paddingLeft: 4
-                            }}>{this.state.personsCount}</Text> */}
-
+                                color: 'white',
+                                paddingHorizontal: 4
+                            }}>+</Text>
+                        </TouchableOpacity>
                     </View>
-                    {/* </TouchableOpacity> */}
                 </View>
             )
         }
@@ -1030,17 +1207,19 @@ export default class LocationsMap extends Component {
             this.setState({ searchesListOpened: true, detailView: false })
         }
     }
+
     updateFilteredList(filtered) {
-        Helper.DEBUG_LOG(filtered)
+        // Helper.DEBUG_LOG(filtered)
         this.setState({ categoriesList: [] })
         this.setState({ categoriesList: filtered })
     }
+
     updateSearchText(text) {
         this.setState({
             searchText: text,
             detailView: false
         })
-        Helper.DEBUG_LOG(`searchText -> ${text}`)
+        //Helper.DEBUG_LOG(`searchText -> ${text}`)
         if (text === '') {
             this.setState({ categoriesList: [] })
             this.setState({ categoriesList: this.state.allCategories })
@@ -1051,23 +1230,32 @@ export default class LocationsMap extends Component {
             const textData = text.toUpperCase();
             return itemData.indexOf(textData) > -1
         });
-        Helper.DEBUG_LOG(newData)
+        //Helper.DEBUG_LOG(newData)
         this.updateFilteredList(newData)
-
     }
-    async onSelectCategory(item) {
 
+    async onSelectCategory(item) {
         if (item.isVenue === true) {
             this.setState({ searchesListOpened: false })
             this.setState({ categoriesList: this.state.allCategories })
             let index = this.state.markers.findIndex(marker => marker.id === item.id);
             const currentMarker = this.state.markers[parseInt(index)]
+            this.fetchUserDistance(currentMarker)
             this.setState({
                 openedVenueMarkerName: currentMarker.name,
                 detailView: true,
                 selectedMarkerIndex: index,
-                confirm_view: false
+                confirm_view: false,
             })
+            if (item.latitude && item.longitude) {
+              this.setState({currentLat: item.latitude, currentLongt: item.longitude})
+              this.map.animateToRegion({
+                latitude: item.latitude,
+                longitude: item.longitude,
+                latitudeDelta: 0.0100,
+                longitudeDelta: 0.0100
+              })
+            }
             let isFav = await Helper.isVenueFavourited(currentMarker.id)
 
             this.setState({ isFavouriteOpendMarker: isFav })
@@ -1076,17 +1264,16 @@ export default class LocationsMap extends Component {
             let isQueued = await Helper.isAlreadyInQueue(currentMarker.id)
             this.setState({ isSelectedAlreadyQueued: isQueued })
         } else {
-            Helper.DEBUG_LOG(`Selection -> ${item.name}`)
+            // Helper.DEBUG_LOG(`Selection -> ${item.name}`)
             this.setState({ searchesListOpened: false, markers: [] })
             let filtered = await Helper.getFilteredVenues(item.name)
-            Helper.DEBUG_LOG(filtered)
+            //Helper.DEBUG_LOG(filtered)
             this.setState({ markers: filtered })
         }
         this.setState({ openedVenueMarkerName: item.name })
-
     }
-    showSearchesList() {
 
+    showSearchesList() {
         if (this.state.searchesListOpened) {
             let listHeight = (HIGHT_SCREEN / 2) + 100
             return (
@@ -1105,68 +1292,48 @@ export default class LocationsMap extends Component {
             )
         }
     }
-    showBottomLineSeprator(id) {
-        if (id != this.state.categoriesList.length - 1) {
-            return (
-                <View
-                    style={{ height: 1, backgroundColor: colors.lightGray, paddingHorizontal: 55, width: '80%' }}
-                />
-            )
-        }
-    }
+
     renderSearchListItem = ({ item }) => {
         return (
             <TouchableOpacity onPress={() => this.onSelectCategory(item)}>
-
                 <View style={{
                     flex: 1,
-                    height: 30,
+                    height: 70,
                     backgroundColor: colors.white,
-                    marginTop: 40,
-                    flexDirection: 'column',
-                    alignContent: 'center',
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'center'
-
+                    alignSelf: 'center',
+                    borderBottomWidth: item.id != this.state.categoriesList.length - 1 ? 1 : 0,
+                    borderColor: colors.lightGray,
+                    width: '80%'
                 }}>
-
-
-                    <View style={{
-                        flexDirection: 'row',
-                        alignContent: 'center',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        paddingHorizontal: 20
-                    }}>
-                        <Image
-
-                            source={{ uri: item.url }}
-                            style={{
-                                resizeMode: 'contain',
-                                width: 40, height: 40,
-                                alignContent: 'center',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        />
-                        <Text style={{
-                            flex: 1,
-                            color: colors.black,
-                            fontFamily: 'Verdana',
-                            fontSize: 20,
-                            paddingLeft: 20,
+                    <Image
+                        source={{ uri: item.url }}
+                        style={{
+                            resizeMode: 'contain',
+                            width: 50, height: 50,
                             alignContent: 'center',
                             alignItems: 'center',
                             justifyContent: 'center',
-                        }}>
-                            {item.name}</Text>
-                    </View>
-
-                    {this.showBottomLineSeprator(item.id)}
+                        }}
+                    />
+                    <Text style={{
+                        flex: 1,
+                        fontFamily: 'Rubik-Light',
+                        fontWeight: 'bold',
+                        color: colors.black,
+                        fontSize: 18,
+                        paddingLeft: 30,
+                        textAlignVertical: 'center',
+                        alignSelf: 'center'
+                    }}>
+                        {item.name}
+                    </Text>
                 </View>
             </TouchableOpacity>
         )
     }
+
     showCurrentLocationText() {
         if (!this.state.searchesListOpened) {
             return (
@@ -1175,15 +1342,14 @@ export default class LocationsMap extends Component {
                     alignContent: 'center',
                     alignItems: 'center',
                     flex: 1,
-
                 }}>
-                    <Text style={{ fontFamily: "Verdana", color: colors.midGray, fontSize: 10 }}>
+                    <Text style={{ fontFamily: 'Rubik-Light', color: colors.midGray, fontSize: 10 }}>
                         {`${this.state.userCurrentLocationText} | `}
                     </Text>
 
                     <Text style={{
-                        fontFamily: "Verdana",
                         color: colors.black,
+                        fontFamily: 'Rubik-Medium',
                         fontSize: 10,
                         alignContent: 'flex-start',
                         alignItems: 'flex-start',
@@ -1191,11 +1357,11 @@ export default class LocationsMap extends Component {
                     }}>
                         {this.state.openedVenueMarkerName}
                     </Text>
-
                 </View>
             )
         }
     }
+
     showEditText() {
         if (this.state.searchesListOpened) {
             return (
@@ -1208,10 +1374,9 @@ export default class LocationsMap extends Component {
                         alignContent: 'center',
                         justifyContent: 'center',
                         alignItems: 'center'
-
                     }}
                     value={this.state.searchText}
-                    placeholder="Type here to search or brows the category"
+                    placeholder="Search or browse the category"
                     onChangeText={(text) => this.updateSearchText(text)}
                 // defaultValue={this.state.searchText}
                 // value={this.state.searchText}
@@ -1219,15 +1384,17 @@ export default class LocationsMap extends Component {
             )
         }
     }
+
     onSelectionComplete(_pesons, _pesons_detail) {
         this.setState({
             visibleContacts: false,
             personsCount: _pesons,
             persons_detail: _pesons_detail
         })
-        Helper.DEBUG_LOG(_pesons)
-        Helper.DEBUG_LOG(_pesons_detail)
+        //Helper.DEBUG_LOG(_pesons)
+        //Helper.DEBUG_LOG(_pesons_detail)
     }
+
     showContactsList() {
         if (this.state.visibleContacts) {
             return (
@@ -1245,59 +1412,49 @@ export default class LocationsMap extends Component {
     setMargin = () => {
         this.setState({ mapMargin: 0 })
     }
+
     onUserLocationUpdate(event) {
-        console.log('open->-onUserLocationUpdate---')
+        //console.log('open->-onUserLocationUpdate---')
         if (event.nativeEvent.coordinate) {
             let coordinate = event.nativeEvent.coordinate
             if (coordinate) {
                 if (coordinate.latitude && coordinate.longitude) {
-                    console.log(coordinate)
+                    // console.log(coordinate)
                     try {
                         this.getTextAddress(coordinate.latitude, coordinate.longitude)
                     } catch (error) {
-
+                        console.log('ERROR onUserLocationUpdate: ', error);
                     }
                 }
-
             }
-
         }
-
-
-
-        console.log('-onUserLocationUpdate-close->')
+        // console.log('-onUserLocationUpdate-close->')
     }
 
-    getPlusButtonColor() {
-        const mMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
-        if (this.state.personsCount < mMarker.limit_group) {
-            return colors.black
-        } else {
-            return colors.lightGray
-        }
-    }
-    getMinusButtonColor() {
-        if (this.state.personsCount > 1) {
-            return colors.black
-        } else {
-            return colors.lightGray
-        }
-    }
     onRegionChange(region) {
         this.setState({ region: region });
     }
-    render() {
-        return (
 
+    clearSearch = async () => {
+        this.setState({ openedVenueMarkerName: '', searchText: '' })
+        await this.findNeares()
+    }
+
+    render() {
+      const {markers} = this.state
+        return (
             <View style={styles.container}>
 
-                <WaitingList ref={ref => (refWaitList = ref)} />
+                {
+                    this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
+                }
                 <MapView
+                    ref={(map) => { this.map = map; }}
                     onMapReady={this.setMargin}
-                    style={{ ...StyleSheet.absoluteFillObject, marginBottom: this.state.mapMargin, backgroundColor: '#F8F9F9' }}
+                    // style={{ ...StyleSheet.absoluteFillObject, marginBottom: this.state.mapMargin, backgroundColor: '#F8F9F9' }}
                     onPress={(event) => this.handleMarkerPress(event)}
                     moveOnMarkerPress={false}
-                    provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+                    // provider={PROVIDER_GOOGLE} // remove if not using Google Maps
                     style={styles.map}
                     // onRegionChange={(region) => this.setState({ region })}
                     // followsUserLocation={true}
@@ -1313,35 +1470,40 @@ export default class LocationsMap extends Component {
                     // region={this.state.region}
                     // pitchEnabled={true}
                     initialRegion={{
-                        latitude: this.state.currentLat,
-                        longitude: this.state.currentLongt,
-                        latitudeDelta: 0.010,
-                        longitudeDelta: 0.010
-                    }}
-                    region={{
-                        latitude: this.state.currentLat,
-                        longitude: this.state.currentLongt,
-                        latitudeDelta: 0.010,
-                        longitudeDelta: 0.010
+                        latitude: this.state.currentLat?this.state.currentLat:Helper.HARDCODED_LATS,
+                        longitude: this.state.currentLongt?this.state.currentLongt:Helper.HARDCODED_LONGTS,
+                        latitudeDelta: 0.0100,
+                        longitudeDelta: 0.0100
                     }}
                     customMapStyle={customStyle}
                     onUserLocationChange={event => this.onUserLocationUpdate(event)}
                 >
-
-                    {this.state.markers.map((marker, index) => (
-
+                    {this.state.refreshh?
+                      markers.map((marker, index) => (
                         <Marker
                             onPress={(event) => this.handleMarkerPress(event)}
                             identifier={index.toString()}
                             moveOnMarkerPress={false}
                             coordinate={this.getLatLong(marker)}
-                        //title={marker.title}
-                        //description={marker.description}
+                            //title={marker.title}
+                            //description={marker.description}
                         >
                             {this.customMarkerView(marker)}
                         </Marker>
-                    ))}
-
+                    )):
+                    markers.map((marker, index) => (
+                      <Marker
+                          onPress={(event) => this.handleMarkerPress(event)}
+                          identifier={index.toString()}
+                          moveOnMarkerPress={false}
+                          coordinate={this.getLatLong(marker)}
+                          //title={marker.title}
+                          //description={marker.description}
+                      >
+                          {this.customMarkerView(marker)}
+                      </Marker>
+                  ))
+                  }
                 </MapView>
                 {/* <ContactsList
                     visibleContacts={this.state.visibleContacts}
@@ -1351,57 +1513,54 @@ export default class LocationsMap extends Component {
                 <Card style={{
                     position: 'absolute',
                     top: Platform.OS == 'ios' ? 80 : 50,
-                    width: '90%',
+                    width: '80%',
                     backgroundColor: '#ffffff',
-                    alignSelf: 'center'
+                    alignSelf: 'center',
+                    left: 15
                 }}>
-                    <View style={{
-                        justifyContent: 'center',
-                        alignContent: 'center'
-                    }}>
-                        <TouchableOpacity
-                            onPress={() => this.onSearchClickHandle()}
-                        >
-
-                            <View style={{
-                                flexDirection: 'row',
-                                height: 40,
-                                flex: 1,
-                            }}>
+                    <View style={{justifyContent: 'center', alignContent: 'center'}}>
+                        <TouchableOpacity onPress={() => this.onSearchClickHandle()}>
+                            <View style={{flexDirection: 'row', height: 40, flex: 1,}}>
                                 <Image
                                     style={{ tintColor: colors.lightGray, width: 30, height: 30, alignSelf: 'center', alignContent: 'center', marginLeft: 10 }}
                                     source={require('../images/arrow_location.png')}
                                 />
                                 {this.showCurrentLocationText()}
                                 {this.showEditText()}
-
                             </View>
                         </TouchableOpacity>
 
-                        <View style={{
-                            position: 'absolute',
-                            right: 8,
-                            alignSelf: 'center',
-                            justifyContent: 'center',
-                            alignContent: 'center'
-                        }}>
-                            <TouchableOpacity onPress={() => this.reloadCurrentLocation()}>
-
+                        {this.state.openedVenueMarkerName ?
+                            <TouchableOpacity
+                                onPress={() => this.clearSearch()}
+                                style={{ position: 'absolute', right: 8, alignSelf: 'center' }}>
                                 <Image
-                                    style={{
-                                        width: 20,
-                                        height: 20,
-                                    }}
-                                    source={require('../images/my_location.png')}
+                                    style={{ width: 15, height: 15 }}
+                                    source={require('../images/cross.jpg')}
                                 />
                             </TouchableOpacity>
-                        </View>
+                            :
+                            <View style={{ position: 'absolute', right: 8, alignSelf: 'center' }}>
+                                <Image
+                                    style={{ width: 20, height: 20 }}
+                                    source={require('../images/search.png')}
+                                />
+                            </View>
+                        }
+
                         {this.showSearchesList()}
                     </View>
-
-
-
                 </Card>
+
+                <Card style={{ height: 40, width: 40, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', position: 'absolute', top: Platform.OS == 'ios' ? 80 : 50, right: 12 }}>
+                    <TouchableOpacity onPress={() => this.reloadCurrentLocation()}>
+                        <Image
+                            style={{ width: 20, height: 20 }}
+                            source={require('../images/my_location.png')}
+                        />
+                    </TouchableOpacity>
+                </Card>
+
                 <View style={{
                     position: 'absolute',
                     top: 140,
@@ -1410,70 +1569,72 @@ export default class LocationsMap extends Component {
                 }}>
                     {this.showDetailMarker(this.state.markers[0])}
                 </View>
-
-
-                <NavigationEvents onDidFocus={() => this.fetchData()} />
             </View>
-
         );
     }
 
     ////////FCM/////////////////////////////////////
     //
     //
-    //       
+    //
     /////////////////////////////////////////
 
+    // const [permissions, setPermissions] = useState({});
 
 
     onRegister(token) {
         if (token) {
+            console.log('onRegister--')
             this.postDeviceToken(token)
         } else {
             this.postDeviceToken(Helper.DEVICE_TOKEN)
         }
-
-
         /// this.setState({registerToken: token.token, fcmRegistered: true});
     }
 
-    async onNotif(notif) {
-        if (notif) {
-            if (notif.data) {
-                if (notif.data.type) {
-                    if (notif.data.type === 'notify') {
+    // async onNotif(notif) {
+    //     //alert('onNotif')
+    //     if (notif) {
+    //         if (notif.data) {
+    //             if (notif.data.type) {
+    //                 if (notif.data.type === 'notify') {
 
-                        try {
-                            let user = await Helper.getUser()
-                            const PAYLOAD = await getUserWaitingListWithHistory(user.id)
-                            PostRequest(GET_USER_WAITING_LIST, PAYLOAD).then((jsonObject) => {
+    //                     try {
+    //                         let user = await Helper.getUser()
+    //                         const PAYLOAD = await getUserWaitingListWithHistory(user.id)
+    //                         PostRequest(GET_USER_WAITING_LIST, PAYLOAD).then((jsonObject) => {
 
-                                if (jsonObject.success) {
-                                    Helper.updateUserQueList(jsonObject.apiResponse)
-                                    setTimeout(() => refWaitList.updateState(), 2000)
+    //                             if (jsonObject.success) {
+    //                                 Helper.updateUserQueList(jsonObject.apiResponse)
+    //                                 //this.updateWaitingListState()
+    //                             }
+    //                         })
+    //                     } catch (error) {
 
-                                    //this.updateWaitingListState()
-                                }
-                            })
-                        } catch (error) {
+    //                     }
+    //                     alert(`${notif.title} \n ${notif.message}`);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    async FetchDataWhenNotified() {
+        try {
+            let user = await Helper.getUser()
+            const PAYLOAD = await getUserWaitingListWithHistory(user.id)
+            PostRequest(GET_USER_WAITING_LIST, PAYLOAD).then((jsonObject) => {
 
-                        }
-                        alert(`${notif.title} \n ${notif.message}`);
+                if (jsonObject.success) {
+                    Helper.updateUserQueList(jsonObject.apiResponse)
+                    setTimeout(() => refWaitList.updateState(), 2000)
 
-
-
-                    }
-
+                    //this.updateWaitingListState()
                 }
-            }
+            })
+        } catch (error) {
+
         }
-
-
-
-
-
     }
-
     handlePerm(perms) {
         alert('Permissions', JSON.stringify(perms));
     }
@@ -1500,20 +1661,21 @@ export default class LocationsMap extends Component {
     // }
 
     async postDeviceToken(fcmToken) {
-        Helper.saveDeviceFcmToken(fcmToken.token)
-        //let userType = await Helper.getUserType()
         let platform = Platform.OS
+        if (platform == 'android') {
+            console.log('androidToken', fcmToken.token)
+            Helper.saveDeviceFcmToken(fcmToken.token)
+        }
+
         let user = await Helper.getUser()
 
-        const PAYLOAD = await registerDeviceToken(user.id, fcmToken.token, platform, 2)
+        const PAYLOAD = await registerDeviceToken(user.id, platform == 'android' ? fcmToken.token : fcmToken, platform, 2)
         PostRequest(REGISTER_DEVICE, PAYLOAD).then((jsonObject) => {
+            console.log('success posted -> ')
             // if (jsonObject.success) {
-
             // }
         })
     }
-
-
 }
 
 const styles = StyleSheet.create({

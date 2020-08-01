@@ -1,3 +1,4 @@
+/* @flow */
 import React, { Component } from 'react';
 
 import {
@@ -12,7 +13,7 @@ import {
     ImageBackground,
     RefreshControl,
     Share,
-
+    BackHandler
 } from 'react-native';
 import { Card } from 'react-native-shadow-cards';
 import { colors } from '../../common/AppColors';
@@ -51,12 +52,24 @@ export default class WaitingList extends Component {
         //     this.onNotif.bind(this),
         // );
         this.updateState = this.updateState.bind(this);
+        // this.props.navigation.addListener('willFocus', this.componentWillFocus)
     }
+
     updateState() {
         var _emptyCurrentWaiting = []
         // var _emptyHistory = []
         this.setState({ dataCurrentlyWaiting: _emptyCurrentWaiting })
         this.updateSyncedData(Helper.userQueList)
+    }
+
+    componentDidMount = async () => {
+      await this.fetchData()
+      BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    }
+
+    handleBackButton() {
+        console.log('handleBackButton IN.');
+        BackHandler.exitApp();
     }
 
     // onNotif(notif) {
@@ -73,8 +86,8 @@ export default class WaitingList extends Component {
         var itemIndex = itemsArr.findIndex(item => id === item.id);
         itemsArr[itemIndex]['expanded'] = !itemsArr[itemIndex]['expanded'];
         this.setState({ dataCurrentlyWaiting: itemsArr })
-
     }
+
     innerViewOfRowWaitingList(item, index) {
         var statusObject = this.state.statuses[index]
         Helper.DEBUG_LOG(statusObject)
@@ -83,11 +96,10 @@ export default class WaitingList extends Component {
                 <View style={{
                     flexDirection: 'column',
                     marginTop: 10
-
                 }}>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ flex: 1, fontSize: 12, color: colors.black, fontFamily: "Verdana", paddingLeft: 4 }}>{item.venue[0].business_address}</Text>
-                        <Text style={{ fontSize: 12, color: colors.lightGray, fontFamily: "Verdana", paddingLeft: 4 }}>{`${Number(statusObject.distance).toFixed(2)} km away`}</Text>
+                    <View style={{ flexDirection: 'row', flex: 1 }}>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.black, paddingLeft: 4, maxWidth: '70%' }}>{item.venue[0].business_address}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 10 }}>{`${Number(statusObject.distance).toFixed(2)} km away`}</Text>
                     </View>
 
                     <View style={{ flexDirection: 'row', marginTop: 20 }}>
@@ -125,17 +137,14 @@ export default class WaitingList extends Component {
                             />
                             <Text style={{
                                 fontSize: 16,
+                                fontFamily: 'Rubik-Light',
                                 fontWeight: 'bold',
                                 color: colors.black,
-                                fontFamily: "Verdana",
                                 paddingLeft: 4
                             }}>{item.persons}</Text>
-
                         </View>
                     </View>
                 </View>
-
-
             )
         }
     }
@@ -146,13 +155,11 @@ export default class WaitingList extends Component {
     //                      HISTORY WAITING LIST
     //------------------------------------------------------------------
 
-
     updateList = (id) => {
         let itemsArr = this.state.dataLastThirtyDays
         var itemIndex = itemsArr.findIndex(item => id === item.id);
         itemsArr[itemIndex]['expanded'] = !itemsArr[itemIndex]['expanded'];
         this.setState({ dataLastThirtyDays: itemsArr })
-
     }
 
     innerViewOfRow(item, index) {
@@ -161,11 +168,10 @@ export default class WaitingList extends Component {
                 <View style={{
                     flexDirection: 'column',
                     marginTop: 10
-
                 }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ flex: 1, fontSize: 12, color: colors.black, fontFamily: "Verdana", paddingLeft: 4 }}>{item.venue[0].business_address}</Text>
-                        {/* <Text style={{ fontSize: 12, color: colors.lightGray, fontFamily: "Verdana", paddingLeft: 4 }}>1 km away</Text> */}
+                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{item.venue[0].business_address}</Text>
+                        {/* <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 4 }}>1 km away</Text> */}
                     </View>
 
                     <View style={{ flexDirection: 'row', marginTop: 20 }}>
@@ -175,10 +181,10 @@ export default class WaitingList extends Component {
                         }}>
                             <Button
                                 width={'100%'}
+                                disabled={true}
                                 // onButtonPress={() => this.onCancelRequest(item)}
                                 text={`${item.status.toUpperCase()}ED`} />
                         </View>
-
 
                         <View style={{
                             height: 50,
@@ -206,17 +212,15 @@ export default class WaitingList extends Component {
                             />
                             <Text style={{
                                 fontSize: 16,
+                                fontFamily: 'Rubik-Light',
                                 fontWeight: 'bold',
                                 color: colors.black,
-                                fontFamily: "Verdana",
                                 paddingLeft: 4
                             }}>{item.persons}</Text>
 
                         </View>
                     </View>
                 </View>
-
-
             )
         }
     }
@@ -231,6 +235,7 @@ export default class WaitingList extends Component {
         }
         return true
     }
+
     showNoDataError() {
         if (this.bothAreEmpty()) {
             return (
@@ -239,26 +244,27 @@ export default class WaitingList extends Component {
                     alignContent: 'center', alignItems: 'center',
                     backgroundColor: 'rgba(0, 0, 0, 0)'
                 }}>
-                    <Text style={{ color: colors.lightGray }}>No content. Pull to refresh.</Text>
+                    <Text style={{ fontFamily: 'Rubik-Light', color: colors.lightGray }}>No content. Pull to refresh.</Text>
                 </View>
             )
         }
     }
 
-
     getColor(index) {
         // let venue = item.venue[0]
         //let isFav = await Helper.isVenueFavourited(venue.id)
-        Helper.DEBUG_LOG(this.state.statuses)
-        Helper.DEBUG_LOG(this.state.statuses[index].isFav)
-        if (this.state.statuses[index].isFav == true) {
-            return colors.black
+        // Helper.DEBUG_LOG(this.state.statuses)
+        // Helper.DEBUG_LOG(this.state.statuses[index].isFav)
+        if (this.state.statuses[index]) {
+          if (this.state.statuses[index].isFav) {
+              return colors.black
+          } else {
+              return colors.lightGray
+          }
         } else {
-            return colors.lightGray
+          return colors.black
         }
-
     }
-
 
     changeStatus(index) {
         if (this.state.statuses[index].isFav == true) {
@@ -273,6 +279,7 @@ export default class WaitingList extends Component {
             return true
         }
     }
+
     async onFavouriteClick(item, index) {
         let nextStatus = await this.changeStatus(index)
 
@@ -282,7 +289,6 @@ export default class WaitingList extends Component {
         } else {
             PAYLOAD = await removeFavourite(item.venue[0].id)
         }
-
         PostRequest(ADD_TO_FAVOUITE, PAYLOAD).then((jsonObject) => {
             if (jsonObject.success) {
                 Helper.userFavouritesVenue = jsonObject.apiResponse.data
@@ -294,13 +300,13 @@ export default class WaitingList extends Component {
         try {
             var url = `https://www.google.com/maps/search/?api=1&query=${item.venue[0].latitude},${item.venue[0].longitude}`
 
-            var name = item.venue[0].name
+            var name = item.venue[0].business_name
             var location = item.venue[0].location
             var mMesage = `${name}, ${location} \n ${url}`
             const result = await Share.share({
-                title:name,
+                title: name,
                 url: url,
-                message:mMesage,
+                message: mMesage,
             });
 
             if (result.action === Share.sharedAction) {
@@ -317,9 +323,7 @@ export default class WaitingList extends Component {
         }
     };
 
-
     shareAndFavOptionsHistory(item, index) {
-
         if (item.expanded) {
             return (
                 <View style={{
@@ -328,7 +332,6 @@ export default class WaitingList extends Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                     alignSelf: 'center',
-
                 }}>
                     <TouchableOpacity
                         onPress={() => this.onShare(item)}
@@ -363,8 +366,8 @@ export default class WaitingList extends Component {
             )
         }
     }
-    shareAndFavOptions(item, index) {
 
+    shareAndFavOptions(item, index) {
         if (item.expanded) {
             return (
                 <View style={{
@@ -408,13 +411,12 @@ export default class WaitingList extends Component {
                             source={require('../images/fav_heart.png')}
                         />
                     </TouchableOpacity>
-
                 </View>
             )
         }
     }
 
-    //--------------APIS CALLING [FETCH LIST, UPDATE LIST BY CANCEL] 
+    //--------------APIS CALLING [FETCH LIST, UPDATE LIST BY CANCEL]
 
     //-- CANCEL REQUEST
     async onCancelRequest(removedItem, index) {
@@ -449,12 +451,17 @@ export default class WaitingList extends Component {
 
     //-- SYNC PRE-LOADED DATA
     async fetchData() {
+        try {
+            this.loadDataFromServer()
+        } catch (error) {
+          console.log(error);
+        }
+
         let statuses = await Helper.getFavSatutsesForWaitingList()
         this.setState({ statuses: statuses })
         let queuesList = Helper.userQueList
         Helper.DEBUG_LOG(statuses)
         this.updateSyncedData(queuesList)
-        //this.loadDataFromServer()
     }
 
     //-- PULL TO REFRESH API
@@ -466,14 +473,13 @@ export default class WaitingList extends Component {
         let user = await Helper.getUser()
         const PAYLOAD = await getUserWaitingListWithHistory(user.id)
         PostRequest(GET_USER_WAITING_LIST, PAYLOAD).then((jsonObject) => {
-            this.hideLoader()
+            //this.hideLoader()
             var objForBothList = jsonObject.apiResponse
             if (jsonObject.success) {
                 Helper.updateUserQueList(objForBothList)
             }
-            this.setState({ isRefreshing: false })
             this.updateSyncedData(objForBothList)
-
+            this.setState({ isRefreshing: false })
         })
     }
 
@@ -534,7 +540,7 @@ export default class WaitingList extends Component {
 
                         <View
                             style={{ flexDirection: 'column' }}>
-                            <Text style={{ color: colors.white, paddingLeft: 10, fontFamily: 'Verdana', fontSize: 18, fontWeight: 'bold' }}>Currently Waiting</Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold' }}>Currently Waiting</Text>
                             <FlatList
                                 nestedScrollEnabled={false}
                                 scrollEnabled={false}
@@ -542,16 +548,16 @@ export default class WaitingList extends Component {
                                     alignContent: 'center',
                                     backgroundColor: 'transparent'
                                 }}
-                                renderItem={({ item, index }) => (<Card
+                                renderItem={({ item, index }) => (
+                                  <Card
                                     elevation={4}
-                                    style={{ padding: 8, margin: 10, }}>
+                                    style={{ padding: 8, margin: 10, width: '90%' }}>
                                     <TouchableOpacity
                                         onPress={() => this.updateCurrentlyWaitingList(item.id)}
                                     >
                                         <View style={{
                                             flexDirection: 'column',
                                         }}>
-
                                             <View style={{
                                                 flexDirection: 'row',
                                                 alignContent: 'center',
@@ -560,26 +566,40 @@ export default class WaitingList extends Component {
                                                 alignSelf: 'center',
                                             }}>
 
+                                                <View style={{ flexDirection: 'column', flex: 1, }}>
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            fontFamily: 'Rubik-Light',
+                                                            color: colors.black,
+                                                            fontWeight: 'bold',
+                                                            paddingLeft: 4,
+                                                            alignContent: 'flex-start',
+                                                            alignItems: 'flex-start',
+                                                            justifyContent: 'flex-start',
+                                                            alignSelf: 'flex-start',
+                                                        }}>
+                                                        {item.venue[0].business_name}
+                                                    </Text>
 
-                                                <Text
-                                                    style={{
-                                                        fontSize: 16,
-                                                        color: colors.black,
-                                                        fontFamily: "Verdana",
-                                                        fontWeight: 'bold',
-                                                        paddingLeft: 4,
-                                                        flex: 1,
-                                                        alignContent: 'center',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        alignSelf: 'center',
-                                                    }}>
-                                                    {item.venue[0].name}
-                                                </Text>
+
+                                                </View>
                                                 {this.shareAndFavOptions(item, index)}
 
                                             </View>
-                                            <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.getAverageWaitTime(item.venue[0].average_wait_time)}</Text>
+                                            <Text
+                                                style={{
+                                                    fontSize: 16,
+                                                    fontFamily: 'Rubik-Light',
+                                                    color: colors.darkGray,
+                                                    paddingLeft: 4,
+                                                    alignContent: 'flex-start',
+                                                    alignItems: 'flex-start',
+                                                    justifyContent: 'flex-start',
+                                                    alignSelf: 'flex-start',
+                                                }}>
+                                                {this.getAverageWaitTime(item.wait_time)}
+                                            </Text>
                                             {this.innerViewOfRowWaitingList(item, index)}
                                         </View>
                                     </TouchableOpacity>
@@ -590,23 +610,23 @@ export default class WaitingList extends Component {
                             />
                         </View>
                         <View style={{ flexDirection: 'column' }}>
-                            <Text style={{ color: colors.white, paddingLeft: 10, fontFamily: 'Verdana', fontSize: 18, fontWeight: 'bold', marginTop: 30 }}>Last Thirty Days</Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 30 }}>Last Thirty Days</Text>
                             <FlatList
-
-                                style={{
-
-                                    alignContent: 'center',
-                                    backgroundColor: 'transparent'
-                                }}
-                                renderItem={({ item, index }) => (<Card
+                                data={this.state.dataLastThirtyDays}
+                                keyExtractor={(item, index) => index}
+                                refreshControl={<RefreshControl
+                                  colors={["#9Bd35A", "#689F38"]}
+                                  refreshing={this.state.isRefreshing}
+                                  onRefresh={() => this.onRefresh()} />}
+                                style={{alignContent: 'center', backgroundColor: 'transparent'}}
+                                renderItem={({ item, index }) => (
+                                  <Card
                                     elevation={4}
-                                    style={{ padding: 8, margin: 10, }}>
+                                    style={{ padding: 8, margin: 10, width: '90%' }}>
                                     <TouchableOpacity
                                         onPress={() => this.updateList(item.id)}
                                     >
-                                        <View style={{
-                                            flexDirection: 'column',
-                                        }}>
+                                        <View style={{flexDirection: 'column',}}>
 
                                             <View style={{
                                                 flexDirection: 'row',
@@ -616,26 +636,42 @@ export default class WaitingList extends Component {
                                                 alignSelf: 'center',
                                             }}>
 
+                                                <View style={{ flexDirection: 'column', flex: 1, }}>
 
-                                                <Text
-                                                    style={{
-                                                        fontSize: 16,
-                                                        color: colors.black,
-                                                        fontFamily: "Verdana",
-                                                        fontWeight: 'bold',
-                                                        paddingLeft: 4,
-                                                        flex: 1,
-                                                        alignContent: 'center',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        alignSelf: 'center',
-                                                    }}>
-                                                    {item.venue[0].name}
-                                                </Text>
+
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 16,
+                                                            fontFamily: 'Rubik-Light',
+                                                            color: colors.black,
+                                                            fontWeight: 'bold',
+                                                            paddingLeft: 4,
+                                                            alignContent: 'flex-start',
+                                                            alignItems: 'flex-start',
+                                                            justifyContent: 'flex-start',
+                                                            alignSelf: 'flex-start',
+                                                        }}>
+                                                        {item.venue[0].business_name}
+                                                    </Text>
+
+                                                </View>
                                                 {this.shareAndFavOptionsHistory(item, index)}
 
                                             </View>
-                                            {/* <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.getAverageWaitTime(item.venue[0].average_wait_time)}</Text> */}
+                                            <Text
+                                                style={{
+                                                    fontSize: 16,
+                                                    fontFamily: 'Rubik-Light',
+                                                    color: colors.darkGray,
+                                                    paddingLeft: 4,
+                                                    alignContent: 'flex-start',
+                                                    alignItems: 'flex-start',
+                                                    justifyContent: 'flex-start',
+                                                    alignSelf: 'flex-start',
+                                                }}>
+                                                {item.created_at}
+                                            </Text>
+                                            {/* <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTime(item.venue[0].average_wait_time)}</Text> */}
                                             {this.innerViewOfRow(item, item.venue[0])}
                                         </View>
                                     </TouchableOpacity>
@@ -643,17 +679,9 @@ export default class WaitingList extends Component {
                                 // renderItem={({item, index}) => (this.renderItem(item, index))}
                                 // renderItem={({ item, index }) => (this.renderItem(item,index))}
                                 // renderItem={this.renderItem}
-                                data={this.state.dataLastThirtyDays}
-                                keyExtractor={(item, index) => index}
-                                refreshControl={<RefreshControl
-                                    colors={["#9Bd35A", "#689F38"]}
-                                    refreshing={this.state.isRefreshing}
-                                    onRefresh={() => this.onRefresh()} />}
                             />
                         </View>
-
-
-                        <NavigationEvents onDidFocus={() => this.fetchData()} />
+                        <NavigationEvents onWillFocus={() => this.fetchData()} />
                     </View >
                 </ScrollView>
             </ImageBackground>

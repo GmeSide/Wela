@@ -12,6 +12,7 @@ export const colors = {
     darkGray: 'rgb(74,74,74)',
     black: '#000',
     lightGray: 'rgb(216,216,216)',
+    lightestGray: '#EEEEEE',
     midGray:'#808080',
     input_box_grey:'#F2F3F4',
     themeDark: appTheme,

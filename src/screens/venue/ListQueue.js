@@ -1,3 +1,4 @@
+/* @flow */
 import React from "react";
 import {
     StyleSheet,
@@ -11,7 +12,6 @@ import {
 import { Card } from 'react-native-shadow-cards';
 import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
-import { NavigationEvents } from "react-navigation";
 import Helper from '../../utils/Helper';
 import Arrows from './Arrows'
 
@@ -19,7 +19,7 @@ const DEVICE_WIDTH = Dimensions.get('window').width;
 
 var mFlatList = null
 
-class ListQueue extends React.Component {
+export default class ListQueue extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -34,61 +34,59 @@ class ListQueue extends React.Component {
             this.setState({ currentIndexListFocus: 0 })
         }
         this.onSlideScroll()
-
     }
+
     onSlideScroll() {
         let wait = new Promise((resolve) => setTimeout(resolve, 500));  // Smaller number should work
         wait.then(() => {
-
             mFlatList.scrollToIndex({ index: this.state.currentIndexListFocus, animated: true });
         });
-
     }
+
     getButtonLabel(status) {
         if (status == "waiting" || status == "Waiting") {
             return "Notify"
+        } else if (status == "confirm" || status == "Confirm") {
+            return "Notified"
         } else {
             return status.length ? status.charAt(0).toUpperCase() + status.slice(1) : status
         }
-
     }
+
     focusedItem(data, index) {
         Helper.DEBUG_LOG(index)
     }
 
     DELETE_ICON(item, index) {
-        if (item.status == "Notified" || item.status == "notified") {
-            return (
-                <View style={{
-                    position: 'absolute',
-                    height: 20,
-                    width: 20,
-                    right: 0,
-                    backgroundColor: colors.lightGray,
-                    borderRadius: Platform.OS === 'ios' ? 20 / 2 : 20
-                }}>
-                    <TouchableOpacity
-                        onPress={() => this.props.deleteNow(index)}
-                    >
-                        <Text
-                            style={{
-                                height: 20,
-                                width: 20,
-                                padding: 2,
-                                color: colors.black,
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                borderRadius: Platform.OS === 'ios' ? 20 / 2 : 20
-                            }}
-                        >
-                            X
-                        </Text>
-
-                    </TouchableOpacity>
-                </View>
-            )
-        }
-
+      if (item.status == "Notified" || item.status == "notified" || item.status == "confirm" || item.status == "Confirm") {
+        return (
+          <TouchableOpacity style={{
+              position: 'absolute',
+              height: 20,
+              width: 20,
+              right: 0,
+              backgroundColor: colors.lightGray,
+              borderRadius: Platform.OS === 'ios' ? 20 / 2 : 20,
+            }}
+            onPress={() => this.props.deleteNow(index,item)}
+          >
+            <Text
+              style={{
+                height: 20,
+                fontFamily: 'Rubik-Light',
+                width: 20,
+                padding: 2,
+                color: colors.black,
+                alignSelf: 'center',
+                textAlign: 'center',
+                borderRadius: Platform.OS === 'ios' ? 20 / 2 : 20
+              }}
+            >
+                X
+            </Text>
+          </TouchableOpacity>
+        )
+      }
     }
 
     slideBack() {
@@ -97,6 +95,7 @@ class ListQueue extends React.Component {
             this.onSlideScroll()
         }
     }
+
     slideNext() {
         if (this.state.currentIndexListFocus < Helper.venueQueueDataOfCustomers.length) {
             this.setState({ currentIndexListFocus: this.state.currentIndexListFocus + 1 })
@@ -114,6 +113,7 @@ class ListQueue extends React.Component {
             )
         }
     }
+
     getUserName(item) {
         if (item.user) {
             return item.user
@@ -121,6 +121,7 @@ class ListQueue extends React.Component {
             return "No Name"
         }
     }
+
     render() {
         return (
             <View style={{
@@ -130,21 +131,40 @@ class ListQueue extends React.Component {
                 alignItems: 'center',
                 backgroundColor: 'transparent'
             }}>
-
+                <Text style={{
+                    marginBottom: 20,
+                    marginTop: 20,
+                    fontFamily: 'Rubik-Light',
+                    color: colors.black,
+                    fontWeight: 'bold',
+                    fontSize: 18
+                }}>
+                    {'Current Wait List'}
+                </Text>
 
                 <FlatList
+                    data={this.props.dataSource.length? [...this.props.dataSource,{status:'thatall'}] : this.props.dataSource}
+                    keyExtractor={item => `${item}`}
                     ref={ref => mFlatList = ref}
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item, index }) => (
                         <View>
+                            {item.status==='thatall'?
+                            <Card
+                            elevation={0}
+                            style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, justifyContent: 'center', height: 150 }}>
+                            <Image
+                              source={require('../../../assets/Group1.png')}
+                              style={{ height: 100, width: DEVICE_WIDTH / 2.7 }}
+                              resizeMode='contain'
+                            />
+                            </Card>
 
-
+                            :
                             <Card
                                 elevation={4}
-                                style={{ width: DEVICE_WIDTH / 3, padding: 8, margin: 10, }}>
-
-
+                                style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, }}>
                                 {this.DELETE_ICON(item, index)}
 
                                 <View style={{
@@ -160,7 +180,7 @@ class ListQueue extends React.Component {
                                         borderRadius: Platform.OS === 'ios' ? 60 / 2 : 60
                                     }}>
                                         <Image
-                                            source={{ uri: "" }}
+                                            source={item.url? { uri: item.url }:require('../images/user_placeholder.png')}
                                             style={{
                                                 height: 60,
                                                 width: 60,
@@ -178,6 +198,7 @@ class ListQueue extends React.Component {
                                             numberOfLines={2}
                                             style={{
                                                 textAlign: 'center',
+                                                fontFamily: 'Rubik-Light',
                                                 justifyContent: 'center',
                                                 alignContent: 'center',
                                                 alignItems: 'center',
@@ -189,7 +210,7 @@ class ListQueue extends React.Component {
                                         </Text>
                                         <Text
                                             numberOfLines={1}
-                                            style={{ color: colors.black, marginTop: 2, fontSize: 12, }}>
+                                            style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 2, fontSize: 12, }}>
                                             {`Group of ${item.persons}`}
                                         </Text>
                                     </View>
@@ -198,30 +219,21 @@ class ListQueue extends React.Component {
                                         background={item.status == "waiting" ? '#000000' : '#8cb3e5'}
                                         topMargin={15}
                                         textSize={12}
-                                        height={35}
-                                        width={DEVICE_WIDTH / 3 - 40}
+                                        height={40}
+                                        width={DEVICE_WIDTH / 3 - 30}
                                         topMargin={10}
                                         onButtonPress={() => this.props.notify(item, index)}
                                         text={this.getButtonLabel(item.status)} />
                                 </View>
-                            </Card>
-
-
+                            </Card>}
                         </View>
                     )}
-
-                    data={this.props.dataSource}
-                    keyExtractor={item => `${item}`}
                 />
                 {this.showArrowsIfListCanScroll()}
             </View>
         );
     }
 } // end of class
-
-export default ListQueue;
-
-
 
 const styles = StyleSheet.create({
     listItem: {
