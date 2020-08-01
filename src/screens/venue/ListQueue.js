@@ -1,3 +1,4 @@
+/* @flow */
 import React from "react";
 import {
     StyleSheet,
@@ -11,7 +12,6 @@ import {
 import { Card } from 'react-native-shadow-cards';
 import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
-import { NavigationEvents } from "react-navigation";
 import Helper from '../../utils/Helper';
 import Arrows from './Arrows'
 
@@ -44,14 +44,17 @@ class ListQueue extends React.Component {
         });
 
     }
+
     getButtonLabel(status) {
         if (status == "waiting" || status == "Waiting") {
             return "Notify"
+        } else if (status == "confirm" || status == "Confirm") {
+            return "Notified"
         } else {
             return status.length ? status.charAt(0).toUpperCase() + status.slice(1) : status
         }
-
     }
+
     focusedItem(data, index) {
         Helper.DEBUG_LOG(index)
     }
@@ -73,6 +76,7 @@ class ListQueue extends React.Component {
                         <Text
                             style={{
                                 height: 20,
+                                fontFamily: 'Rubik-Light',
                                 width: 20,
                                 padding: 2,
                                 color: colors.black,
@@ -130,7 +134,16 @@ class ListQueue extends React.Component {
                 alignItems: 'center',
                 backgroundColor: 'transparent'
             }}>
-
+                <Text style={{
+                    marginBottom: 20,
+                    marginTop: 20,
+                    fontFamily: 'Rubik-Light',
+                    color: colors.black,
+                    fontWeight: 'bold',
+                    fontSize: 18
+                }}>
+                    {'Current Wait List'}
+                </Text>
 
                 <FlatList
                     ref={ref => mFlatList = ref}
@@ -138,14 +151,10 @@ class ListQueue extends React.Component {
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item, index }) => (
                         <View>
-
-
                             <Card
                                 elevation={4}
-                                style={{ width: DEVICE_WIDTH / 3, padding: 8, margin: 10, }}>
-
-
-                                {this.DELETE_ICON(item, index)}
+                                style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, }}>
+                                {/* {this.DELETE_ICON(item, index)} */}
 
                                 <View style={{
                                     flexDirection: 'column',
@@ -178,6 +187,7 @@ class ListQueue extends React.Component {
                                             numberOfLines={2}
                                             style={{
                                                 textAlign: 'center',
+                                                fontFamily: 'Rubik-Light',
                                                 justifyContent: 'center',
                                                 alignContent: 'center',
                                                 alignItems: 'center',
@@ -189,7 +199,7 @@ class ListQueue extends React.Component {
                                         </Text>
                                         <Text
                                             numberOfLines={1}
-                                            style={{ color: colors.black, marginTop: 2, fontSize: 12, }}>
+                                            style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 2, fontSize: 12, }}>
                                             {`Group of ${item.persons}`}
                                         </Text>
                                     </View>
@@ -198,8 +208,8 @@ class ListQueue extends React.Component {
                                         background={item.status == "waiting" ? '#000000' : '#8cb3e5'}
                                         topMargin={15}
                                         textSize={12}
-                                        height={35}
-                                        width={DEVICE_WIDTH / 3 - 40}
+                                        height={40}
+                                        width={DEVICE_WIDTH / 3 - 30}
                                         topMargin={10}
                                         onButtonPress={() => this.props.notify(item, index)}
                                         text={this.getButtonLabel(item.status)} />

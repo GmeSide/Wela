@@ -107,7 +107,7 @@ class DetailViewModal extends React.Component {
     handleConfirm = (date) => {
         this.hideDatePicker()
         var time = date.toLocaleTimeString('en-US')
-       
+
         var spilted = time.split(':')
         var hr = spilted[0]
         var minutes = spilted[1]
@@ -120,14 +120,14 @@ class DetailViewModal extends React.Component {
             hours = hours - 12;
           }
         }
-        
+
         if(hours == 0){
             hours = 12;
         }
 
         var time = `${hours}:${minutes} ${am_pm}`
         //alert(time)
-        
+
 
         let itemsArr = this.state.timesToEdit
         if (this.state.isOpenTime == true) {
@@ -139,7 +139,7 @@ class DetailViewModal extends React.Component {
         this.setState({ timesToEdit: itemsArr })
         setTimeout(() => { this.hideDatePicker()}, 1000)
         //console.warn("time ", time);
-       
+
     };
 
     cancelVenueDetailView() {
@@ -187,7 +187,6 @@ class DetailViewModal extends React.Component {
             }
         })
 
-
         var message
         var error = false
 
@@ -233,10 +232,10 @@ class DetailViewModal extends React.Component {
                     Helper.venueUserObject = jsonObject.apiResponse.data
                     this.setState({ dataSource: jsonObject.apiResponse.profile })
                     this.loadUpdatedData()
-                    setTimeout(() => { this.cancelVenueDetailView() }, 4000)
+                    this.cancelVenueDetailView()
 
                 }
-                setTimeout(() => { this.setState({ isLoading: false }) }, 4000)
+                this.setState({ isLoading: false })
                 showToastMessage("", jsonObject.apiResponse.message)
 
             })
@@ -244,6 +243,7 @@ class DetailViewModal extends React.Component {
         }
 
     }
+
     cancelVenueDetailView() {
         this.props.cancelVenueDetailView()
     }
@@ -402,7 +402,7 @@ class DetailViewModal extends React.Component {
 
                         }}>
                         <ScrollView>
-                            {/* 
+                            {/*
                         *
                         * VENUE NAME VIEW ...............
                         */}
@@ -413,6 +413,7 @@ class DetailViewModal extends React.Component {
                             }}>
                                 <Text style={{
                                     justifyContent: 'flex-start',
+                                    fontFamily: 'Rubik-Light',
                                     alignContent: 'flex-start',
                                     alignSelf: 'flex-start',
                                     color: colors.black,
@@ -424,7 +425,6 @@ class DetailViewModal extends React.Component {
                                         justifyContent: 'center',
                                         alignContent: 'center',
                                         alignSelf: 'center',
-                                        textAlignVertical: 'center',
                                         width: 22, height: 22, marginRight: 15
                                     }}
                                     source={require('../../screens/images/ic_profile.png')}
@@ -433,7 +433,7 @@ class DetailViewModal extends React.Component {
                             </View>
 
 
-                            {/* 
+                            {/*
                         *
                         * CAPACITY VIEW ...............
                         */}
@@ -445,6 +445,7 @@ class DetailViewModal extends React.Component {
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
                                         justifyContent: 'center',
+                                        fontFamily: 'Rubik-Light',
                                         alignContent: 'center',
                                         alignSelf: 'center',
                                         textAlignVertical: 'center',
@@ -500,6 +501,7 @@ class DetailViewModal extends React.Component {
                                             onPress={() => { textInputPeople.focus() }}>
                                             <Text style={{
                                                 width: '100%',
+                                                fontFamily: 'Rubik-Light',
                                                 paddingLeft: 5,
                                                 color: colors.black,
                                                 textAlign: 'left',
@@ -516,6 +518,7 @@ class DetailViewModal extends React.Component {
                                 <View style={{ flex: 1 }}>
                                     <Text style={{
                                         justifyContent: 'center',
+                                        fontFamily: 'Rubik-Light',
                                         alignContent: 'center',
                                         alignSelf: 'center',
                                         textAlignVertical: 'center',
@@ -570,6 +573,7 @@ class DetailViewModal extends React.Component {
                                             onPress={() => { textInputLimit.focus() }}>
                                             <Text style={{
                                                 width: '100%',
+                                                fontFamily: 'Rubik-Light',
                                                 paddingLeft: 5,
                                                 color: colors.black,
                                                 textAlign: 'left',
@@ -589,13 +593,14 @@ class DetailViewModal extends React.Component {
                             </View>
 
 
-                            {/* 
+                            {/*
                         *
                         * ADDRESS VIEW ...............
                         */}
 
                             <Text style={{
                                 justifyContent: 'center',
+                                fontFamily: 'Rubik-Light',
                                 alignContent: 'center',
                                 alignSelf: 'center',
                                 textAlignVertical: 'center',
@@ -636,9 +641,9 @@ class DetailViewModal extends React.Component {
                                         <Text
                                             numberOfLines={1}
                                             ellipsizeMode='tail'
-
                                             style={{
                                                 paddingLeft: 5,
+                                                fontFamily: 'Rubik-Light',
                                                 color: colors.black,
                                                 textAlign: 'center',
                                                 justifyContent: 'center',
@@ -689,6 +694,7 @@ class DetailViewModal extends React.Component {
 
                             <Text style={{
                                 justifyContent: 'center',
+                                fontFamily: 'Rubik-Light',
                                 alignContent: 'center',
                                 alignSelf: 'center',
                                 textAlignVertical: 'center',
@@ -709,7 +715,7 @@ class DetailViewModal extends React.Component {
                                         marginTop:8,
                                         paddingHorizontal: 10,
                                     }}>
-                                        <Text style={{ width: '50%' }}>{this.getDay(item.day)}</Text>
+                                        <Text style={{ fontFamily: 'Rubik-Light', width: '50%' }}>{this.getDay(item.day)}</Text>
 
                                         <View style={{ width: '50%', flexDirection: 'row' }}>
 
@@ -736,6 +742,7 @@ class DetailViewModal extends React.Component {
                                                     onPress={() => this.onOpenDate(index, true)}>
                                                     <Text style={{
                                                         width: '100%',
+                                                        fontFamily: 'Rubik-Light',
                                                         paddingLeft: 5,
                                                         color: colors.black,
                                                         textAlign: 'center',
@@ -771,6 +778,7 @@ class DetailViewModal extends React.Component {
                                                     onPress={() => this.onOpenDate(index, false)}>
                                                     <Text style={{
                                                         width: '100%',
+                                                        fontFamily: 'Rubik-Light',
                                                         paddingLeft: 5,
                                                         color: colors.black,
                                                         textAlign: 'center',

@@ -46,7 +46,12 @@ end
 
 target 'WELA' do
   # Pods for WELA
+  permissions_path = '../node_modules/react-native-permissions/ios'
   rn_maps_path = '../node_modules/react-native-maps'
+
+  pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary.podspec"
+  pod 'Permission-Camera', :path => "#{permissions_path}/Camera.podspec"
+
   pod 'react-native-google-maps', :path => rn_maps_path
   pod 'GoogleMaps'
   pod 'Google-Maps-iOS-Utils'
@@ -82,9 +87,17 @@ target 'WELA' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
+ 
+  # pod 'Permission-Camera', :path => '../node_modules/react-native-permissions/ios/Camera.podspec'
+  # pod 'Permission-PhotoLibrary', :path => '../node_modules/react-native-permissions/ios/PhotoLibrary.podspec'
+  # pod 'Permission-StoreKit', :path => '../node_modules/react-native-permissions/ios/StoreKit.podspec'
+
    # react-native-maps dependencies
    pod 'react-native-maps', path: rn_maps_path
-   
+   pod 'RNFBCrashlytics', :path => '../node_modules/@react-native-firebase/crashlytics'
+
+   pod 'RNCPushNotificationIOS', :path => '../node_modules/@react-native-community/push-notification-ios'
+
   target 'WELATests' do
     inherit! :complete
     # Pods for testing

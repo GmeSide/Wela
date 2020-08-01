@@ -13,7 +13,8 @@ import {
     Platform,
     PermissionsAndroid,
     Animated,
-    Picker
+    Picker,
+    BackHandler
 } from 'react-native';
 import { colors } from '../../common/AppColors';
 import { Card } from 'react-native-shadow-cards';
@@ -33,6 +34,8 @@ import NotifService from '../venue/NotifService';
 import { NavigationEvents } from "react-navigation";
 import WaitingList from '../waiting/WaitingList.js';
 import IHAKPicker from "./ihakpicker";
+import PushNotificationIOS from "@react-native-community/push-notification-ios";
+
 var refWaitList = null
 const HIGHT_SCREEN = (Dimensions.get('window').height);
 
@@ -265,8 +268,61 @@ export default class LocationsMap extends Component {
             this.onRegister.bind(this),
             this.onNotif.bind(this),
         );
+        this.props.navigation.addListener('willFocus', this.componentWillFocus)
+    }
+
+    componentWillFocus = async () => {
+      console.log('LocationsMap FOCUSED');
+      await this.fetchData()
+    }
+
+    componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+        if (Platform.OS == 'ios') {
+            PushNotification.configure({
+
+                // // (optional) Called when Token is generated (iOS and Android)
+                // onRegister: function(token) {
+                //     console.log( 'TOKEN:', token );
+                // },
+
+                // // (required) Called when a remote or local notification is opened or received
+                // onNotification: function(notification) {
+                //     console.log( 'NOTIFICATION:', notification );
+                // },
+
+                // // ANDROID ONLY: (optional) GCM Sender ID.
+                // senderID: "YOUR GCM SENDER ID",
+
+                // IOS ONLY (optional): default: all - Permissions to register.
+                permissions: {
+                    alert: true,
+                    badge: true,
+                    sound: true
+                },
+
+                // Should the initial notification be popped automatically
+                // default: true
+                popInitialNotification: true,
+
+                /**
+                  * IOS ONLY: (optional) default: true
+                  * - Specified if permissions will requested or not,
+                  * - if not, you must call PushNotificationsHandler.requestPermissions() later
+                  */
+                requestPermissions: true,
+            });
+            PushNotificationIOS.requestPermissions()
+            PushNotificationIOS.getInitialNotification()
+        }
+
+
 
     }
+    handleBackButton() {
+        console.log('handleBackButton IN.');
+          BackHandler.exitApp();
+      }
 
     async getFavListIfEmpty() {
         try {
@@ -632,8 +688,8 @@ export default class LocationsMap extends Component {
                                 <Text
                                     style={{
                                         fontSize: 16,
+                                        fontFamily: 'Rubik-Light',
                                         color: colors.black,
-                                        fontFamily: "Verdana",
                                         fontWeight: 'bold',
                                         paddingLeft: 4,
                                         flex: 1,
@@ -647,7 +703,7 @@ export default class LocationsMap extends Component {
                                 {/* {this.shareAndFavOptions(item)} */}
 
                             </View>
-                            <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.getAverageWaitTimeByMarker(marker)}</Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTimeByMarker(marker)}</Text>
                             {/* {this.innerViewOfRow(item)} */}
                         </View>
                     </TouchableOpacity>
@@ -799,8 +855,8 @@ export default class LocationsMap extends Component {
                                     <Text
                                         style={{
                                             fontSize: 16,
+                                            fontFamily: 'Rubik-Light',
                                             color: colors.black,
-                                            fontFamily: "Verdana",
                                             fontWeight: 'bold',
                                             paddingLeft: 4,
                                             flex: 1,
@@ -829,7 +885,7 @@ export default class LocationsMap extends Component {
                                         />
                                     </TouchableOpacity>
                                 </View>
-                                <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.getAverageWaitTime()}</Text>
+                                <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTime()}</Text>
                                 {this.innerViewOfRow(mMarker)}
                             </View>
                         </TouchableOpacity>
@@ -851,28 +907,25 @@ export default class LocationsMap extends Component {
 
                 }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ flex: 1, fontSize: 12, color: colors.black, fontFamily: "Verdana", paddingLeft: 4 }}>{this.state.markers[parseInt(this.state.selectedMarkerIndex)].location}</Text>
-                        <Text style={{ fontSize: 12, color: colors.lightGray, fontFamily: "Verdana", paddingLeft: 4 }}>{this.state.currentMarkerDistance}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{this.state.markers[parseInt(this.state.selectedMarkerIndex)].location}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 4 }}>{this.state.currentMarkerDistance}</Text>
                     </View>
                     {this.lineUpView()}
                     {this.confirmView()}
 
                 </View>
-
-
             )
         }
     }
 
     requestToLineUp() {
-        if (this.state.isSelectedAlreadyQueued != true) {
-            if (Helper.totalInCurrentWaitingList() < 3) {
+        if (this.state.isSelectedAlreadyQueued === false) {
+            if (Helper.totalInCurrentWaitingList() < 2) {
                 this.setState({ confirm_view: true })
             }
-
         }
-
     }
+    
     getOpacity() {
         if (this.state.isSelectedAlreadyQueued === true) {
             return 0.5
@@ -883,8 +936,8 @@ export default class LocationsMap extends Component {
             return 1
         }
     }
-    lineUpView() {
 
+    lineUpView() {
         if (!this.state.confirm_view) {
             return (
                 <View style={{
@@ -901,8 +954,8 @@ export default class LocationsMap extends Component {
                 </View>
             )
         }
-
     }
+
     setPeopleSelectedValue(itemValue, itemIndex) {
         this.setState({ people_selected_count: itemValue })
     }
@@ -950,9 +1003,9 @@ export default class LocationsMap extends Component {
                     }}>
                         <Text style={{
                             fontSize: 16,
+                            fontFamily: 'Rubik-Light',
                             fontWeight: 'bold',
                             color: colors.black,
-                            fontFamily: "Verdana",
                             paddingLeft: 4,
 
                         }}>{this.state.personsCount}</Text>
@@ -981,9 +1034,9 @@ export default class LocationsMap extends Component {
                             >
                                 <Text style={{
                                     fontSize: 20,
+                                    fontFamily: 'Rubik-Light',
                                     fontWeight: 'bold',
                                     color: this.getPlusButtonColor(),
-                                    fontFamily: "Verdana",
                                     paddingLeft: 4,
                                     height: 25,
                                     alignItems: "flex-start",
@@ -997,9 +1050,9 @@ export default class LocationsMap extends Component {
                             >
                                 <Text style={{
                                     fontSize: 24,
+                                    fontFamily: 'Rubik-Light',
                                     fontWeight: 'bold',
                                     color: this.getMinusButtonColor(),
-                                    fontFamily: "Verdana",
                                     paddingLeft: 4,
                                     height: 25,
                                     alignItems: "flex-end",
@@ -1012,9 +1065,9 @@ export default class LocationsMap extends Component {
                         </View>
                         {/* <Text style={{
                                 fontSize: 16,
+                                fontFamily: 'Rubik-Light',
                                 fontWeight: 'bold',
                                 color: colors.black,
-                                fontFamily: "Verdana",
                                 paddingLeft: 4
                             }}>{this.state.personsCount}</Text> */}
 
@@ -1105,45 +1158,26 @@ export default class LocationsMap extends Component {
             )
         }
     }
-    showBottomLineSeprator(id) {
-        if (id != this.state.categoriesList.length - 1) {
-            return (
-                <View
-                    style={{ height: 1, backgroundColor: colors.lightGray, paddingHorizontal: 55, width: '80%' }}
-                />
-            )
-        }
-    }
+
     renderSearchListItem = ({ item }) => {
         return (
             <TouchableOpacity onPress={() => this.onSelectCategory(item)}>
-
                 <View style={{
                     flex: 1,
-                    height: 30,
+                    height: 70,
                     backgroundColor: colors.white,
-                    marginTop: 40,
-                    flexDirection: 'column',
-                    alignContent: 'center',
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'center'
-
+                    alignSelf: 'center',
+                    borderBottomWidth: item.id != this.state.categoriesList.length - 1? 1 : 0,
+                    borderColor: colors.lightGray,
+                    width: '80%'
                 }}>
-
-
-                    <View style={{
-                        flexDirection: 'row',
-                        alignContent: 'center',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        paddingHorizontal: 20
-                    }}>
                         <Image
-
                             source={{ uri: item.url }}
                             style={{
                                 resizeMode: 'contain',
-                                width: 40, height: 40,
+                                width: 50, height: 50,
                                 alignContent: 'center',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1151,22 +1185,21 @@ export default class LocationsMap extends Component {
                         />
                         <Text style={{
                             flex: 1,
+                            fontFamily: 'Rubik-Light',
+                            fontWeight: 'bold',
                             color: colors.black,
-                            fontFamily: 'Verdana',
-                            fontSize: 20,
-                            paddingLeft: 20,
-                            alignContent: 'center',
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            fontSize: 18,
+                            paddingLeft: 30,
+                            textAlignVertical: 'center',
+                            alignSelf: 'center'
                         }}>
-                            {item.name}</Text>
-                    </View>
-
-                    {this.showBottomLineSeprator(item.id)}
+                            {item.name}
+                        </Text>
                 </View>
             </TouchableOpacity>
         )
     }
+
     showCurrentLocationText() {
         if (!this.state.searchesListOpened) {
             return (
@@ -1177,13 +1210,13 @@ export default class LocationsMap extends Component {
                     flex: 1,
 
                 }}>
-                    <Text style={{ fontFamily: "Verdana", color: colors.midGray, fontSize: 10 }}>
+                    <Text style={{ fontFamily: 'Rubik-Light', color: colors.midGray, fontSize: 10 }}>
                         {`${this.state.userCurrentLocationText} | `}
                     </Text>
 
                     <Text style={{
-                        fontFamily: "Verdana",
                         color: colors.black,
+                        fontFamily: 'Rubik-Light',
                         fontSize: 10,
                         alignContent: 'flex-start',
                         alignItems: 'flex-start',
@@ -1398,9 +1431,6 @@ export default class LocationsMap extends Component {
                         </View>
                         {this.showSearchesList()}
                     </View>
-
-
-
                 </Card>
                 <View style={{
                     position: 'absolute',
@@ -1410,30 +1440,27 @@ export default class LocationsMap extends Component {
                 }}>
                     {this.showDetailMarker(this.state.markers[0])}
                 </View>
-
-
-                <NavigationEvents onDidFocus={() => this.fetchData()} />
             </View>
-
         );
     }
 
     ////////FCM/////////////////////////////////////
     //
     //
-    //       
+    //
     /////////////////////////////////////////
 
+    // const [permissions, setPermissions] = useState({});
 
 
     onRegister(token) {
+
         if (token) {
+            console.log(token)
             this.postDeviceToken(token)
         } else {
             this.postDeviceToken(Helper.DEVICE_TOKEN)
         }
-
-
         /// this.setState({registerToken: token.token, fcmRegistered: true});
     }
 

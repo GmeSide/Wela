@@ -40,8 +40,6 @@ const TabNavigator = createBottomTabNavigator(
         LocationsMap: LocationsMapStack,
         FavouritesList: FavouritesListStack,
         UserProfile: UserProfileStack
-
-
     },
     {
         defaultNavigationOptions: ({ navigation }) => ({
@@ -76,7 +74,7 @@ const TabNavigator = createBottomTabNavigator(
                             }}
                             source={iconName}
                         />
-                        {/* <Text style={{ color: tintColor, fontSize: 12, paddingTop: 3 }}>
+                        {/* <Text style={{ fontFamily: 'Rubik-Light', color: tintColor, fontSize: 12, paddingTop: 3 }}>
               {title}
             </Text> */}
                         {/* {home.showBadge(title, badgeCount)} */}

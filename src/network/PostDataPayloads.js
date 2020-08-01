@@ -6,7 +6,7 @@ import Helper from '../utils/Helper'
 //                      POST PARAS OBJECTS
 //--------------------------------------------------------------------------------------
 /**
- * LOGIN & REGISTER SCREENS 
+ * LOGIN & REGISTER SCREENS
  */
 
 export async function login(email, password, type) {
@@ -26,8 +26,8 @@ export function register(name, email, password, phone) {
 }
 
 
-export async function socialLogin(email, social_type, id, name, phone) {
-    
+export async function socialLogin(email, social_type, id, name, phone, picUrl) {
+
     return JSON.stringify({
         email: email,
         type: 2,
@@ -36,17 +36,19 @@ export async function socialLogin(email, social_type, id, name, phone) {
         name: name,
         phone: phone,
         latitude: "",
-        longitude: ""
+        longitude: "",
+        profile_picture: picUrl
     })
 }
 
 
 
-export async function updateProfile(name, phone) {
+export async function updateProfile(name, phone, picture) {
     let user = await Helper.getUser()
     return JSON.stringify({
         name: name,
         email: user.email,
+        profile_picture: picture,
         password: user.password,
         phone: phone,
         id: user.id,
@@ -77,7 +79,7 @@ export function resendCode(userEmail) {
 
 /**
  * Favourite
- * 
+ *
  */
 
 
@@ -207,6 +209,28 @@ export async function updateVenueProfile(id, location, latitude, longitude, zip_
 
 }
 
+export async function createVenue(businessName, type, city, location, zip_code, total_capacity, limit_group, switchOn, open_time, close_time, day) {
+    let venueUser = await Helper.VenueSignUp
+    return JSON.stringify({
+      name: venueUser.name,
+      email: venueUser.email,
+      password: venueUser.password,
+      phone: venueUser.phone,
+      business_name: businessName,
+      type: type,
+      city: city,
+      location: location,
+      zip_code: zip_code,
+      total_capacity: total_capacity,
+      limit_group: limit_group,
+      average_wait_time: '15',
+      is_patio: switchOn,
+      day: day,
+      open_time: open_time,
+      close_time: close_time
+    })
+}
+
 export async function toggleVenue(venue_id, toggle) {
     return JSON.stringify({
         id: venue_id,
@@ -223,7 +247,3 @@ export async function registerDeviceToken(user_id, fcm_token, platform, type) {
         type: type
     })
 }
-
-
-
-

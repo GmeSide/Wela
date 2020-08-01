@@ -7,11 +7,10 @@ import {
     Text,
     Animated,
     Image,
+    BackHandler
 } from 'react-native';
 import Button from '../../common/BlackButton';
 import { colors } from '../../common/AppColors';
-
-
 
 export default class LoginOptions extends Component {
     constructor(props) {
@@ -20,8 +19,14 @@ export default class LoginOptions extends Component {
             email: '',
             password: ''
         }
-
     }
+    componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    }
+    handleBackButton() {
+        console.log('handleBackButton IN.');
+          BackHandler.exitApp();
+      }
 
     resendCodePayload() {
         return resendCode("majid.khuhro@gmail.com")
@@ -66,7 +71,7 @@ export default class LoginOptions extends Component {
                             style={{ height: 50, width: 200 }}
                             source={require('../images/logo.png')}
                         />
-                        <Text style={{ color: colors.black, marginTop: 4 }}>
+                        <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>
                             Wait Conveniently
                         </Text>
 
@@ -97,7 +102,7 @@ export default class LoginOptions extends Component {
                                     alignSelf: 'center',
                                 }}
                             />
-                            <Text style={{ color: colors.black }}> OR </Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.black }}> OR </Text>
                             <View
                                 style={{
                                     flexDirection: 'row',

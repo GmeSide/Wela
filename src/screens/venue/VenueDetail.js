@@ -26,7 +26,7 @@ export default class VenueDetail extends Component {
     }
     setExpanded() {
         this.props.onVisible()
-      
+
     }
     onConfirm() {
         this.setState({
@@ -37,7 +37,7 @@ export default class VenueDetail extends Component {
         })
     }
 
-  
+
     SHOW_Name() {
         if (!this.state.isExpanded) {
             return (
@@ -51,6 +51,7 @@ export default class VenueDetail extends Component {
                 }}>
                     <Text style={{
                         justifyContent: 'flex-start',
+                        fontFamily: 'Rubik-Light',
                         alignContent: 'flex-start',
                         alignSelf: 'center',
                         textAlignVertical: 'center',
@@ -63,7 +64,6 @@ export default class VenueDetail extends Component {
                             justifyContent: 'center',
                             alignContent: 'center',
                             alignSelf: 'center',
-                            textAlignVertical: 'center',
                             width: 22, height: 22, marginRight: 15
                         }}
                         source={require('../../screens/images/ic_profile.png')}

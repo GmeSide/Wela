@@ -41,10 +41,12 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 20
+    marginTop: 20,
+    fontFamily: 'Rubik-Light'
   }, textDescription: {
     color: '#000000',
-    margin: 10
+    margin: 10,
+    fontFamily: 'Rubik-Light'
   }, tinyLogo: {
     width:250,
     height: 200

@@ -38,7 +38,6 @@ class ImageButton extends React.Component {
                 justifyContent: "center",
                 fontWeight: 'bold',
                 alignContent: 'center',
-                textAlignVertical: 'center',
                 textAlign: 'center',
                 alignItems: "center",
             }}
@@ -68,6 +67,7 @@ class ImageButton extends React.Component {
                         alignItems: "center",
                         color: this.props.textColor ? this.props.textColor : colors.white,
                         fontSize: 16,
+                        fontFamily: 'Rubik-Light'
                     }} >{this.props.text ? this.props.text : 'Save'}</Text>
                 </View>
 

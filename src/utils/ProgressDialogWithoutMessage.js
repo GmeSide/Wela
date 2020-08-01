@@ -3,12 +3,10 @@ import {
     Modal,
     View,
     StyleSheet,
-    Text,
     ActivityIndicator
 } from 'react-native';
 import { colors } from '../styles/variables'
 import { Colors } from 'react-native-paper';
-
 
 const ProgressDialogWithoutMessage = ({ visible }) => (
     <Modal

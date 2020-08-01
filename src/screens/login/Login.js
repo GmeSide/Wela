@@ -1,3 +1,4 @@
+/* @flow */
 import React, { Component } from 'react';
 
 import {
@@ -26,23 +27,18 @@ import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
 import { LOGIN, GET_FAVOURITE, GET_USER_WAITING_LIST, SOCIAL_LOGIN } from '../../network/EndPoints';
 import { login, getAllFavourite, getUserWaitingListWithHistory, socialLogin } from '../../network/PostDataPayloads';
 
-import { LoginManager, AccessToken } from 'react-native-fbsdk';
+import { LoginManager, AccessToken, LoginButton } from 'react-native-fbsdk';
 
 var imageGoogle = require('../images/ic_google.png')
 var imageApple = require('../images/ic_apple.png')
 
-
-// import { LoginManager, AccessToken } from 'react-native-fbsdk';
-
-
-
-
 const DEVICE_WIDTH = Dimensions.get('window').width;
-
-
 
 async function onFacebookButtonPress() {
     // Attempt login with permissions
+    if (AccessToken.getCurrentAccessToken() != null) {
+      LoginManager.logOut();
+    }
     const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
 
     if (result.isCancelled) {
@@ -55,6 +51,8 @@ async function onFacebookButtonPress() {
     if (!data) {
         throw 'Something went wrong obtaining access token';
     }
+
+    console.log('FB data: ', data);
 
     // Create a Firebase credential with the AccessToken
     const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
@@ -80,14 +78,6 @@ export default class Login extends Component {
         }
 
     }
-    async onFacebookLogin() {
-
-        let fbData = await onFacebookButtonPress()
-        var profile = fbData.additionalUserInfo.profile
-        alert(`${profile.name} \n ${profile.email} `)
-
-        // Helper.DEBUG_LOG(fbData)
-    }
 
     async componentDidMount() {
         GoogleSignin.configure(
@@ -98,12 +88,11 @@ export default class Login extends Component {
                 // iosClientId: '112823672001-tg0ock0hqhl599ev3140u07abo9k33v6.apps.googleusercontent.com',
                 scopes: ['profile', 'email']
             });
-        if (Helper.DEBUG == true) {
+        if (Helper.DEBUG === true) {
             this.setState({ email: 'm@gnt.com', password: 'we123' })
         }
-
-
     }
+
     sendPermissions() {
         var config = {
             skipPermissionRequests: false,
@@ -123,6 +112,7 @@ export default class Login extends Component {
 
         }
     }
+
     requestCameraPermission = async () => {
         try {
             const granted = await PermissionsAndroid.request(
@@ -138,7 +128,7 @@ export default class Login extends Component {
             );
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 this.setState({ permissionGranted: true })
-                
+
             } else {
                 this.setState({ permissionGranted: false })
                 this.requestCameraPermission()
@@ -149,15 +139,14 @@ export default class Login extends Component {
     };
 
     async onGoogleSignIn() {
-
         try {
-
             await GoogleSignin.hasPlayServices();
             console.log("reached google sign in");
             //const info = await GoogleSignin.signIn();
             const userInfo = await this.onGoogleButtonPress();
+            console.log('userInfo.additionalUserInfo: ', userInfo.additionalUserInfo.profile.picture);
             let user = userInfo.user
-
+            let picUrl = userInfo.additionalUserInfo.profile.picture
             var email = ""
             var social_type = 2
             var id = ""
@@ -182,7 +171,7 @@ export default class Login extends Component {
                     showToastMessage("Login", "Email not found")
                 } else {
                     this.showLoader("Logging..")
-                    const PAYLOAD = await socialLogin(email, social_type, id, name, phone)
+                    const PAYLOAD = await socialLogin(email, social_type, id, name, phone, picUrl)
                     Helper.DEBUG_LOG(PAYLOAD)
                     PostRequest(SOCIAL_LOGIN, PAYLOAD,true).then((jsonObject) => {
                         this.hideLoader()
@@ -196,10 +185,10 @@ export default class Login extends Component {
                     })
                 }
             }
-
-            Helper.DEBUG_LOG(userInfo)
+            // Helper.DEBUG_LOG(userInfo)
         } catch (error) {
             Helper.DEBUG_LOG(error)
+            console.log('onGoogleSignIn: ', error);
             // if (error.code === statusCodes.SIGN_IN_CANCELLED) {
             //     console.log("error occured SIGN_IN_CANCELLED");
             //     // user cancelled the login flow
@@ -213,17 +202,47 @@ export default class Login extends Component {
             //     console.log("error occured unknow error");
             // }
         }
+    }
 
-        Helper.DEBUG_LOG(user)
+    async onFacebookLogin() {
+      try {
+        let fbData = await onFacebookButtonPress()
+        let profile = fbData.additionalUserInfo.profile
+        let user = fbData.user
+
+        let email = user.email? user.email : ""
+        let social_type = 2
+        let id = profile.id? profile.id : ""
+        let name = profile.name? profile.name : ""
+        let phone = user.phoneNumber? user.phoneNumber : ""
+        let picUrl = user.photoURL? user.photoURL : ""
+
+        if (user) {
+          this.showLoader("Logging..")
+          const PAYLOAD = await socialLogin(email, social_type, id, name, phone, picUrl)
+          PostRequest(SOCIAL_LOGIN, PAYLOAD,true).then((jsonObject) => {
+              this.hideLoader()
+              if (jsonObject.success) {
+                  this.sendPermissions()
+                  var user = jsonObject.apiResponse.data[0]
+                  Helper.saveUser(user)
+                  this.props.navigation.navigate('Home')
+              }
+          })
+        }
+      } catch (error) {
+        let msg = 'An account already exists with the same email address but different sign-in credentials.'+
+        ' Sign in using a provider associated with this email address.'
+        showToastMessage("Firebase Duplicate Record.", msg)
+        console.log('ERROR onFacebookLogin: ', error);
+      }
     }
 
     async onGoogleButtonPress() {
         // Get the users ID token
         const { idToken } = await GoogleSignin.signIn();
-
         // Create a Google credential with the token
         const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
         // Sign-in the user with the credential
         return auth().signInWithCredential(googleCredential);
     }
@@ -232,17 +251,13 @@ export default class Login extends Component {
     hideLoader() { this.setState({ isLoading: false }) }
 
     async WelaLogin() {
-
         var message
         var error = false
         var email = this.state.email
         var password = this.state.password
-
-
         // var email = "majid.khuhro@gmail.com"
         // var password = "we123"
         var type = 2
-
 
         if (email.trim() == '') {
             message = 'Please enter email!'
@@ -271,11 +286,9 @@ export default class Login extends Component {
                     this.fetchFavourites(jsonObject.apiResponse.data[0])
                 }
             })
-
         }
-
-
     }
+
     async fetchFavourites(user) {
         await Helper.saveUserType(2)
         this.showLoader("Fetching..")
@@ -291,6 +304,7 @@ export default class Login extends Component {
             // this.setState({ isFavouritesFetched: true })
         })
     }
+
     async fetchUserQues(user) {
         //this.showLoader("Fetching..")
         const PAYLOAD = await getUserWaitingListWithHistory(user.id)
@@ -314,14 +328,14 @@ export default class Login extends Component {
         }
         return keyValuePairs.join('&');
     }
+
     updateUsername = (text) => {
         this.setState({ email: text })
     }
+
     updatePassword = (text) => {
         this.setState({ password: text })
     }
-
-
 
     showHorizontalLine() {
         return (
@@ -335,7 +349,7 @@ export default class Login extends Component {
                         alignSelf: 'center',
                     }}
                 />
-                <Text style={{ color: colors.black }}> OR </Text>
+                <Text style={{ fontFamily: 'Rubik-Light', color: colors.black }}> OR </Text>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -348,6 +362,7 @@ export default class Login extends Component {
             </View>
         )
     }
+
     render() {
         return (
             <Animated.View style={{
@@ -386,7 +401,7 @@ export default class Login extends Component {
                                 style={{ height: 50, width: 200 }}
                                 source={require('../images/logo.png')}
                             />
-                            <Text style={{ color: colors.black, marginTop: 4 }}>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>
                                 Wait Conveniently
                         </Text>
 
@@ -399,7 +414,8 @@ export default class Login extends Component {
                                 background={'#4267B2'}
                                 topMargin={10}
                                 onButtonPress={() => this.onFacebookLogin()}
-                                text={'Sign in with Facebook'} />
+                                text={'Sign in with Facebook'}
+                            />
 
                             <ImageButton
                                 image={imageGoogle}
@@ -453,7 +469,7 @@ export default class Login extends Component {
                                 onPress={() => this.props.navigation.navigate('SignUp')}
                             >
 
-                                <Text style={{ alignSelf: 'center', marginTop: 20, marginBottom: 20 }}>NOT USING WELA? REGISTER NOW</Text>
+                                <Text style={{ fontFamily: 'Rubik-Light', alignSelf: 'center', marginTop: 20, marginBottom: 20 }}>NOT USING WELA? REGISTER NOW</Text>
                             </TouchableOpacity>
                             {/* <Button
                                 topMargin={10}
@@ -461,14 +477,10 @@ export default class Login extends Component {
                                 text={'Venu Login'} /> */}
                         </View>
 
-
-
                     </Animated.View>
                 </KeyboardAwareScrollView>
 
-
             </Animated.View >
-
         );
     }
 }

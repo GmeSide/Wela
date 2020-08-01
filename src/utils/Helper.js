@@ -14,7 +14,9 @@ class Helper {
 
     static user
     static userFavouritesVenue
-    static userQueList
+    static userQueList = { data: [] }
+
+    static VenueSignUp
 
     static venueQueueDataOfCustomers
     static venueUserObject
@@ -23,7 +25,7 @@ class Helper {
     static DEVICE_TOKEN
     /**
      * Log only when app is in debug mode
-     * @param {*} message 
+     * @param {*} message
      */
     static DEBUG_LOG(message) {
         if (this.DEBUG) {
@@ -33,7 +35,7 @@ class Helper {
 
     /**
      * Email validation
-     * @param {*} text 
+     * @param {*} text
      */
     static isValidEmail(text) {
         let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -62,8 +64,8 @@ class Helper {
     ////////////////////////////////////////////////////////////////////
 
     /**
-     * 
-     * @param {*} data 
+     *
+     * @param {*} data
      */
     static async saveUser(data) {
         this.storeData(Constants.KEY_USER, data)
@@ -164,7 +166,7 @@ class Helper {
                 categories.push(data)
             })
         }
-       
+
 
         return categories
     }
@@ -460,7 +462,7 @@ class Helper {
         }
 
     }
-    
+
 
 
     static favouritesAvailable() {
@@ -483,9 +485,9 @@ class Helper {
     ////////////////////////////////////////////////////////////////////
 
     /**
-     * SAVING TO CACHE 
-     * @param {*} key 
-     * @param {*} value 
+     * SAVING TO CACHE
+     * @param {*} key
+     * @param {*} value
      */
     static storeData = async (key, value) => {
         try {
@@ -497,8 +499,8 @@ class Helper {
     }
 
     /**
-     * FETCHING DATA FROM CACHE 
-     * @param {*} key 
+     * FETCHING DATA FROM CACHE
+     * @param {*} key
      */
     static getSroedData = async (key) => {
         try {

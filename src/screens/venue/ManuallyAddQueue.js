@@ -159,6 +159,7 @@ class ManuallyAddQueue extends React.Component {
                         <Text
                             style={{
                                 fontWeight: 'bold',
+                                fontFamily: 'Rubik-Light',
                                 fontSize: 24,
                                 color: '#ffffff',
                                 textAlignVertical: 'center',
@@ -166,7 +167,6 @@ class ManuallyAddQueue extends React.Component {
                                 alignItems: 'center',
                                 alignSelf: 'center',
                                 justifyContent: 'center',
-                                textAlignVertical: 'center'
                             }}
                         >-</Text>
                     </TouchableOpacity>
@@ -344,11 +344,10 @@ class ManuallyAddQueue extends React.Component {
                         }}>
                             <Text style={{
                                 fontSize: 16,
+                                fontFamily: 'Rubik-Light',
                                 fontWeight: 'bold',
                                 color: colors.black,
-                                fontFamily: "Verdana",
                                 paddingLeft: 4,
-
                             }}>{this.state.personsCount}</Text>
                             <Image
                                 style={{
@@ -377,9 +376,9 @@ class ManuallyAddQueue extends React.Component {
                                 >
                                     <Text style={{
                                         fontSize: 20,
+                                        fontFamily: 'Rubik-Light',
                                         fontWeight: 'bold',
                                         color: this.getPlusButtonColor(),
-                                        fontFamily: "Verdana",
                                         paddingLeft: 4,
                                         height: 25,
                                         alignItems: "flex-start",
@@ -393,9 +392,9 @@ class ManuallyAddQueue extends React.Component {
                                 >
                                     <Text style={{
                                         fontSize: 24,
+                                        fontFamily: 'Rubik-Light',
                                         fontWeight: 'bold',
                                         color: this.getMinusButtonColor(),
-                                        fontFamily: "Verdana",
                                         paddingLeft: 4,
                                         height: 25,
                                         alignItems: "flex-end",
@@ -429,6 +428,7 @@ class ManuallyAddQueue extends React.Component {
                                 <Text
                                     style={{
                                         fontWeight: 'bold',
+                                        fontFamily: 'Rubik-Light',
                                         fontSize: 24,
                                         color: '#ffffff',
                                         textAlignVertical: 'center',
