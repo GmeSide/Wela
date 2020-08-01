@@ -1,0 +1,52 @@
+{
+  "name": "WELA",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@react-native-community/async-storage": "^1.11.0",
+    "@react-native-community/datetimepicker": "^2.5.0",
+    "@react-native-community/geolocation": "^2.0.2",
+    "@react-native-community/google-signin": "^4.0.3",
+    "@react-native-community/netinfo": "^5.9.4",
+    "@react-native-community/push-notification-ios": "^1.3.0",
+    "@react-native-firebase/app": "^7.2.1",
+    "@react-native-firebase/auth": "^8.0.6",
+    "react": "16.11.0",
+    "react-native": "0.62.2",
+    "react-native-contacts": "^5.2.3",
+    "react-native-fbsdk": "^2.0.0",
+    "react-native-flip-toggle-button": "^1.0.8",
+    "react-native-geocoder": "^0.5.0",
+    "react-native-gesture-handler": "^1.1.0",
+    "react-native-get-location": "^1.4.2",
+    "react-native-keyboard-aware-scroll-view": "^0.9.1",
+    "react-native-maps": "0.27.1",
+    "react-native-modal-datetime-picker": "^8.7.1",
+    "react-native-propel-kit": "^0.8.9",
+    "react-native-push-notification": "^4.0.0",
+    "react-native-screens": "^2.0.0-beta.2",
+    "react-native-shadow-cards": "^1.0.2",
+    "react-native-simple-toast": "^1.1.2",
+    "react-navigation": "^3.5.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/runtime": "^7.10.2",
+    "@react-native-community/eslint-config": "^2.0.0",
+    "babel-jest": "^26.0.1",
+    "eslint": "^7.2.0",
+    "jest": "^26.0.1",
+    "metro-react-native-babel-preset": "^0.59.0",
+    "react-test-renderer": "16.11.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}

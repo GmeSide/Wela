@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>112823672001-tg0ock0hqhl599ev3140u07abo9k33v6.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.112823672001-tg0ock0hqhl599ev3140u07abo9k33v6</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>112823672001-eoe92h5p85ukl896fi557f0e471tkr82.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBqUL0roNWsCTLBaH5H3CGItExoT9J5vhQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>112823672001</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.wela.app</string>
+	<key>PROJECT_ID</key>
+	<string>prefab-range-280702</string>
+	<key>STORAGE_BUCKET</key>
+	<string>prefab-range-280702.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:112823672001:ios:cae67d7fad4a21b2c1c840</string>
+	<key>DATABASE_URL</key>
+	<string>https://prefab-range-280702.firebaseio.com</string>
+</dict>
+</plist>
