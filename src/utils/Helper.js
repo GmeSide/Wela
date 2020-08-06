@@ -4,7 +4,7 @@ import GetLocation from 'react-native-get-location';
 import Constants from './Constants'
 
 class Helper {
-    static DEBUG = false
+    static DEBUG = __DEV__
     static HARDCODED_LOCATION_SHOW = false
     static DISTANCE = 200
     static UNIT = "K" // "K"|"M" K->kilo meters , M->For miles

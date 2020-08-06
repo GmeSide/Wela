@@ -35,9 +35,10 @@ export default class VenueLogin extends Component {
 
     componentDidMount() {
         if (Helper.DEBUG === true) {
-           // this.setState({ email: 'moonbucks@gmail.com', password: 'pass1234' })
-            this.setState({ email: 'faxpho8@gmail.com', password: 'pass1234' })
-            // this.setState({ email: 'faxpho6@gmail.com', password: 'pass1234' })
+           // this.setState({ email: 'elvyflo@gmail.com', password: 'pass1234' })
+            this.setState({ email: 'maddog@gmail.com', password: 'pass1234' })
+            // this.setState({ email: 'roostercoffee@gmail.com', password: 'pass1234' })
+            // this.setState({ email: 'wynona@gmail.com', password: 'pass1234' })
         }
     }
 

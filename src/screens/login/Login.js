@@ -89,7 +89,7 @@ export default class Login extends Component {
                 scopes: ['profile', 'email']
             });
         if (Helper.DEBUG === true) {
-            this.setState({ email: 'm@gnt.com', password: 'we123' })
+            this.setState({ email: 'abc@gmail.com', password: 'pass1234' })
         }
     }
 
