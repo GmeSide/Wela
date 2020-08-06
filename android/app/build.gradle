@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: 'com.google.gms.google-services'
+apply from: './versionCode.gradle'
 
 import com.android.build.OutputFile
 
@@ -137,7 +138,7 @@ android {
         applicationId "com.wela.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode Integer.parseInt(VERSION_CODE)
         versionName "1.0"
         multiDexEnabled true
     }
