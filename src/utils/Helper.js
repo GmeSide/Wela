@@ -2,6 +2,7 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import GetLocation from 'react-native-get-location';
 import Constants from './Constants'
+import Geocoder from 'react-native-geocoder';
 
 class Helper {
     static DEBUG = __DEV__
@@ -202,39 +203,47 @@ class Helper {
     static async getNearestVenues(location) {
         let user = await this.getUser()
         let allVenues = user.venue_type.venues
-        var nearestVenues = []
+        let nearestVenues = []
+
         if (allVenues && allVenues.length > 0) {
-
-
-
-            allVenues.forEach(async venue => {
-                var locDistance
-
-                if (this.HARDCODED_LOCATION_SHOW == true) {
-                    locDistance = await this.distance(this.HARDCODED_LATS, this.HARDCODED_LONGTS, venue.latitude, venue.longitude, this.UNIT)
-                } else {
-                    locDistance = await this.distance(
-                        location.latitude,
-                        location.longitude,
-                        venue.latitude,
-                        venue.longitude,
-                        this.UNIT
-                    )
-
-                }
-
-
-
-                // this.DEBUG_LOG(locDistance)
-                if (locDistance <= this.DISTANCE) {
-                    //this.DEBUG_LOG(venue.name)
-                    nearestVenues.push(venue)
-                }
-            });
-
-
+          nearestVenues = Promise.all(allVenues.map(venue => this.filterVenues(venue, location)))
         }
+
         return nearestVenues
+    }
+
+    static async filterVenues(venue, location) {
+        var locDistance
+        let latitude = 0
+        let longitude = 0
+
+        // update location base on address
+        const address = `${venue.street_number} ${venue.street_name}, ${venue.city}, ${venue.country}`
+        const res = await Geocoder.geocodeAddress(address);
+        if (res && res.length > 0) {
+          const { lat, lng } = res[0].position
+          latitude = lat
+          longitude = lng
+        }
+
+        if (this.HARDCODED_LOCATION_SHOW == true) {
+            locDistance = await this.distance(this.HARDCODED_LATS, this.HARDCODED_LONGTS, latitude, longitude, this.UNIT)
+        } else {
+            locDistance = await this.distance(
+                location.latitude,
+                location.longitude,
+                latitude,
+                longitude,
+                this.UNIT
+            )
+        }
+
+        return {
+          ...venue,
+          latitude,
+          longitude,
+          locDistance
+        }
     }
 
     static async getUserCurrentLocation() {

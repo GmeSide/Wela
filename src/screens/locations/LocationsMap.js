@@ -738,7 +738,7 @@ export default class LocationsMap extends Component {
                 });
             }
             let nearestVenues = await Helper.getNearestVenues(location)
-            //Helper.DEBUG_LOG(nearestVenues)
+            nearestVenues = nearestVenues.filter(venue => venue.locDistance <= Helper.DISTANCE)
             if (nearestVenues && nearestVenues.length > 0) {
                 this.setState({
                     markers: nearestVenues
