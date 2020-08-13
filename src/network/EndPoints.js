@@ -1,6 +1,6 @@
 
 
-export const BASE_URL = "http://wela.goyzer.com/api/v1/"
+export const BASE_URL = "https://admin.wela.app/api/v1/"
 export function getFullUrl(api) { return BASE_URL + api }
 
 export const LOGIN = `login`
