@@ -26,8 +26,8 @@ export default class VenueLogin extends Component {
             showPass: true,
             press: false,
             isLoading: false,
-            email: 'faxpho5@gmail.com',
-            password: 'pass1234',
+            email: '',
+            password: '',
             selectedType: '',
             isFavouritesFetched: false
         }
