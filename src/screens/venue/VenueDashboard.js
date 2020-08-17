@@ -42,6 +42,7 @@ export default class VenueDashboard extends Component {
             showVenueDetailView: false,
             usersQueueData: [],
             loggedInVenue: {},
+            averageWaitTime: 0,
             currentIndexListFocus: 0,
             permissionGranted: false,
         }
@@ -475,6 +476,9 @@ export default class VenueDashboard extends Component {
                 } else {
                     this.setState({ currentIndexListFocus: 0 })
                 }
+                if (jsonObject.apiResponse.wait_time > 0) {
+                  this.setState({ averageWaitTime: jsonObject.apiResponse.wait_time })
+                }
             } else {
               this.updatingUsersQueueData([])
             }
@@ -522,7 +526,7 @@ export default class VenueDashboard extends Component {
                         color: 'white',
                         fontFamily: 'Rubik-Light',
                         fontSize: 16,
-                    }}>{`${this.state.loggedInVenue.average_wait_time} Minutes`}</Text>
+                    }}>{`${this.state.averageWaitTime > 0 ? this.state.averageWaitTime : this.state.loggedInVenue.average_wait_time} Minutes`}</Text>
                 </View>
 
                 {/* <Image
