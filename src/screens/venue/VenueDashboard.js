@@ -475,6 +475,8 @@ export default class VenueDashboard extends Component {
                 } else {
                     this.setState({ currentIndexListFocus: 0 })
                 }
+            } else {
+              this.updatingUsersQueueData([])
             }
         })
     }
