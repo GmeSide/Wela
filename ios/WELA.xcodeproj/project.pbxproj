@@ -84,6 +84,7 @@
 		89BBCC75AE6DD49300CBD6E3 /* libPods-WELA.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WELA.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8FDEA610F47680CD46AEF02C /* libPods-WELA-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WELA-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		93874608BC2C48B6A0C82D6C /* Rubik-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-BlackItalic.ttf"; path = "../assets/fonts/Rubik-BlackItalic.ttf"; sourceTree = "<group>"; };
+		9DC7829B24E677AC0057F230 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		9DE8A5C124DAC04E007F3250 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A3D470E68693FFF6C26CCACA /* Pods-WELA-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WELA-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-WELA-tvOSTests/Pods-WELA-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		A6156AD005AB4CE5A0EDE602 /* Rubik-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-LightItalic.ttf"; path = "../assets/fonts/Rubik-LightItalic.ttf"; sourceTree = "<group>"; };
@@ -207,6 +208,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				9DC7829B24E677AC0057F230 /* main.jsbundle */,
 				9DE8A5C124DAC04E007F3250 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* WELA */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -394,11 +396,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04BF5C7524CF590F006BA3BB /* main.jsbundle in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				C7265CBB24164DFA92186D8F /* Rubik-Black.ttf in Resources */,
 				07DDC48386DE4B64B26803B4 /* Rubik-BlackItalic.ttf in Resources */,
-				04BF5C7524CF590F006BA3BB /* main.jsbundle in Resources */,
 				090BDE72EDB84C93A59CC160 /* Rubik-Bold.ttf in Resources */,
 				DFE322E470CB488FB4BC0D60 /* Rubik-BoldItalic.ttf in Resources */,
 				53491EA4F38A4C83BD90F6CB /* Rubik-Italic.ttf in Resources */,
@@ -441,7 +443,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
 		0C918FA8F54F5690756E5504 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
