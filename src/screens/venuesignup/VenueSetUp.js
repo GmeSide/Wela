@@ -53,13 +53,9 @@ export default class VenueSetUp extends Component {
           ],
           businessType: 0,
           allBusinessTypes: [
-            'Select Category',
-            'Cafes',
-            'Bars & Restaurants',
-            'Retail',
-            'Grocery',
-            'Farmers Market',
-            'Ice Cream Parlours'
+            'Activities',
+            'Food & Drinks',
+            'Retail'
           ],
           isDateTimeModalVisible: false,
           isLoading: false
