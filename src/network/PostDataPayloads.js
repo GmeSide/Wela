@@ -187,7 +187,7 @@ export async function updateVenueProfile(id, businessEmail, streetAddress, stree
     })
 }
 
-export async function createVenue(businessName, businessEmail, type, city, streetNumber, streetName , province, country , zip_code, total_capacity, limit_group, switchOn, open_time, close_time, day) {
+export async function createVenue(businessName, businessEmail, businessPhone, type, city, streetNumber, streetName , province, country , zip_code, total_capacity, limit_group, switchOn, open_time, close_time, day) {
     let venueUser = await Helper.VenueSignUp
     return JSON.stringify({
       name: venueUser.name,
@@ -196,6 +196,7 @@ export async function createVenue(businessName, businessEmail, type, city, stree
       phone: venueUser.phone,
       business_name: businessName,
       business_email: businessEmail,
+      business_phone: businessPhone,
       type: type,
       city: city,
       street_number: streetNumber,

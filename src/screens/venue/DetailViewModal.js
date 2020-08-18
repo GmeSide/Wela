@@ -402,7 +402,7 @@ export default class DetailViewModal extends React.Component {
                               <TextInput
                                   style={[styles.inputStyle, {width: '100%'}]}
                                   keyboardType={'default'}
-                                  placeholder={"Business Email"}
+                                  placeholder={"Direct Business Email"}
                                   autoCorrect={false}
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}

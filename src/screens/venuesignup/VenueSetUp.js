@@ -24,6 +24,7 @@ export default class VenueSetUp extends Component {
         this.state = {
           businessName: '',
           businessEmail: '',
+          businessPhone: '',
           streetNumber: '',
           streetName: '',
           city: '',
@@ -32,7 +33,7 @@ export default class VenueSetUp extends Component {
           ppGroup: '',
           province: '',
           country: '',
-          switchOn: true,
+          switchOn: false,
           dataSource: [
             { day: 'monday'},
             { day: 'tuesday'},
@@ -64,8 +65,8 @@ export default class VenueSetUp extends Component {
     }
 
     componentWillFocus = async () => {
-      const res = await getVenueTypes()
-      this.setState({allBusinessTypes: ['Select Category', ...res.data]})
+      // const res = await getVenueTypes()
+      this.setState({allBusinessTypes: ['Select Category', ...this.state.allBusinessTypes]})
     }
 
     getDay(day) {
@@ -139,6 +140,9 @@ export default class VenueSetUp extends Component {
         } else if (this.state.businessEmail.toString().trim() == '') {
             message = 'Please enter your business email.'
             error = true
+        } else if (this.state.businessPhone.toString().trim() == '') {
+            message = 'Please enter your business phone.'
+            error = true
         } else if (this.state.totalCapacity.toString().trim() == '') {
             message = 'Please enter your business capacity.'
             error = true
@@ -160,6 +164,7 @@ export default class VenueSetUp extends Component {
             const PAYLOAD = await createVenue(
               this.state.businessName,
               this.state.businessEmail,
+              this.state.businessPhone,
               this.state.allBusinessTypes[this.state.businessType],
               this.state.city,
               this.state.streetNumber,
@@ -230,12 +235,29 @@ export default class VenueSetUp extends Component {
                       ref="two0"
                       style={[styles.inputStyle, {width: '100%'}]}
                       keyboardType={'default'}
-                      placeholder={"Business Email"}
+                      placeholder={"Direct Business Email"}
                       autoCorrect={false}
                       autoCapitalize={'none'}
                       returnKeyType={'next'}
                       onChangeText={text => this.setState({ businessEmail: text })}
                       value={this.state.businessEmail}
+                      placeholderTextColor={colors.black}
+                      underlineColorAndroid="transparent"
+                      onSubmitEditing={() => {this.refs['two1'].focus();}}
+                  />
+                </View>
+
+                <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 20, marginTop: 8}}>
+                  <TextInput
+                      ref="two1"
+                      style={[styles.inputStyle, {width: '100%'}]}
+                      keyboardType='number-pad'
+                      placeholder={"Direct Business Phone"}
+                      autoCorrect={false}
+                      autoCapitalize={'none'}
+                      returnKeyType={'next'}
+                      onChangeText={text => this.setState({ businessPhone: text })}
+                      value={this.state.businessPhone}
                       placeholderTextColor={colors.black}
                       underlineColorAndroid="transparent"
                       onSubmitEditing={() => {this.refs['two'].focus();}}
