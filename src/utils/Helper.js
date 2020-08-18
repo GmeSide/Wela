@@ -200,16 +200,32 @@ class Helper {
         return filtered
     }
 
+    // static async getNearestVenues(location) {
+    //     let user = await this.getUser()
+    //     let allVenues = user.venue_type.venues
+    //     let nearestVenues = []
+
+    //     if (allVenues && allVenues.length > 0) {
+    //       nearestVenues = Promise.all(allVenues.map(venue => this.filterVenues(venue, location)))
+    //     }
+
+    //     return nearestVenues
+    // }
+
     static async getNearestVenues(location) {
-        let user = await this.getUser()
-        let allVenues = user.venue_type.venues
-        let nearestVenues = []
+      let user = await this.getUser()
+      let allVenues = user.venue_type.venues
+      let nearestVenues = []
 
-        if (allVenues && allVenues.length > 0) {
-          nearestVenues = Promise.all(allVenues.map(venue => this.filterVenues(venue, location)))
+      if (allVenues && allVenues.length > 0) {
+        for (const venue of allVenues) {
+          const res = await this.filterVenues(venue, location)
+          if (res == null) continue
+          nearestVenues.push(res)
         }
+      }
 
-        return nearestVenues
+      return nearestVenues
     }
 
     static async filterVenues(venue, location) {
@@ -219,11 +235,16 @@ class Helper {
 
         // update location base on address
         const address = `${venue.street_number} ${venue.street_name}, ${venue.city}, ${venue.country}`
-        const res = await Geocoder.geocodeAddress(address);
-        if (res && res.length > 0) {
-          const { lat, lng } = res[0].position
-          latitude = lat
-          longitude = lng
+        try {
+          const res = await Geocoder.geocodeAddress(address);
+          if (res && res.length > 0) {
+            const { lat, lng } = res[0].position
+            latitude = lat
+            longitude = lng
+          }
+        }
+        catch(err) {
+            console.log(err);
         }
 
         if (this.HARDCODED_LOCATION_SHOW == true) {
