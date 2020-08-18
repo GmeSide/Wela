@@ -55,7 +55,7 @@
 	<string>WELA app need use your camera app for your profile picture.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Wela app needs to use your contact list to quick select and add in persons details when you send queue request.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Wela app needs to get your location to find nearest venues for you.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Wela app needs to get your location to find nearest venues for you.</string>
