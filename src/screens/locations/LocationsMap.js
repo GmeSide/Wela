@@ -1455,7 +1455,7 @@ export default class LocationsMap extends Component {
                     // style={{ ...StyleSheet.absoluteFillObject, marginBottom: this.state.mapMargin, backgroundColor: '#F8F9F9' }}
                     onPress={(event) => this.handleMarkerPress(event)}
                     moveOnMarkerPress={false}
-                    // provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+                    provider={PROVIDER_GOOGLE} // remove if not using Google Maps
                     style={styles.map}
                     // onRegionChange={(region) => this.setState({ region })}
                     // followsUserLocation={true}
