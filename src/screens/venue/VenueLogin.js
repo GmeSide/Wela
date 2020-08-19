@@ -185,7 +185,7 @@ export default class VenueLogin extends Component {
                     </Animated.View>
                 </KeyboardAwareScrollView>
 
-            </Animated.View >
+            </Animated.View>
 
         );
     }
