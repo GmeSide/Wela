@@ -21,6 +21,7 @@ class Helper {
     static venueQueueDataOfCustomers
     static venueUserObject
     static venueProfiles
+    static locationAlert = false
 
     static DEVICE_TOKEN
     /**
@@ -285,15 +286,21 @@ class Helper {
                 if (code === 'CANCELLED') {
                     //alert('Location cancelled by user or by another request');
                 }
-                if (code === 'UNAVAILABLE') {
-                    alert('Location service is disabled or unavailable');
+                if (code === 'UNAVAILABLE' || code === 'UNAUTHORIZED') {
+                    if (!this.locationAlert) {
+                      this.locationAlert = true
+                      alert('Location service is disabled or unavailable');
+                    }
                 }
                 if (code === 'TIMEOUT') {
-                    alert('Location request timed out');
+                  if (!this.locationAlert) {
+                    this.locationAlert = true
+                      alert('Location request timed out');
+                    }
                 }
-                if (code === 'UNAUTHORIZED') {
-                    alert('Authorization denied');
-                }
+                // if (code === 'UNAUTHORIZED') {
+                //     alert('Authorization denied');
+                // }
                 return null
             });
     }

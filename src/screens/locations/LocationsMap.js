@@ -300,6 +300,7 @@ export default class LocationsMap extends Component {
             // this.onNotif.bind(this),
         );
         this.props.navigation.addListener('willFocus', this.componentWillFocus)
+        Helper.locationAlert = false
     }
 
     componentDidMount = async () => {
@@ -717,7 +718,7 @@ export default class LocationsMap extends Component {
         console.log('findNeares location: ', location);
         if (location == null) {
             console.log('stuck');
-            await this.findNeares()
+            // await this.findNeares()
             return
         }
         try {
