@@ -30,6 +30,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.112823672001-tg0ock0hqhl599ev3140u07abo9k33v6</string>
+        <string>fb361311298180632</string>
 			</array>
 		</dict>
 		<dict/>
@@ -94,5 +95,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+  <key>FacebookAppID</key>
+  <string>361311298180632</string>
+  <key>FacebookDisplayName</key>
+  <string>WELA</string>
 </dict>
 </plist>
