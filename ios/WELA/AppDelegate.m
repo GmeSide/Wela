@@ -121,6 +121,11 @@ static void InitializeFlipper(UIApplication *application) {
  
   [[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
   [application registerForRemoteNotifications];
+  
+  if (@available(iOS 13, *)) {
+      self.window.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
+  }
+
 //  if (application.applicationState == UIApplicationStateActive ) {
 //
 //      UILocalNotification *localNotification = [[UILocalNotification alloc] init];
