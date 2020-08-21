@@ -304,7 +304,7 @@ export default class LocationsMap extends Component {
     }
 
     componentDidMount = async () => {
-      this.messageListener = firebase.messaging().onMessage(async(message: RemoteMessage) => {
+      this.messageListener = firebase.messaging().onMessage(async(message) => {
           // Process your message as required
           console.log('Notification onMessage: ', message)
           if (message.data.type === 'toggle') {
