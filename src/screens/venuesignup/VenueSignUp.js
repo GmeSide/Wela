@@ -96,7 +96,7 @@ export default class VenueSignUp extends Component {
 
                             <UserInput
                                 placeholderTextColor={colors.black}
-                                placeholder="Your Name"
+                                placeholder="Business Name"
                                 autoCapitalize={'none'}
                                 returnKeyType={'next'}
                                 keyboardType='email-address'
@@ -163,7 +163,7 @@ export default class VenueSignUp extends Component {
                         </View>
                     </Animated.View>
                 </KeyboardAwareScrollView>
-            </Animated.View >
+            </Animated.View>
         );
     }
 }

@@ -216,7 +216,7 @@ export default class VenueSetUp extends Component {
                       ref="one"
                       style={[styles.inputStyle, {width: '100%'}]}
                       keyboardType={'default'}
-                      placeholder={"Business Name"}
+                      placeholder={"Your Name"}
                       autoCorrect={false}
                       autoCapitalize={'none'}
                       returnKeyType={'next'}
