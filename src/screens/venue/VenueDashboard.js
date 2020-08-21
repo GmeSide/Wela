@@ -476,7 +476,7 @@ export default class VenueDashboard extends Component {
                 } else {
                     this.setState({ currentIndexListFocus: 0 })
                 }
-                if (jsonObject.apiResponse.wait_time > 0) {
+                if (jsonObject.apiResponse.wait_time != null) {
                   this.setState({ averageWaitTime: jsonObject.apiResponse.wait_time })
                 }
             } else {
@@ -526,7 +526,7 @@ export default class VenueDashboard extends Component {
                         color: 'white',
                         fontFamily: 'Rubik-Light',
                         fontSize: 16,
-                    }}>{`${this.state.averageWaitTime > 0 ? this.state.averageWaitTime : this.state.loggedInVenue.average_wait_time} Minutes`}</Text>
+                    }}>{`${this.state.averageWaitTime} Minutes`}</Text>
                 </View>
 
                 {/* <Image
@@ -629,7 +629,7 @@ export default class VenueDashboard extends Component {
                         />
                     </TouchableOpacity>
                 </View>
-            </Animated.View >
+            </Animated.View>
         );
     }
 
