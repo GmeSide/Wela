@@ -11,7 +11,8 @@ import {
     Platform,
     RefreshControl,
     PermissionsAndroid,
-    BackHandler
+    BackHandler,
+    ScrollView
 } from 'react-native';
 import VenueDetail from './VenueDetail'
 import { Card } from 'react-native-shadow-cards';
@@ -537,15 +538,15 @@ export default class VenueDashboard extends Component {
                 /> */}
 
                 <View style={{
-                    flex: 2,
-                    marginTop: 5,
+                    flex: 1,
+                    marginTop: 40,
                     width: '100%',
                     flexDirection: 'column',
                     alignContent: 'center',
                     alignItems: 'center',
                     alignSelf: 'center',
                     justifyContent: 'center',
-                    marginBottom: Platform.OS == 'ios' ? 40 : 10
+                    marginBottom: Platform.OS == 'ios' ? 40 : 10,
                 }}>
                     <View style={{
                         flex: 1,

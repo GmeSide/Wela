@@ -132,8 +132,8 @@ export default class ListQueue extends React.Component {
                 backgroundColor: 'transparent'
             }}>
                 <Text style={{
-                    marginBottom: 20,
-                    marginTop: 20,
+                    marginBottom: 10,
+                    marginTop: 10,
                     fontFamily: 'Rubik-Light',
                     color: colors.black,
                     fontWeight: 'bold',
