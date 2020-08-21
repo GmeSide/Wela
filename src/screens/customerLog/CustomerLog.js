@@ -68,7 +68,7 @@ export default class CustomerLog extends Component {
                 this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
               }
 
-              <Text style={{fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 25}}>Upcoming</Text>
+              {/* <Text style={{fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 25}}>Upcoming</Text>
               <FlatList
                 data={this.state.upcoming}
                 keyExtractor={item => `${item}`}
@@ -119,9 +119,9 @@ export default class CustomerLog extends Component {
                     </View>
                   </Card>
                 )}
-              />
+              /> */}
 
-              <Text style={{ fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 30 }}>Earlier Today</Text>
+              <Text style={{ fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 30 }}>Past 12 Hours</Text>
               <FlatList
                 data={this.state.earlierToday}
                 keyExtractor={(item, index) => index}
