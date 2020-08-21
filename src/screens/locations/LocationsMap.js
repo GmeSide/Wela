@@ -218,7 +218,11 @@ const customStyle = [
 // };
 const unsubscribe = messaging().onMessage(async (remoteMessage) => {
     // console.log('remoteMessage->',remoteMessage);
-    alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
+    if (remoteMessage.notification.title) {
+      alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
+    } else {
+      alert(`${remoteMessage.notification.body}`);
+    }
    // alert('kuch our')
 
     if (remoteMessage.notification) {
