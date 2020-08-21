@@ -1,7 +1,7 @@
 /* @flow */
 import React, { Component } from 'react';
 import { StyleSheet, Dimensions, View, Text, ScrollView, Image, TextInput,
-   TouchableOpacity, FlatList, Keyboard } from 'react-native';
+   TouchableOpacity, FlatList, Keyboard, Platform } from 'react-native';
 import UserInput from '../../common/UserInput';
 import Button from '../../common/BlackButton';
 import { colors } from '../../common/AppColors';
@@ -13,10 +13,9 @@ import Helper from '../../utils/Helper.js'
 import { PostRequest, showToastMessage, getVenueTypes } from '../../network/ApiRequest.js';
 import { CREATE_VENUE_PROFILE } from '../../network/EndPoints';
 import { createVenue } from '../../network/PostDataPayloads';
+import RNPickerSelect from 'react-native-picker-select';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
-var textInputLimit = null
-var textInputPeople = null
 
 export default class VenueSetUp extends Component {
     constructor(props) {
@@ -52,11 +51,11 @@ export default class VenueSetUp extends Component {
             { id: 1, day: 'saturday', open_time: '', close_time: '' },
             { id: 1, day: 'sunday', open_time: '', close_time: '' },
           ],
-          businessType: 0,
+          businessType: '',
           allBusinessTypes: [
-            'Activities',
-            'Food & Drinks',
-            'Retail'
+            { label: 'Activities', value: 'Activities' },
+            { label: 'Food & Drinks', value: 'Food & Drinks' },
+            { label: 'Retail', value: 'Retail' }
           ],
           isDateTimeModalVisible: false,
           isLoading: false
@@ -66,7 +65,6 @@ export default class VenueSetUp extends Component {
 
     componentWillFocus = async () => {
       // const res = await getVenueTypes()
-      this.setState({allBusinessTypes: ['Select Category', ...this.state.allBusinessTypes]})
     }
 
     getDay(day) {
@@ -149,7 +147,7 @@ export default class VenueSetUp extends Component {
         } else if (this.state.ppGroup.toString().trim() == '') {
             message = 'Please enter people per group.'
             error = true
-        } else if (this.state.allBusinessTypes[this.state.businessType] === 'Select Category') {
+        } else if (this.state.businessType == '') {
             message = 'Please enter your business category.'
             error = true
         } else {
@@ -165,7 +163,7 @@ export default class VenueSetUp extends Component {
               this.state.businessName,
               this.state.businessEmail,
               this.state.businessPhone,
-              this.state.allBusinessTypes[this.state.businessType],
+              this.state.businessType,
               this.state.city,
               this.state.streetNumber,
               this.state.streetName,
@@ -269,10 +267,12 @@ export default class VenueSetUp extends Component {
                   borderRadius: 4,
                   backgroundColor: colors.input_box_grey,
                   marginHorizontal: 20,
+                  paddingHorizontal: Platform.OS === 'ios' ? 10 : 0,
                   marginTop: 8,
+                  justifyContent: 'center',
                   width: '90%'
                 }}>
-                  <Picker
+                  {/* <Picker
                     selectedValue={this.state.businessType}
                     style={{
                       alignSelf: 'center',
@@ -288,7 +288,20 @@ export default class VenueSetUp extends Component {
                     {this.state.allBusinessTypes.map((item, index) => {
                         return (<Picker.Item label={item} value={index} key={index}/>)
                     })}
-                  </Picker>
+                  </Picker> */}
+                <RNPickerSelect
+                  placeholder={{label: 'Select Category', value: ''}}
+                  value={this.state.businessType}
+                  style={{
+                    transform: [
+                       { scaleX: 0.85 },
+                       { scaleY: 0.85 },
+                    ],
+                  }}
+                  pickerProps={{ style: { } }}
+                  onValueChange={(value) => this.setState({ businessType: value })}
+                  items={this.state.allBusinessTypes}
+                />
                 </View>
 
                 <View style={{

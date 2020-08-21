@@ -9,8 +9,11 @@ class Helper {
     static HARDCODED_LOCATION_SHOW = false
     static DISTANCE = 200
     static UNIT = "K" // "K"|"M" K->kilo meters , M->For miles
-    static HARDCODED_LATS = 43.6559534
-    static HARDCODED_LONGTS = -79.3660584
+    static HARDCODED_LATS = 10.8009
+    static HARDCODED_LONGTS = 106.6503763
+    // static HARDCODED_LATS = 43.6559534
+    // static HARDCODED_LONGTS = -79.3660584
+
 
     static user
     static userFavouritesVenue
@@ -277,6 +280,13 @@ class Helper {
             .then(location => {
                 //Helper.DEBUG_LOG(`currentLocation ->`)
                 //Helper.DEBUG_LOG(location)
+                // if (this.DEBUG) {
+                //   const _location = {
+                //     latitude: 43.6559534,
+                //     longitude: -79.3660584
+                //   }
+                //   return _location
+                // }
                 return location
             })
             .catch(ex => {
