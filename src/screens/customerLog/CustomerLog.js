@@ -1,6 +1,7 @@
 /* @flow */
 import React, { Component } from 'react';
 
+import moment from 'moment';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity, Platform, Dimensions,
   Image, ImageBackground, RefreshControl, Share, BackHandler, ScrollView} from 'react-native';
 import { Card } from 'react-native-shadow-cards';
@@ -30,13 +31,25 @@ export default class CustomerLog extends Component {
 
     componentWillFocus = async () => {
       console.log('CustomerLog FOCUSED.');
-      const res = await getCustomerLog()
+      userVenue = Helper.venueUserObject
+      const res = await getCustomerLog(userVenue?.id)
       console.log('res: ', res);
       if (res.data.success) {
         this.setState({upcoming :res.data.data})
         this.setState({earlierToday :res.data.data_history})
       }
     }
+
+    getStatus(status) {
+      // if (status == "waiting" || status == "Waiting") {
+      //     // return "Notify"
+      // }
+      if (status == "confirm" || status == "Confirm") {
+          return "Notified"
+      } else {
+          return status.length ? status.charAt(0).toUpperCase() + status.slice(1) : status
+      }
+  }
 
     componentDidMount = async () => {}
 
@@ -62,7 +75,7 @@ export default class CustomerLog extends Component {
                 renderItem={({ item, index }) => (
                   <Card
                     elevation={4}
-                    style={{ padding: 8, margin: 10, width: '90%' }}>
+                    style={{ padding: 8, margin: 10, width: '90%', justifyContent: 'space-between', flexDirection: 'row' }}>
                     <View style={{flexDirection: 'column'}}>
                       <Text style={{
                         fontSize: 16,
@@ -80,7 +93,28 @@ export default class CustomerLog extends Component {
                           color: colors.darkGray,
                           paddingLeft: 4,
                       }}>
-                        {'Party of '+item.persons}
+                        {'Party of ' + item.persons}
+                      </Text>
+                    </View>
+                    <View style={{ justifyContent: 'flex-end' }}>
+                      <Text style={{
+                        fontSize: 16,
+                        fontFamily: 'Rubik-Light',
+                        color: colors.black,
+                        fontWeight: 'bold',
+                        paddingLeft: 4,
+                      }}>
+                        {moment(item.created_at).format("h:mm a")}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontFamily: 'Rubik-Light',
+                          color: colors.darkGray,
+                          paddingLeft: 4,
+                          textAlign: 'right'
+                      }}>
+                        {this.getStatus(item.status)}
                       </Text>
                     </View>
                   </Card>
@@ -99,7 +133,7 @@ export default class CustomerLog extends Component {
                 renderItem={({ item, index }) => (
                   <Card
                     elevation={4}
-                    style={{ padding: 8, margin: 10, width: '90%' }}>
+                    style={{ padding: 8, margin: 10, width: '90%', justifyContent: 'space-between', flexDirection: 'row'  }}>
                     <View style={{flexDirection: 'column'}}>
                       <Text
                         style={{
@@ -119,7 +153,28 @@ export default class CustomerLog extends Component {
                           paddingLeft: 4,
                           alignSelf: 'flex-start',
                         }}>
-                        {'Party of 10.'}
+                        {'Party of ' + item.persons}
+                      </Text>
+                    </View>
+                    <View style={{ justifyContent: 'flex-end' }}>
+                      <Text style={{
+                        fontSize: 16,
+                        fontFamily: 'Rubik-Light',
+                        color: colors.black,
+                        fontWeight: 'bold',
+                        paddingLeft: 4,
+                      }}>
+                        {moment(item.created_at).format("h:mm a")}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontFamily: 'Rubik-Light',
+                          color: colors.darkGray,
+                          paddingLeft: 4,
+                          textAlign: 'right'
+                      }}>
+                        {this.getStatus(item.status)}
                       </Text>
                     </View>
                 </Card>)}
@@ -127,25 +182,32 @@ export default class CustomerLog extends Component {
 
           </ScrollView>
 
-          <View style={{flexDirection: 'row', justifyContent: 'space-evenly', width: '100%', height: 50, backgroundColor: colors.lightestGray, paddingHorizontal: 50}}>
+          {/* <View style={{flexDirection: 'row', justifyContent: 'space-evenly', width: '100%', height: 50, backgroundColor: colors.lightestGray, paddingHorizontal: 50}}>
             <TouchableOpacity
             onPress={() => this.props.navigation.navigate('VenueDashboard')}
             style={{width: '30%', justifyContent: 'center', alignItems: 'center'}}>
               <Image style={{width: 35, height: 35}} source={require('../images/ic_menu.png')} />
             </TouchableOpacity>
 
-            {/*<TouchableOpacity
+            <TouchableOpacity
             onPress={() => console.log('Button 1')}
             style={{width: '30%', justifyContent: 'center', alignItems: 'center'}}>
               <Image style={{width: 35, height: 35}} source={require('../images/ic_profile.png')} />
-            </TouchableOpacity>*/}
-          </View>
-
+            </TouchableOpacity>
+          </View> */}
+          <Button
+              style={{marginVertical: '2.5%'}}
+              width={'95%'}
+              topMargin={10}
+              onButtonPress={() => this.props.navigation.navigate('VenueDashboard')}
+              text={'Back'}
+          />
         </ImageBackground>
       );
     }
 }
 
+const DEVICE_WIDTH = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   image: {flex: 1, resizeMode: "cover", justifyContent: "center"},
 });

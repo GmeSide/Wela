@@ -585,9 +585,9 @@ export default class VenueDashboard extends Component {
                         text={'Add'}
                     />
 
-                    {/* <TouchableOpacity
-                    style={{width:(DEVICE_WIDTH / 4) * 3, height: 50, marginTop: 10, backgroundColor: colors.lightGray, justifyContent: 'center'}}
-                    onPress={() => this.props.navigation.navigate('CustomerLog')}>
+                    <TouchableOpacity
+                      style={{width:(DEVICE_WIDTH / 4) * 3, height: 50, marginTop: 10, backgroundColor: colors.black, justifyContent: 'center'}}
+                      onPress={() => this.props.navigation.navigate('CustomerLog')}>
                       <Text style={{
                           fontWeight: 'bold',
                           textAlign: 'center',
@@ -596,7 +596,7 @@ export default class VenueDashboard extends Component {
                           fontFamily: 'Rubik-Light'
                       }} >{'Customer Log'}
                       </Text>
-                    </TouchableOpacity> */}
+                    </TouchableOpacity>
                 </View>
 
                 <VenueDetail

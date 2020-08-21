@@ -137,10 +137,10 @@ export const getVenueTypes = async () => {
   return res;
 }
 
-export const getCustomerLog = async () => {
+export const getCustomerLog = async (venue_id) => {
   console.log('getCustomerLog API');
   const bodyconfig = {
-    venue_id: 1,
+    venue_id: venue_id,
   }
   const headersconfig = {
     headers: {

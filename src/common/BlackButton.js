@@ -26,7 +26,7 @@ class BlackButton extends React.Component {
         return (
             <TouchableOpacity
             disabled={this.props.disabled}
-            style={{
+            style={[{
                 height: this.props.height ? this.props.height : 50,
                 flexDirection: 'row',
                 width: this.props.width ? this.props.width : DEVICE_WIDTH - 40,
@@ -41,7 +41,7 @@ class BlackButton extends React.Component {
                 textAlign: 'center',
                 alignItems: "center",
                 marginHorizontal:this.props.marginHorizontaly?this.props.marginHorizontaly:0
-            }}
+            }, this.props.style]}
                 onPress={this.props.onButtonPress}>
                 {/* {this.IMAGEVIEW()} */}
                 <Text style={{
