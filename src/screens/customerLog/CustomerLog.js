@@ -32,7 +32,7 @@ export default class CustomerLog extends Component {
     componentWillFocus = async () => {
       console.log('CustomerLog FOCUSED.');
       userVenue = Helper.venueUserObject
-      const res = await getCustomerLog(userVenue?.id)
+      const res = await getCustomerLog(userVenue?.id, 12)
       console.log('res: ', res);
       if (res.data.success) {
         this.setState({upcoming :res.data.data})
