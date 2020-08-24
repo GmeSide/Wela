@@ -123,17 +123,19 @@ export default class ListQueue extends React.Component {
     }
 
     render() {
+        const { dataSource } = this.props
         return (
             <View style={{
                 width: DEVICE_WIDTH,
                 alignContent: 'center',
-                justifyContent: 'center',
+                justifyContent: dataSource.length > 0 ? 'space-evenly' : 'center',
                 alignItems: 'center',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                height: '100%'
             }}>
                 <Text style={{
-                    marginBottom: 10,
-                    marginTop: 10,
+                    marginBottom: dataSource.length > 0 ? 0 : 20,
+                    marginTop: 5,
                     fontFamily: 'Rubik-Light',
                     color: colors.black,
                     fontWeight: 'bold',
@@ -143,35 +145,36 @@ export default class ListQueue extends React.Component {
                 </Text>
 
                 <FlatList
-                    data={this.props.dataSource.length? [...this.props.dataSource,{status:'thatall'}] : this.props.dataSource}
+                    data={dataSource.length? [...dataSource,{status:'thatall'}] : dataSource}
                     keyExtractor={item => `${item}`}
                     ref={ref => mFlatList = ref}
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
+                    style={{ flexGrow: 0 }}
                     renderItem={({ item, index }) => (
-                        <View>
+                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                             {item.status==='thatall'?
                             <Card
-                            elevation={0}
-                            style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, justifyContent: 'center', height: 150 }}>
-                            <Image
-                              source={require('../../../assets/Group1.png')}
-                              style={{ height: 100, width: DEVICE_WIDTH / 2.7 }}
-                              resizeMode='contain'
-                            />
+                              elevation={0}
+                              style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, justifyContent: 'center', height: 150 }}>
+                              <Image
+                                source={require('../../../assets/Group1.png')}
+                                style={{ height: 100, width: DEVICE_WIDTH / 2.7 }}
+                                resizeMode='contain'
+                              />
                             </Card>
 
                             :
                             <Card
                                 elevation={4}
-                                style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, }}>
+                                style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10 }}>
                                 {this.DELETE_ICON(item, index)}
 
                                 <View style={{
                                     flexDirection: 'column',
                                     justifyContent: 'center',
                                     alignContent: 'center',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
                                 }}>
                                     <View style={{
                                         height: 60,
@@ -229,7 +232,17 @@ export default class ListQueue extends React.Component {
                         </View>
                     )}
                 />
+
                 {this.showArrowsIfListCanScroll()}
+
+                <Text style={{
+                    fontFamily: 'Rubik-Light',
+                    color: colors.black,
+                    fontWeight: 'bold',
+                    fontSize: 18,
+                  }}>
+                  {`${dataSource.length} Groups Waiting`}
+                </Text>
             </View>
         );
     }

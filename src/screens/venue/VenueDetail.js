@@ -16,7 +16,7 @@ export default class VenueDetail extends Component {
         this.state = {
             isExpanded: false,
             viewHeight: 50,
-            topMargin: Platform.OS=='android'?'22%':'33%',
+            topMargin: '20%',
             bottomMargin: '0%'
         }
     }
@@ -71,7 +71,8 @@ export default class VenueDetail extends Component {
             <Card style={{
                 height: this.state.viewHeight,
                 position: 'absolute',
-                top: this.state.topMargin,
+                // top: this.state.topMargin,
+                bottom: -25,
                 alignContent: 'center',
                 alignSelf: 'center',
                 justifyContent: 'center'
@@ -90,10 +91,6 @@ export default class VenueDetail extends Component {
         );
     }
 }
-
-
-const DEVICE_WIDTH = Dimensions.get('window').width;
-const DEVICE_HEIGHT = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
     container: {

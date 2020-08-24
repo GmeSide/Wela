@@ -29,7 +29,8 @@ export default class ToggleWaiting extends React.Component {
     render() {
         return (
             <View style={{
-                flexDirection: 'row', marginTop: 20,
+                flexDirection: 'row',
+                marginTop: 15,
                 alignItems: 'center',
                 alignContent: 'center',
                 justifyContent: 'center',

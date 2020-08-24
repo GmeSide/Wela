@@ -217,7 +217,7 @@ export default class ManuallyAddQueue extends React.Component {
                                             placeholder={'Customer Phone Number'}
                                             autoCorrect={false}
                                             autoCapitalize={'none'}
-                                            keyboardType='number-pad'
+                                            keyboardType='phone-pad'
                                             returnKeyType={'done'}
                                             onChangeText={text => this.updatePhone(text, index)}
                                             value={this.state.contact[index].phone}

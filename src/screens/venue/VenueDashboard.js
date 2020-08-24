@@ -487,6 +487,7 @@ export default class VenueDashboard extends Component {
     }
 
     render() {
+        const { usersQueueData } = this.state
         return (
             <Animated.View
                 // refreshControl={<RefreshControl
@@ -503,12 +504,11 @@ export default class VenueDashboard extends Component {
                 <View
                     style={{
                         width: '100%',
-                        height: Platform.OS == 'android' ? '25%' : '35%',
+                        height: '25%',
                         backgroundColor: '#8cb3e5',
                         alignItems: 'center',
                         justifyContent: 'space-evenly',
-                        flexDirection: 'column',
-                        paddingVertical: 25
+                        paddingVertical: 25,
                     }}
                 >
                     <Text style={{
@@ -528,6 +528,10 @@ export default class VenueDashboard extends Component {
                         fontFamily: 'Rubik-Light',
                         fontSize: 16,
                     }}>{`${this.state.averageWaitTime} Minutes`}</Text>
+
+                    <VenueDetail
+                      onVisible={() => this.venueDetailViewOpen()}
+                    />
                 </View>
 
                 {/* <Image
@@ -538,40 +542,24 @@ export default class VenueDashboard extends Component {
                 /> */}
 
                 <View style={{
-                    flex: 1,
-                    marginTop: 40,
+                    height: '75%',
                     width: '100%',
-                    flexDirection: 'column',
-                    alignContent: 'center',
                     alignItems: 'center',
-                    alignSelf: 'center',
                     justifyContent: 'center',
-                    marginBottom: Platform.OS == 'ios' ? 40 : 10,
+                    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
                 }}>
                     <View style={{
                         flex: 1,
-                        flexDirection: 'column',
-                        alignContent: 'center',
                         alignItems: 'center',
-                        alignSelf: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        marginTop: 25,
                     }}>
                         <ListQueue
                             currentIndex={this.state.currentIndexListFocus}
                             deleteNow={(index,item) => this.deleteNow(index,item)}
                             notify={(item, index) => this.onNotifyTap(item, index)}
-                            dataSource={this.state.usersQueueData}
+                            dataSource={usersQueueData}
                         />
-
-                        <Text style={{
-                            marginTop: 20,
-                            fontFamily: 'Rubik-Light',
-                            color: colors.black,
-                            fontWeight: 'bold',
-                            fontSize: 18
-                        }}>
-                            {`${this.state.usersQueueData.length} Groups Waiting`}
-                        </Text>
                     </View>
 
                     <ToggleWaiting
@@ -599,10 +587,6 @@ export default class VenueDashboard extends Component {
                       </Text>
                     </TouchableOpacity>
                 </View>
-
-                <VenueDetail
-                    onVisible={() => this.venueDetailViewOpen()}
-                />
 
                 <ManuallyAddQueue
                     showAddQueueView={this.state.showAddQueueView}
