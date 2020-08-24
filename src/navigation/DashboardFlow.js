@@ -11,6 +11,7 @@ import CustomerLog from "../screens/customerLog/CustomerLog";
 import VerifyOTP from "../screens/otp/VerifyOTP";
 import VenueDashboard from "../screens/venue/VenueDashboard";
 import VenueLogin from "../screens/venue/VenueLogin";
+import VenueResetPassword from "../screens/venue/VenueResetPassword";
 
 import TabNavigator from "../navigation/TabNavigatorControl";
 
@@ -25,6 +26,7 @@ const RootStack = createStackNavigator(
     VenueLogin: { screen: VenueLogin, navigationOptions: { header: null } },
     VenueSignUp: { screen: VenueSignUp },
     VenueSetUp: { screen: VenueSetUp },
+    VenueResetPassword: { screen: VenueResetPassword },
     CustomerLog: { screen: CustomerLog, navigationOptions: { header: null } },
     Home: { screen: TabNavigator,
       navigationOptions: {

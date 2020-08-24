@@ -175,10 +175,16 @@ export default class VenueLogin extends Component {
 
                             <TouchableOpacity
                                 onPress={() => this.props.navigation.navigate('VenueSignUp')}
-                                style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 20 }}
+                                style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 0 }}
                             >
                                 <Text style={{fontFamily: 'Rubik-Light'}}>NOT USING WELA? </Text>
                                 <Text style={{ fontFamily: 'Rubik-Light', borderBottomWidth: 1 }}>REGISTER NOW</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => this.props.navigation.navigate('VenueResetPassword')}
+                                style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10, marginBottom: 20 }}
+                            >
+                                <Text style={{ fontFamily: 'Rubik-Light', borderBottomWidth: 1 }}>RESET PASSWORD</Text>
                             </TouchableOpacity>
                         </View>
 

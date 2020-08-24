@@ -249,7 +249,7 @@ export default class VenueSetUp extends Component {
                   <TextInput
                       ref="two1"
                       style={[styles.inputStyle, {width: '100%'}]}
-                      keyboardType='number-pad'
+                      keyboardType='phone-pad'
                       placeholder={"Direct Business Phone"}
                       autoCorrect={false}
                       autoCapitalize={'none'}

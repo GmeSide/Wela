@@ -199,6 +199,7 @@ export default class CustomerLog extends Component {
               style={{marginVertical: '2.5%'}}
               width={'95%'}
               topMargin={10}
+              bottomMargin={Platform.OS === 'ios' ? 20 : 10}
               onButtonPress={() => this.props.navigation.navigate('VenueDashboard')}
               text={'Back'}
           />

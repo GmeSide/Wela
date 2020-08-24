@@ -31,6 +31,7 @@ class BlackButton extends React.Component {
                 flexDirection: 'row',
                 width: this.props.width ? this.props.width : DEVICE_WIDTH - 40,
                 marginTop: this.props.topMargin,
+                marginBottom: this.props.bottomMargin,
                 borderRadius: 4,
                 alignSelf: 'center',
                 borderColor: colors.themeDark,
