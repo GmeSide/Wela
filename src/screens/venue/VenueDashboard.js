@@ -486,6 +486,10 @@ export default class VenueDashboard extends Component {
         })
     }
 
+    logout = () => {
+      this.props.navigation.navigate('VenueLogin')
+    }
+
     render() {
         const { usersQueueData } = this.state
         return (
@@ -607,10 +611,26 @@ export default class VenueDashboard extends Component {
                     <TouchableOpacity onPress={() => this.reloadData()}>
                         <Image
                             style={{
-                                width: 30,
-                                height: 30,
+                                width: 25,
+                                height: 25,
                             }}
                             source={require('../images/ic_sync.png')}
+                        />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{
+                    position: 'absolute',
+                    top: Platform.OS == 'ios' ? 95 : 65,
+                    right: 20
+                }}>
+                    <TouchableOpacity onPress={() => this.logout()}>
+                        <Image
+                            style={{
+                                width: 25,
+                                height: 25,
+                            }}
+                            source={require('../images/shutdown.png')}
                         />
                     </TouchableOpacity>
                 </View>

@@ -22,7 +22,7 @@ const RootStack = createStackNavigator(
     Login: { screen: Login,  navigationOptions: { header: null } },
     SignUp: { screen: SignUp },
     VerifyOTP: { screen: VerifyOTP },
-    VenueDashboard: { screen: VenueDashboard, navigationOptions: { header: null } },
+    VenueDashboard: { screen: VenueDashboard, navigationOptions: { header: null, gesturesEnabled: false } },
     VenueLogin: { screen: VenueLogin, navigationOptions: { header: null } },
     VenueSignUp: { screen: VenueSignUp },
     VenueSetUp: { screen: VenueSetUp },
