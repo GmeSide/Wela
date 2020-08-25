@@ -76,7 +76,7 @@ export default class ManuallyAddQueue extends React.Component {
                     this.setState({ contact: [{ name: '', phone: '' }], personsCount: 1 })
                     showToastMessage("Create Account", jsonObject.apiResponse.message)
                     // this.props.navigation.navigate('VerifyOTP', { user: jsonObject.apiResponse })
-                    this.props.onAddManualQueueRequest()
+                    setTimeout(() => { this.props.onAddManualQueueRequest() }, 200);
                 }
             })
         }
