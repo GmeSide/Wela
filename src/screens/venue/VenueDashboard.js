@@ -422,8 +422,10 @@ export default class VenueDashboard extends Component {
     }
 
     onAddManualQueueRequestComplete = async () => {
-        this.setState({ showAddQueueView: false })
-        await this.reloadData()
+        this.setState({ showAddQueueView: false }, async () => {
+          // setTimeout(async () => { await this.reloadData() }, 200);
+          await this.reloadData()
+        })
     }
 
     cancelVenueDetailView() {
