@@ -1,16 +1,13 @@
 /* @flow */
 import React, { Component } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
 import UserInput from '../../common/UserInput';
-import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
-import { LOGIN } from '../../network/EndPoints';
-import { login } from '../../network/PostDataPayloads';
+import { showToastMessage } from '../../network/ApiRequest.js';
 import Helper from '../../utils/Helper.js';
 import ProgressDialog from '../../utils/ProgressDialog';
-
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
 export default class VenueResetPassword extends Component {
@@ -22,6 +19,7 @@ export default class VenueResetPassword extends Component {
     super(props);
     this.state = {
       loaderMessage: 'Wait..',
+      email: '',
       currentPassword: '',
       newPassword: '',
       confirmNewPassword: '',
@@ -37,26 +35,32 @@ export default class VenueResetPassword extends Component {
   showLoader(message) { this.setState({ isLoading: true, loaderMessage: message }) }
   hideLoader() { this.setState({ isLoading: false }) }
 
+  validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+  }
+
   async WelaLogin() {
     var message
     var error = false
-    var {currentPassword, newPassword, confirmNewPassword, } = this.state
+    var { email, currentPassword, newPassword, confirmNewPassword, } = this.state
     var type = 1
 
-    if (currentPassword.trim() == '') {
-      message = 'Please enter Current Password!'
+    if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
+      showToastMessage("Required", "Please fill all the fields.")
       error = true
-    } else if (newPassword.trim() == '') {
-      message = 'Please enter New Password'
-      error = true
-    } else if (newPassword !== confirmNewPassword) {
-      error = true
-      message = "Confirm New Password does not match"
     }
-
-    if (error) {
-      showToastMessage("Required", message)
-    } else {
+    let validEmail = this.validateEmail(email)
+    if (!validEmail) {
+      showToastMessage("Error", "Please enter a valid email.")
+      error = true
+    }
+    let passMatch = (newPassword === confirmNewPassword)
+    if (!passMatch) {
+      showToastMessage("Error", "Passwords do not match.")
+      error = true
+    }
+    if (!error) {
       this.showLoader("Logging..")
       // const PAYLOAD = await login(email, password, 1)
       // Helper.DEBUG_LOG(PAYLOAD)
@@ -115,6 +119,17 @@ export default class VenueResetPassword extends Component {
               <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>Wait Conveniently</Text>
             </View>
             <View style={{ flexDirection: 'column' }}>
+              <UserInput
+                placeholderTextColor={colors.black}
+                placeholder="Your Email"
+                autoCapitalize={'none'}
+                returnKeyType={'next'}
+                keyboardType='email-address'
+                autoCorrect={false}
+                value={this.state.email}
+                onChangeText={text => this.setState({ email: text })}
+              />
+
               <UserInput
                 placeholderTextColor={colors.black}
                 secureTextEntry={true}
