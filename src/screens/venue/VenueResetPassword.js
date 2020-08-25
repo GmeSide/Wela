@@ -41,24 +41,25 @@ export default class VenueResetPassword extends Component {
   }
 
   async WelaLogin() {
-    var message
     var error = false
     var { email, currentPassword, newPassword, confirmNewPassword, } = this.state
-    var type = 1
 
     if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
       showToastMessage("Required", "Please fill all the fields.")
       error = true
+      return
     }
     let validEmail = this.validateEmail(email)
     if (!validEmail) {
       showToastMessage("Error", "Please enter a valid email.")
       error = true
+      return
     }
     let passMatch = (newPassword === confirmNewPassword)
     if (!passMatch) {
       showToastMessage("Error", "Passwords do not match.")
       error = true
+      return
     }
     if (!error) {
       this.showLoader("Logging..")
