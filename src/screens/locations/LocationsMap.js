@@ -1292,15 +1292,15 @@ export default class LocationsMap extends Component {
                     }}
                     renderItem={this.renderSearchListItem}
                     data={this.state.categoriesList}
-                    keyExtractor={(item) => item}
+                    keyExtractor={(item, index) => index + ""}
                 />
             )
         }
     }
 
-    renderSearchListItem = ({ item }) => {
+    renderSearchListItem = ({ item, index }) => {
         return (
-            <TouchableOpacity onPress={() => this.onSelectCategory(item)}>
+            <TouchableOpacity key={index} onPress={() => this.onSelectCategory(item)}>
                 <View style={{
                     flex: 1,
                     height: 70,

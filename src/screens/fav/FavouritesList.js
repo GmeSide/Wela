@@ -97,10 +97,11 @@ export default class FavouritesList extends Component {
 
     }
 
-    renderItem = ({ item }) => {
+    renderItem = ({ item, index }) => {
         return (
 
             <Card
+                key={index}
                 elevation={4}
                 style={{ padding: 20, margin: 10, }}>
                 <TouchableOpacity >
@@ -211,17 +212,17 @@ export default class FavouritesList extends Component {
                             renderItem={this.renderItem}
                             data={this.state.dataSource}
                             refreshControl={<RefreshControl
-                                colors={["#9Bd35A", "#689F38"]}
-                                refreshing={this.state.isRefreshing}
-                                onRefresh={() => this.onRefresh()} />}
-                            keyExtractor={item => `${item}`}
+                            colors={["#9Bd35A", "#689F38"]}
+                            refreshing={this.state.isRefreshing}
+                            onRefresh={() => this.onRefresh()} />}
+                            keyExtractor={(item, index) => index + ""}
                         />
 
 
                     </View>
                     {this.showNoDataError()}
                 </ImageBackground>
-            </View >
+            </View>
 
         );
     }

@@ -689,7 +689,9 @@ export default class DetailViewModal extends React.Component {
                                 nestedScrollEnabled={false}
                                 style={{ marginTop: 5 }}
                                 renderItem={({ item, index }) => (
-                                    <View style={{
+                                    <View
+                                      key={index}
+                                      style={{
                                         flexDirection: 'column',
                                         justifyContent: 'center',
                                         alignContent: 'center',
@@ -777,7 +779,7 @@ export default class DetailViewModal extends React.Component {
                                     </View>
                                 )}
                                 data={this.state.dataSource}
-                                keyExtractor={item => `${item}`}
+                                keyExtractor={(item, index) => index + ""}
                             />
 
                             <DateTimePickerModal

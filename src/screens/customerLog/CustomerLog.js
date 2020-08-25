@@ -71,9 +71,10 @@ export default class CustomerLog extends Component {
               {/* <Text style={{fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 25}}>Upcoming</Text>
               <FlatList
                 data={this.state.upcoming}
-                keyExtractor={item => `${item}`}
+                keyExtractor={(item, index) => index + ""}
                 renderItem={({ item, index }) => (
                   <Card
+                    key={index}
                     elevation={4}
                     style={{ padding: 8, margin: 10, width: '90%', justifyContent: 'space-between', flexDirection: 'row' }}>
                     <View style={{flexDirection: 'column'}}>
@@ -124,7 +125,7 @@ export default class CustomerLog extends Component {
               <Text style={{ fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 30 }}>Past 12 Hours</Text>
               <FlatList
                 data={this.state.earlierToday}
-                keyExtractor={(item, index) => index}
+                keyExtractor={(item, index) => index + ""}
                 refreshControl={<RefreshControl
                   colors={["#9Bd35A", "#689F38"]}
                   refreshing={this.state.isRefreshing}
@@ -132,6 +133,7 @@ export default class CustomerLog extends Component {
                 }
                 renderItem={({ item, index }) => (
                   <Card
+                    key={index}
                     elevation={4}
                     style={{ padding: 8, margin: 10, width: '90%', justifyContent: 'space-between', flexDirection: 'row'  }}>
                     <View style={{flexDirection: 'column'}}>

@@ -150,9 +150,9 @@ export default class ManuallyAddQueue extends React.Component {
                             scrollEnabled={false}
                             nestedScrollEnabled={false}
                             data={this.state.contact}
-                            keyExtractor={item => `${item}`}
+                            keyExtractor={(item, index) => index + ""}
                             renderItem={({ item, index }) => (
-                                <View style={{
+                                <View key={index} style={{
                                     flexDirection: 'column',
                                 }}>
                                     <View style={{

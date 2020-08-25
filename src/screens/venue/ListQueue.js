@@ -146,13 +146,13 @@ export default class ListQueue extends React.Component {
 
                 <FlatList
                     data={dataSource.length? [...dataSource,{status:'thatall'}] : dataSource}
-                    keyExtractor={item => `${item}`}
+                    keyExtractor={(item, index) => index + ""}
                     ref={ref => mFlatList = ref}
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
                     style={{ flexGrow: 0 }}
                     renderItem={({ item, index }) => (
-                        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                        <View key={index} style={{ alignItems: 'center', justifyContent: 'center' }}>
                             {item.status==='thatall'?
                             <Card
                               elevation={0}

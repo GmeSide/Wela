@@ -491,9 +491,11 @@ export default class VenueSetUp extends Component {
                 <FlatList
                     style={{ marginHorizontal: 20 }}
                     data={this.state.dataSource}
-                    keyExtractor={item => `${item}`}
+                    keyExtractor={(item, index) => index + ""}
                     renderItem={({ item, index }) => (
-                        <View style={{
+                        <View
+                          key={index}
+                          style={{
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignContent: 'center',

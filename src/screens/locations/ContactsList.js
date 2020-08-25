@@ -203,8 +203,9 @@ class ContactsList extends React.Component {
                                 keyExtractor={item => item.recordID}
                                 extraData={this.state}
                                 ListHeaderComponent={this.renderHeader}
-                                renderItem={({ item }) => {
-                                    return <TouchableOpacity style={{
+                                renderItem={({ item, index }) => {
+                                    return <TouchableOpacity key={index}
+                                    style={{
                                         flexDirection: 'row',
                                         padding: 10,
                                         borderBottomWidth: 1,

@@ -550,6 +550,7 @@ export default class WaitingList extends Component {
                                 }}
                                 renderItem={({ item, index }) => (
                                   <Card
+                                    key={index}
                                     elevation={4}
                                     style={{ padding: 8, margin: 10, width: '90%' }}>
                                     <TouchableOpacity
@@ -606,14 +607,14 @@ export default class WaitingList extends Component {
                                 </Card>)}
                                 // renderItem={this.renderWaitingListItem}
                                 data={this.state.dataCurrentlyWaiting}
-                                keyExtractor={item => `${item}`}
+                                keyExtractor={(item, index) => index + ""}
                             />
                         </View>
                         <View style={{ flexDirection: 'column' }}>
                             <Text style={{ fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 30 }}>Last Thirty Days</Text>
                             <FlatList
                                 data={this.state.dataLastThirtyDays}
-                                keyExtractor={(item, index) => index}
+                                keyExtractor={(item, index) => index + ""}
                                 refreshControl={<RefreshControl
                                   colors={["#9Bd35A", "#689F38"]}
                                   refreshing={this.state.isRefreshing}
@@ -621,6 +622,7 @@ export default class WaitingList extends Component {
                                 style={{alignContent: 'center', backgroundColor: 'transparent'}}
                                 renderItem={({ item, index }) => (
                                   <Card
+                                    key={index}
                                     elevation={4}
                                     style={{ padding: 8, margin: 10, width: '90%' }}>
                                     <TouchableOpacity
