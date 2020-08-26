@@ -119,6 +119,12 @@ export default class ManuallyAddQueue extends React.Component {
         }
     }
 
+    focusInput = (refName) => {
+      if (this.refs[refName]) {
+        this.refs[refName].focus()
+      }
+    };
+
     render() {
         return (
             <Modal
@@ -166,6 +172,7 @@ export default class ManuallyAddQueue extends React.Component {
                                         textAlignVertical: 'center',
                                     }}>
                                         <TextInput
+                                            ref={'contact' + index + 'name'}
                                             style={{
                                                 width: '100%',
                                                 color: colors.black,
@@ -182,6 +189,7 @@ export default class ManuallyAddQueue extends React.Component {
                                             keyboardType='default'
                                             returnKeyType={'next'}
                                             onChangeText={text => this.updateName(text, index)}
+                                            onSubmitEditing={() => this.focusInput('contact' + index + 'phone')}
                                             value={this.state.contact[index].name}
                                             placeholderTextColor={colors.black}
                                             underlineColorAndroid="transparent"
@@ -202,6 +210,7 @@ export default class ManuallyAddQueue extends React.Component {
                                         textAlignVertical: 'center',
                                     }}>
                                         <TextInput
+                                            ref={'contact' + index + 'phone'}
                                             style={{
                                                 width: '100%',
                                                 color: colors.black,
@@ -216,8 +225,9 @@ export default class ManuallyAddQueue extends React.Component {
                                             autoCorrect={false}
                                             autoCapitalize={'none'}
                                             keyboardType='phone-pad'
-                                            returnKeyType={'done'}
+                                            returnKeyType={this.state.contact[index + 1] ? 'next' : 'done'}
                                             onChangeText={text => this.updatePhone(text, index)}
+                                            onSubmitEditing={() => this.focusInput('contact' + (index + 1) + 'name')}
                                             value={this.state.contact[index].phone}
                                             placeholderTextColor={colors.black}
                                             underlineColorAndroid="transparent"
