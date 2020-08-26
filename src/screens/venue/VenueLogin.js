@@ -80,11 +80,15 @@ export default class VenueLogin extends Component {
                 if (jsonObject.success) {
 
                     let userObject = jsonObject.apiResponse.data[0]
+                    let profileObject = jsonObject.apiResponse.profile
 
-                    Helper.venueProfiles = jsonObject.apiResponse.profile
+                    Helper.venueProfiles = profileObject
                     Helper.venueUserObject = userObject
                     Helper.venueQueueDataOfCustomers = userObject.venue_type.queue
+                    Helper.saveUser(userObject)
+                    Helper.saveProfile(profileObject)
 
+                    this.setState({ email: '', password: '' })
                     this.props.navigation.navigate('VenueDashboard')
                 }
             })

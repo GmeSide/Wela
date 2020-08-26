@@ -29,7 +29,7 @@ export default class Splash extends Component {
     }
     componentWillFocus = async () => {
         if (Platform.OS == 'android') {
-           
+
         } else {
             Geolocation.requestAuthorization()
         }
@@ -60,19 +60,24 @@ export default class Splash extends Component {
        // Helper.DEBUG_LOG(userLoggedIn)
         this.setState({ isLoggedIn: userLoggedIn })
         let user = await Helper.getUser()
+        let profile = await Helper.getProfile()
         //Helper.DEBUG_LOG(user)
-        if (this.state.isLoggedIn) {
+        if (this.state.isLoggedIn && user.user_type === 1 && user && profile) {
+            Helper.venueProfiles = profile
+            Helper.venueUserObject = user
+            Helper.venueQueueDataOfCustomers = user.venue_type.queue
+            this.props.navigation.navigate('VenueDashboard')
+        } else if (this.state.isLoggedIn && user.user_type === 2) {
             this.props.navigation.navigate('Home')
-            //this.fetchFavourites(user)
         } else {
             //Geolocation.requestAuthorization()
-            setTimeout(() => { this.props.navigation.navigate('LoginOptions') }, 4000)
+            setTimeout(() => { this.props.navigation.navigate('LoginOptions') }, 3000)
         }
         // await crashlytics().setCrashlyticsCollectionEnabled(true)
         //crashlytics().recordError("Test error");
         //crashlytics().crash()
 
-      
+
     }
 
 

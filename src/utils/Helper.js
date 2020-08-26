@@ -87,6 +87,22 @@ class Helper {
     }
 
     /**
+     *
+     * @param {*} data
+     */
+    static async saveProfile(data) {
+        this.storeData(Constants.KEY_PROFILE, data)
+    }
+
+    /**
+     * GET USER PROFILE
+     */
+    static async getProfile() {
+        this.venueProfiles = await this.getSroedData(Constants.KEY_PROFILE)
+        return this.venueProfiles
+    }
+
+    /**
      * GET USER FCM TOKEN
      */
     static async getDeviceFCMToken() {

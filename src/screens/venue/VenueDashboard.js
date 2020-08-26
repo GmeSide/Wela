@@ -488,7 +488,8 @@ export default class VenueDashboard extends Component {
         })
     }
 
-    logout = () => {
+    logout = async () => {
+      await Helper.clearAsyncStorage()
       this.props.navigation.navigate('VenueLogin')
     }
 
