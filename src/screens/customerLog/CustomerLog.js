@@ -24,6 +24,10 @@ export default class CustomerLog extends Component {
 
   componentWillFocus = async () => {
     console.log('CustomerLog FOCUSED.');
+    this.onRefresh()
+  }
+
+  async onRefresh() {
     userVenue = Helper.venueUserObject
     await this.setState({ isLoading: true })
     const res = await getCustomerLog(userVenue?.id, 12)
@@ -46,12 +50,6 @@ export default class CustomerLog extends Component {
   }
 
   componentDidMount = async () => { }
-
-  async onRefresh() {
-    this.setState({ isRefreshing: true })
-    console.log('onRefresh');
-    this.setState({ isRefreshing: false })
-  }
 
   renderEmptyItem = () => {
     return (
@@ -127,10 +125,10 @@ export default class CustomerLog extends Component {
           <FlatList
             data={this.state.earlierToday}
             keyExtractor={(item, index) => index + ""}
-            refreshControl={<RefreshControl
-              colors={["#9Bd35A", "#689F38"]}
-              refreshing={this.state.isRefreshing}
-              onRefresh={() => this.onRefresh()} />
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.isRefreshing}
+                onRefresh={() => this.onRefresh()} />
             }
             ListEmptyComponent={this.renderEmptyItem}
             renderItem={({ item, index }) => (

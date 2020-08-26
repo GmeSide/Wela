@@ -21,6 +21,7 @@ import Helper from '../../utils/Helper.js'
 import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
 import { ADD_RQUEST_TO_VENUE, MANUAL_ADD } from '../../network/EndPoints';
 import { addUserToQueueManually } from '../../network/PostDataPayloads';
+import LoadingView from "../../common/LoadingView";
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -126,18 +127,15 @@ export default class ManuallyAddQueue extends React.Component {
                 transparent={true}
                 visible={this.props.showAddQueueView}>
                 <TouchableOpacity
-                activeOpacity={1}
-                onPressOut={() => this.props.onAddManualQueueRequest()}
-                style={{
-                    flex: 1,
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.5)'
-                }}>
-                    {
-                        this.state.isLoading ? <ProgressDialog title='Please wait' message="Adding.." /> : null
-                    }
+                  activeOpacity={1}
+                  onPressOut={() => this.props.onAddManualQueueRequest()}
+                  style={{
+                      flex: 1,
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0,0,0,0.5)'
+                  }}>
                     <Card
                         elevation={4}
                         style={{
@@ -316,6 +314,7 @@ export default class ManuallyAddQueue extends React.Component {
                           text={'Cancel'} />*/}
                     </Card>
                 </TouchableOpacity>
+                {this.state.isLoading ? <LoadingView message = "Adding.." /> : undefined}
             </Modal>
         )
     }
