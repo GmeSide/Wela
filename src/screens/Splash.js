@@ -57,17 +57,17 @@ export default class Splash extends Component {
     }
     async componentDidMount() {
         let userLoggedIn = await Helper.isUserLoggedIn()
-       // Helper.DEBUG_LOG(userLoggedIn)
-        this.setState({ isLoggedIn: userLoggedIn })
+        // Helper.DEBUG_LOG(userLoggedIn)
+        // this.setState({ isLoggedIn: userLoggedIn })
         let user = await Helper.getUser()
         let profile = await Helper.getProfile()
         //Helper.DEBUG_LOG(user)
-        if (this.state.isLoggedIn && user.user_type === 1 && user && profile) {
+        if (userLoggedIn && user?.user_type === 1 && profile) {
             Helper.venueProfiles = profile
             Helper.venueUserObject = user
             Helper.venueQueueDataOfCustomers = user.venue_type.queue
             this.props.navigation.navigate('VenueDashboard')
-        } else if (this.state.isLoggedIn && user.user_type === 2) {
+        } else if (userLoggedIn && user?.user_type === 2) {
             this.props.navigation.navigate('Home')
         } else {
             //Geolocation.requestAuthorization()
