@@ -32,6 +32,7 @@ import messaging from '@react-native-firebase/messaging';
 // import firebase, { Notification, RemoteMessage, Analytics } from 'react-native-firebase'
 import NotifService from './NotifService';
 import Geolocation from '@react-native-community/geolocation';
+import LoadingView from '../../common/LoadingView';
 
 export default class VenueDashboard extends Component {
     constructor(props) {
@@ -506,7 +507,7 @@ export default class VenueDashboard extends Component {
                     flexDirection: 'column',
                 }}>
                 {
-                    this.state.isLoading ? <ProgressDialog title='Please wait' message="Fetching.." /> : null
+                    /* this.state.isLoading ? <ProgressDialog title='Please wait' message="Fetching.." /> : null */
                 }
                 <View
                     style={{
@@ -637,6 +638,7 @@ export default class VenueDashboard extends Component {
                         />
                     </TouchableOpacity>
                 </View>
+                {this.state.isLoading ? <LoadingView message = "Fetching.." /> : undefined}
             </Animated.View>
         );
     }
