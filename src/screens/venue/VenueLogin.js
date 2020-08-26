@@ -13,6 +13,7 @@ import ProgressDialog from '../../utils/ProgressDialog';
 import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
 import { LOGIN } from '../../network/EndPoints';
 import { login } from '../../network/PostDataPayloads';
+import LoadingView from '../../common/LoadingView';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -117,11 +118,6 @@ export default class VenueLogin extends Component {
                     contentContainerStyle={styles.container}
                     scrollEnabled={true}
                 >
-
-                    {
-                        this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
-                    }
-
                     <Animated.View style={{
                         flex: 1,
                         flexDirection: 'column',
@@ -194,7 +190,7 @@ export default class VenueLogin extends Component {
 
                     </Animated.View>
                 </KeyboardAwareScrollView>
-
+                {this.state.isLoading ? <LoadingView message={this.state.loaderMessage} /> : undefined}
             </Animated.View>
 
         );

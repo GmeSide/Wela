@@ -68,6 +68,15 @@ export function resendCode(userEmail) {
     })
 }
 
+export function changePassword(email, currentPassword, newPassword, confirmNewPassword) {
+    return JSON.stringify({
+        email: email,
+        current_password: currentPassword,
+        password: newPassword,
+        password_confirmation: confirmNewPassword
+    })
+}
+
 /**
  * Favourite
  *

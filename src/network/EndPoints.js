@@ -32,3 +32,4 @@ export const CREATE_VENUE_PROFILE = `venue/update`
 export const TOGGLE_VENUE = `venue/toggle`
 export const MANUAL_ADD = `queue/manual/add`
 export const DELETE_QUEUE = `queue/remove`
+export const CHANGE_PASSWORD = `change_password`

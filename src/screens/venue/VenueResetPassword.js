@@ -4,10 +4,12 @@ import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
+import LoadingView from '../../common/LoadingView';
 import UserInput from '../../common/UserInput';
-import { showToastMessage } from '../../network/ApiRequest.js';
+import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
+import { CHANGE_PASSWORD } from '../../network/EndPoints';
+import { changePassword } from '../../network/PostDataPayloads';
 import Helper from '../../utils/Helper.js';
-import ProgressDialog from '../../utils/ProgressDialog';
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
 export default class VenueResetPassword extends Component {
@@ -19,10 +21,10 @@ export default class VenueResetPassword extends Component {
     super(props);
     this.state = {
       loaderMessage: 'Wait..',
-      email: '',
-      currentPassword: '',
-      newPassword: '',
-      confirmNewPassword: '',
+      email: 'tony@nustechnology.com',
+      currentPassword: '11111111',
+      newPassword: '12345678',
+      confirmNewPassword: '12345678',
       isLoading: false,
     }
   }
@@ -63,25 +65,14 @@ export default class VenueResetPassword extends Component {
     }
     if (!error) {
       this.showLoader("Logging..")
-      // const PAYLOAD = await login(email, password, 1)
-      // Helper.DEBUG_LOG(PAYLOAD)
-      // await Helper.saveUserType(1)
-      // PostRequest(LOGIN, PAYLOAD, true).then((jsonObject) => {
-      //   this.hideLoader()
-      //   if (jsonObject.success) {
-
-      //     let userObject = jsonObject.apiResponse.data[0]
-
-      //     Helper.venueProfiles = jsonObject.apiResponse.profile
-      //     Helper.venueUserObject = userObject
-      //     Helper.venueQueueDataOfCustomers = userObject.venue_type.queue
-
-      //     this.props.navigation.navigate('VenueDashboard')
-      //   }
-      // })
-      setTimeout(() => {
+      const PAYLOAD = await changePassword(email, currentPassword, newPassword, confirmNewPassword)
+      PostRequest(CHANGE_PASSWORD, PAYLOAD, true).then((jsonObject) => {
         this.hideLoader()
-      }, 2000);
+        if (jsonObject.success) {
+          showToastMessage('', jsonObject?.apiResponse?.message)
+          this.props.navigation.navigate('VenueLogin')
+        }
+      })
     }
   }
 
@@ -98,7 +89,6 @@ export default class VenueResetPassword extends Component {
           resetScrollToCoords={{ x: 0, y: 0 }}
           contentContainerStyle={styles.container}
           scrollEnabled={true}>
-          {this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null}
           <Animated.View style={{
             flex: 1,
             flexDirection: 'column',
@@ -179,6 +169,7 @@ export default class VenueResetPassword extends Component {
             </View>
           </Animated.View>
         </KeyboardAwareScrollView>
+        {this.state.isLoading ? <LoadingView message={this.state.loaderMessage} /> : null}
       </Animated.View>
     );
   }
