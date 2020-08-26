@@ -21,10 +21,10 @@ export default class VenueResetPassword extends Component {
     super(props);
     this.state = {
       loaderMessage: 'Wait..',
-      email: 'tony@nustechnology.com',
-      currentPassword: '11111111',
-      newPassword: '12345678',
-      confirmNewPassword: '12345678',
+      email: '',
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
       isLoading: false,
     }
   }
