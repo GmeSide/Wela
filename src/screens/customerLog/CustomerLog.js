@@ -15,6 +15,7 @@ import ProgressDialog from '../../utils/ProgressDialog';
 import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
 import { CANCEL_WAITING_LIST_BY_USER, GET_USER_WAITING_LIST, ADD_TO_FAVOUITE } from '../../network/EndPoints';
 import { updateVenueQueListByUser, getUserWaitingListWithHistory, addToFavourite, removeFavourite } from '../../network/PostDataPayloads';
+import LoadingView from '../../common/LoadingView';
 
 export default class CustomerLog extends Component {
     constructor(props) {
@@ -32,8 +33,9 @@ export default class CustomerLog extends Component {
     componentWillFocus = async () => {
       console.log('CustomerLog FOCUSED.');
       userVenue = Helper.venueUserObject
+      await this.setState({ isLoading: true })
       const res = await getCustomerLog(userVenue?.id, 12)
-      console.log('res: ', res);
+      await this.setState({ isLoading: false })
       if (res.data.success) {
         this.setState({upcoming :res.data.data})
         this.setState({earlierToday :res.data.data_history})
@@ -59,13 +61,24 @@ export default class CustomerLog extends Component {
       this.setState({ isRefreshing: false })
     }
 
+    renderEmptyItem = () => {
+      return (
+        <Text style={{
+          fontFamily: 'Rubik-Light',
+          color: colors.white,
+          paddingLeft: 10,
+          fontSize: 16,
+          marginTop: 25 }}>No items found</Text>
+      )
+    }
+
     render() {
       return (
         <ImageBackground source={require('../images/bg_screen.png')} style={styles.image}>
           <ScrollView>
 
               {
-                this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
+                // this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
               }
 
               {/* <Text style={{fontFamily: 'Rubik-Light', color: colors.white, paddingLeft: 10, fontSize: 18, fontWeight: 'bold', marginTop: 25}}>Upcoming</Text>
@@ -131,6 +144,7 @@ export default class CustomerLog extends Component {
                   refreshing={this.state.isRefreshing}
                   onRefresh={() => this.onRefresh()} />
                 }
+                ListEmptyComponent={this.renderEmptyItem}
                 renderItem={({ item, index }) => (
                   <Card
                     key={index}
@@ -205,6 +219,7 @@ export default class CustomerLog extends Component {
               onButtonPress={() => this.props.navigation.navigate('VenueDashboard')}
               text={'Back'}
           />
+          {this.state.isLoading ? <LoadingView message = "Fetching.." /> : undefined}
         </ImageBackground>
       );
     }
