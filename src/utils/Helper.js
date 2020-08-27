@@ -286,6 +286,10 @@ class Helper {
 
         return {
           ...venue,
+          location: {
+            latitude,
+            longitude
+          },
           latitude,
           longitude,
           locDistance

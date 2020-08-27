@@ -36,6 +36,7 @@ import IHAKPicker from "./ihakpicker";
 import ProgressDialog from '../../utils/ProgressDialog';
 import messaging from '@react-native-firebase/messaging';
 import firebase from '@react-native-firebase/app';
+import ClusteredMapView from 'react-native-maps-super-cluster'
 
 const HIGHT_SCREEN = (Dimensions.get('window').height);
 
@@ -298,7 +299,7 @@ export default class LocationsMap extends Component {
             }
           ]
         }
-
+        this.zIndex = 1
         this.notif = new NotifService(
             this.onRegister.bind(this),
             // this.onNotif.bind(this),
@@ -532,7 +533,7 @@ export default class LocationsMap extends Component {
             currentLat: location.latitude,
             currentLongt: location.longitude
         });
-        this.map.animateToRegion({
+        this.map.getMapRef().animateToRegion({
           latitude: location.latitude,
           longitude: location.longitude,
           latitudeDelta: 0.0100,
@@ -904,14 +905,22 @@ export default class LocationsMap extends Component {
         if (event.nativeEvent.action === 'marker-press') {
             console.log('onMarker->')
             const markerID = event.nativeEvent.id
-            const currentMarker = this.state.markers[parseInt(markerID)]
+            let index
+            let currentMarker
+            for (i = 0; i < this.state.markers.length; i++) {
+              const marker = this.state.markers[i]
+              if (marker.id === parseInt(markerID)) {
+                index = i
+                currentMarker = marker
+              }
+            }
             // console.log('currentMarker: ', currentMarker);
-            if (currentMarker.toggle) {
+            if (currentMarker && currentMarker.toggle) {
               this.fetchUserDistance(currentMarker)
               this.setState({
                   openedVenueMarkerName: currentMarker.name,
                   detailView: true,
-                  selectedMarkerIndex: markerID,
+                  selectedMarkerIndex: index,
                   confirm_view: false,
                   currentLat: currentMarker.latitude,
                   currentLongt: currentMarker.longitude
@@ -1065,13 +1074,14 @@ export default class LocationsMap extends Component {
 
     innerViewOfRow(mMarker) {
         if (this.state.lineUped) {
+          const address = `${mMarker.street_number} ${mMarker.street_name}`
             return (
                 <View style={{
                     flexDirection: 'column',
                     marginTop: 10
                 }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{this.state.markers[parseInt(this.state.selectedMarkerIndex)].location}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{address}</Text>
                         <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 4 }}>{this.state.currentMarkerDistance}</Text>
                     </View>
                     {this.lineUpView(mMarker)}
@@ -1259,7 +1269,7 @@ export default class LocationsMap extends Component {
             })
             if (item.latitude && item.longitude) {
               this.setState({currentLat: item.latitude, currentLongt: item.longitude})
-              this.map.animateToRegion({
+              this.map.getMapRef().animateToRegion({
                 latitude: item.latitude,
                 longitude: item.longitude,
                 latitudeDelta: 0.0100,
@@ -1450,6 +1460,46 @@ export default class LocationsMap extends Component {
         await this.findNeares()
     }
 
+    renderCluster = (cluster, onPress) => {
+      const pointCount = cluster.pointCount,
+        coordinate = cluster.coordinate,
+        clusterId = cluster.clusterId
+
+      return (
+        <Marker coordinate={coordinate} onPress={onPress} key={clusterId} zIndex={this.zIndex++}>
+          <View style={styles.clusterContainer}>
+            <View style={styles.clusterStyle}>
+              <Text style={styles.clusterTextStyle}>
+                {pointCount}
+              </Text>
+            </View>
+          </View>
+        </Marker>
+      )
+    }
+
+    renderMarker = (item)  => {
+      return (
+        this.state.refreshh?
+          <Marker
+            key={item.id}
+            onPress={(event) => this.handleMarkerPress(event)}
+            identifier={item.id.toString()}
+            moveOnMarkerPress={false}
+            coordinate={this.getLatLong(item)}>
+            {this.customMarkerView(item)}
+          </Marker> :
+          <Marker
+            key={item.id}
+            onPress={(event) => this.handleMarkerPress(event)}
+            identifier={item.id.toString()}
+            moveOnMarkerPress={false}
+            coordinate={this.getLatLong(item)}>
+            {this.customMarkerView(item)}
+          </Marker>
+      )
+    }
+
     render() {
       const {markers} = this.state
         return (
@@ -1458,7 +1508,7 @@ export default class LocationsMap extends Component {
                 {
                     this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
                 }
-                <MapView
+                {/* <MapView
                     ref={(map) => { this.map = map; }}
                     onMapReady={this.setMargin}
                     // style={{ ...StyleSheet.absoluteFillObject, marginBottom: this.state.mapMargin, backgroundColor: '#F8F9F9' }}
@@ -1516,7 +1566,34 @@ export default class LocationsMap extends Component {
                       </Marker>
                   ))
                   }
-                </MapView>
+                </MapView> */}
+                <ClusteredMapView
+                  data={markers}
+                  ref={(r) => { this.map = r }}
+                  onMapReady={this.setMargin}
+                  onPress={(event) => this.handleMarkerPress(event)}
+                  moveOnMarkerPress={false}
+                  provider={PROVIDER_GOOGLE}
+                  style={styles.map}
+                  showsUserLocation={true}
+                  showsMyLocationButton={false}
+                  userLocationPriority={"high"}
+                  showsBuildings={false}
+                  showsTraffic={false}
+                  userLocationFastestInterval={600000}
+                  initialRegion={{
+                      latitude: this.state.currentLat ? this.state.currentLat : Helper.HARDCODED_LATS,
+                      longitude: this.state.currentLongt ? this.state.currentLongt : Helper.HARDCODED_LONGTS,
+                      latitudeDelta: 0.0100,
+                      longitudeDelta: 0.0100
+                  }}
+                  zoomEnabled={true}
+                  minZoom={1}
+                  maxZoom={20}
+                  customMapStyle={customStyle}
+                  onUserLocationChange={event => this.onUserLocationUpdate(event)}
+                  renderMarker={this.renderMarker}
+                  renderCluster={this.renderCluster} />
                 {/* <ContactsList
                     visibleContacts={this.state.visibleContacts}
                     contacts={this.state.contactList}
@@ -1702,5 +1779,27 @@ const styles = StyleSheet.create({
     map: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: '#F8F9F9'
+    },
+    clusterContainer: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    },
+    clusterStyle: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
+    clusterTextStyle: {
+      fontSize: 13,
+      color: 'white',
+      fontWeight: '600',
+      textAlign: 'center',
     },
 });
