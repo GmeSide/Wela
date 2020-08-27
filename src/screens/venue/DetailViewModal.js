@@ -28,9 +28,6 @@ import { ifIphoneX } from 'react-native-iphone-x-helper';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
-var textInputLimit = null
-var textInputPeople = null
-
 export default class DetailViewModal extends React.Component {
     constructor(props) {
         super(props);
@@ -407,6 +404,7 @@ export default class DetailViewModal extends React.Component {
 
                             <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
                               <TextInput
+                                  ref="businessEmail"
                                   style={[styles.inputStyle, {width: '100%'}]}
                                   keyboardType={'default'}
                                   placeholder={"Direct Business Email"}
@@ -414,6 +412,7 @@ export default class DetailViewModal extends React.Component {
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}
                                   onChangeText={text => this.setState({ businessEmail: text })}
+                                  onSubmitEditing={() => this.refs.totalCapacity.focus()}
                                   value={this.state.businessEmail}
                                   placeholderTextColor={colors.black}
                                   underlineColorAndroid="transparent"
@@ -456,7 +455,7 @@ export default class DetailViewModal extends React.Component {
                                         textAlignVertical: 'center',
                                     }}>
                                         <TextInput
-                                            ref={ref => textInputPeople = ref}
+                                            ref="totalCapacity"
                                             style={{
                                                 width: '50%',
                                                 color: colors.black,
@@ -473,6 +472,7 @@ export default class DetailViewModal extends React.Component {
                                             keyboardType='number-pad'
                                             returnKeyType={'done'}
                                             onChangeText={text => this.setState({ total_capacity: text })}
+                                            onSubmitEditing={() => this.refs.limitGroup.focus()}
                                             value={this.state.total_capacity}
                                             placeholderTextColor={colors.black}
                                             underlineColorAndroid="transparent"
@@ -486,7 +486,7 @@ export default class DetailViewModal extends React.Component {
                                                 alignContent: 'center',
                                                 alignItems: 'center'
                                             }}
-                                            onPress={() => { textInputPeople.focus() }}>
+                                            onPress={() => { this.refs.totalCapacity.focus() }}>
                                             <Text style={{
                                                 width: '100%',
                                                 fontFamily: 'Rubik-Light',
@@ -526,7 +526,7 @@ export default class DetailViewModal extends React.Component {
                                         textAlignVertical: 'center',
                                     }}>
                                         <TextInput
-                                            ref={ref => textInputLimit = ref}
+                                            ref="limitGroup"
                                             style={{
                                                 flex: 1,
                                                 width: '50%',
@@ -544,6 +544,7 @@ export default class DetailViewModal extends React.Component {
                                             keyboardType='number-pad'
                                             returnKeyType={'done'}
                                             onChangeText={text => this.setState({ limit_group: text })}
+                                            onSubmitEditing={() => this.refs.streetNumber.focus()}
                                             value={this.state.limit_group}
                                             placeholderTextColor={colors.black}
                                             underlineColorAndroid="transparent"
@@ -558,7 +559,7 @@ export default class DetailViewModal extends React.Component {
                                                 alignContent: 'center',
                                                 alignItems: 'center'
                                             }}
-                                            onPress={() => { textInputLimit.focus() }}>
+                                            onPress={() => { this.refs.limitGroup.focus() }}>
                                             <Text style={{
                                                 width: '100%',
                                                 fontFamily: 'Rubik-Light',
@@ -594,6 +595,7 @@ export default class DetailViewModal extends React.Component {
 
                             <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
                               <TextInput
+                                  ref="streetNumber"
                                   style={[styles.inputStyle, {width: '100%'}]}
                                   keyboardType={'default'}
                                   placeholder={"Street Number"}
@@ -601,6 +603,7 @@ export default class DetailViewModal extends React.Component {
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}
                                   onChangeText={text => this.setState({ streetNumber: text })}
+                                  onSubmitEditing={() => this.refs.streetAddress.focus()}
                                   value={this.state.streetNumber}
                                   placeholderTextColor={colors.black}
                                   underlineColorAndroid="transparent"
@@ -609,6 +612,7 @@ export default class DetailViewModal extends React.Component {
 
                             <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
                               <TextInput
+                                  ref="streetAddress"
                                   style={[styles.inputStyle, {width: '100%'}]}
                                   keyboardType={'default'}
                                   placeholder={"Street Name"}
@@ -616,6 +620,7 @@ export default class DetailViewModal extends React.Component {
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}
                                   onChangeText={text => this.setState({ streetAddress: text })}
+                                  onSubmitEditing={() => this.refs.city.focus()}
                                   value={this.state.streetAddress}
                                   placeholderTextColor={colors.black}
                                   underlineColorAndroid="transparent"
@@ -624,7 +629,7 @@ export default class DetailViewModal extends React.Component {
 
                             <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
                               <TextInput
-                                  ref="four"
+                                  ref="city"
                                   style={[styles.inputStyle, {width: '65%'}]}
                                   keyboardType={'default'}
                                   placeholder={"City"}
@@ -632,14 +637,14 @@ export default class DetailViewModal extends React.Component {
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}
                                   onChangeText={text => this.setState({ city: text })}
+                                  onSubmitEditing={() => this.refs.zip.focus()}
                                   value={this.state.city}
                                   placeholderTextColor={colors.black}
                                   underlineColorAndroid="transparent"
-                                  onSubmitEditing={() => {this.refs['five'].focus();}}
                               />
 
                               <TextInput
-                                  ref="five"
+                                  ref="zip"
                                   style={[styles.inputStyle, {width: '32%', marginLeft: 10}]}
                                   keyboardType={'default'}
                                   placeholder={"Zip"}
@@ -647,15 +652,16 @@ export default class DetailViewModal extends React.Component {
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}
                                   onChangeText={text => this.setState({ zip_code: text })}
+                                  onSubmitEditing={() => this.refs.province.focus()}
                                   value={this.state.zip_code}
                                   placeholderTextColor={colors.black}
                                   underlineColorAndroid="transparent"
-                                  onSubmitEditing={() => {this.refs['six'].focus();}}
                               />
                             </View>
 
                             <View style={{flexDirection: 'row', alignSelf: 'flex-start', marginHorizontal: 5, marginTop: 8}}>
                               <TextInput
+                                  ref="province"
                                   style={[styles.inputStyle, {width: '50%'}]}
                                   keyboardType={'default'}
                                   placeholder={"Province"}
@@ -663,12 +669,14 @@ export default class DetailViewModal extends React.Component {
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}
                                   onChangeText={text => this.setState({ province: text })}
+                                  onSubmitEditing={() => this.refs.country.focus()}
                                   value={this.state.province}
                                   placeholderTextColor={colors.black}
                                   underlineColorAndroid="transparent"
                               />
 
                               <TextInput
+                                  ref="country"
                                   style={[styles.inputStyle, {width: '47%', marginLeft: 10}]}
                                   keyboardType={'default'}
                                   placeholder={"Country"}
