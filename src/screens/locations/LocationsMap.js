@@ -337,9 +337,9 @@ export default class LocationsMap extends Component {
           }
       })
 
-      await this.fetchData()
-
       await this.reloadCurrentLocation()
+
+      await this.fetchData()
 
       let user = await Helper.getUser()
       const updatedVenues = await this.gettingVenues(user.id)
@@ -348,7 +348,6 @@ export default class LocationsMap extends Component {
         Helper.saveUser(user)
       }
 
-      await this.fetchData()
 
       // Add listener for push notifications
       //PushNotificationIOS.addEventListener('notification', onRemoteNotification);
@@ -524,26 +523,22 @@ export default class LocationsMap extends Component {
 
     reloadCurrentLocation = async () => {
       console.log('reloadCurrentLocation IN.');
-        let location = await Helper.getUserCurrentLocation()
-        console.log('location: ', location);
-        try {
-            this.setState({ userCurrentLocationText: '' })
-            this.getTextAddress(location.latitude, location.longitude)
-        } catch (error) {
-
-        }
-        if (location && location != null) {
-            this.setState({
-                currentLat: location.latitude,
-                currentLongt: location.longitude
-            });
-            this.map.animateToRegion({
-              latitude: location.latitude,
-              longitude: location.longitude,
-              latitudeDelta: 0.0100,
-              longitudeDelta: 0.0100
-            })
-        }
+      let location = await Helper.getUserCurrentLocation()
+      console.log('location: ', location);
+      if (location && location != null) {
+        this.setState({ userCurrentLocationText: '' })
+        await this.getTextAddress(location.latitude, location.longitude)
+        this.setState({
+            currentLat: location.latitude,
+            currentLongt: location.longitude
+        });
+        this.map.animateToRegion({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.0100,
+          longitudeDelta: 0.0100
+        })
+      }
     }
 
     fetchContats() {
@@ -657,7 +652,7 @@ export default class LocationsMap extends Component {
 
         if (Platform.OS == 'android') {
             if (this.state.permissionGranted) {
-                // this.findNeares()
+
             } else {
                 this.requestCameraPermission()
             }
@@ -718,39 +713,49 @@ export default class LocationsMap extends Component {
 
     findNeares = async () => {
         console.log('findNeares IN.');
-        let location = await Helper.getUserCurrentLocation()
+        let location = null
+        if (this.state.currentLat && this.state.currentLongt) {
+          location = {
+            latitude: this.state.currentLat,
+            longitude: this.state.currentLongt
+          }
+          console.log('findNeares location already get: ', location);
+        } else {
+          location = await Helper.getUserCurrentLocation()
+        }
+
         console.log('findNeares location: ', location);
         if (location == null) {
-            console.log('stuck');
-            // await this.findNeares()
+            console.log('findNeares stuck');
             return
         }
-        try {
-            await this.getTextAddress(location.latitude, location.longitude)
-            if (this.state.userCurrentLocationText == '') {
-                this.getTextAddress(location.latitude, location.longitude)
-            }
-        } catch (error) {
-            console.log('ERROR findNeares: ', error);
+
+        if (!this.state.currentLat && !this.state.currentLongt) {
+          this.setState({
+              currentLat: location.latitude,
+              currentLongt: location.longitude
+          })
         }
+
+        // await this.getTextAddress(location.latitude, location.longitude)
+        if (this.state.userCurrentLocationText == '') {
+            console.log('findNeares getTextAddress again: ', location);
+            this.getTextAddress(location.latitude, location.longitude)
+        }
+
         let categories = await Helper.getVenueCategories()
         this.setState({ categoriesList: categories, allCategories: categories })
-        if (location && location != null) {
-            if (!this.state.currentLat && !this.state.currentLongt) {
-                this.setState({
-                    currentLat: location.latitude,
-                    currentLongt: location.longitude
-                });
-            }
-            let nearestVenues = await Helper.getNearestVenues(location)
-            nearestVenues = nearestVenues.filter(venue => venue.locDistance <= Helper.DISTANCE)
-            if (nearestVenues && nearestVenues.length > 0) {
-                this.setState({
-                    markers: nearestVenues
-                });
-                let venuesNames = await Helper.getVenueCategoriesByLocation(nearestVenues)
-                this.setState({ filteredVenuesNames: venuesNames, allVenuesNames: venuesNames })
-            }
+        console.log('findNeares categories: ', categories.length);
+
+        let nearestVenues = await Helper.getNearestVenues(location)
+        nearestVenues = nearestVenues.filter(venue => venue.locDistance <= Helper.DISTANCE)
+        console.log('findNeares nearestVenues: ', nearestVenues.length);
+        if (nearestVenues && nearestVenues.length > 0) {
+            this.setState({
+                markers: nearestVenues
+            });
+            let venuesNames = await Helper.getVenueCategoriesByLocation(nearestVenues)
+            this.setState({ filteredVenuesNames: venuesNames, allVenuesNames: venuesNames })
         }
     }
 
@@ -1486,6 +1491,7 @@ export default class LocationsMap extends Component {
                     {this.state.refreshh?
                       markers.map((marker, index) => (
                         <Marker
+                            key={index}
                             onPress={(event) => this.handleMarkerPress(event)}
                             identifier={index.toString()}
                             moveOnMarkerPress={false}
@@ -1498,6 +1504,7 @@ export default class LocationsMap extends Component {
                     )):
                     markers.map((marker, index) => (
                       <Marker
+                          key={index}
                           onPress={(event) => this.handleMarkerPress(event)}
                           identifier={index.toString()}
                           moveOnMarkerPress={false}
