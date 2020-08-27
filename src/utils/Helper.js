@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import GetLocation from 'react-native-get-location';
 import Constants from './Constants'
 import Geocoder from 'react-native-geocoder';
+import { Platform } from 'react-native';
 
 class Helper {
     static DEBUG = __DEV__
@@ -25,6 +26,10 @@ class Helper {
     static venueUserObject
     static venueProfiles
     static locationAlert = false
+
+    static isIOS() {
+      return Platform.OS === 'ios'
+    }
 
     static DEVICE_TOKEN
     /**

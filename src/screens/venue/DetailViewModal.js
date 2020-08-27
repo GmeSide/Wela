@@ -358,7 +358,7 @@ export default class DetailViewModal extends React.Component {
                     ...ifIphoneX({
                       paddingTop: 30
                     }, {
-                      paddingTop: 0
+                      paddingTop: Helper.isIOS() ? 20 : 0
                     })
 
                 }}>
