@@ -66,9 +66,9 @@ export default class Splash extends Component {
             Helper.venueProfiles = profile
             Helper.venueUserObject = user
             Helper.venueQueueDataOfCustomers = user.venue_type.queue
-            this.props.navigation.navigate('VenueDashboard')
+            setTimeout(() => { this.props.navigation.navigate('VenueDashboard') }, 1000)
         } else if (userLoggedIn && user?.user_type === 2) {
-            this.props.navigation.navigate('Home')
+            setTimeout(() => { this.props.navigation.navigate('Home') }, 1000)
         } else {
             //Geolocation.requestAuthorization()
             setTimeout(() => { this.props.navigation.navigate('LoginOptions') }, 3000)

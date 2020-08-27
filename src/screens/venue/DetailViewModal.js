@@ -24,6 +24,7 @@ import { UPDATE_VENUE_PROFILE } from '../../network/EndPoints';
 import { updateVenueProfile } from '../../network/PostDataPayloads';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { ifIphoneX } from 'react-native-iphone-x-helper';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -353,7 +354,13 @@ export default class DetailViewModal extends React.Component {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.5)'
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    ...ifIphoneX({
+                      paddingTop: 30
+                    }, {
+                      paddingTop: 0
+                    })
+
                 }}>
                     {
                         this.state.isLoading ? <ProgressDialog title='Please wait' message="Update Details.." /> : null
@@ -367,7 +374,7 @@ export default class DetailViewModal extends React.Component {
                             padding: 10,
 
                         }}>
-                        <ScrollView>
+                        <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%' }}>
                             {/*
                         *
                         * VENUE NAME VIEW ...............
