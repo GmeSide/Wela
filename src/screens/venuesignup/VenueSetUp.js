@@ -14,6 +14,7 @@ import { PostRequest, showToastMessage, getVenueTypes } from '../../network/ApiR
 import { CREATE_VENUE_PROFILE } from '../../network/EndPoints';
 import { createVenue } from '../../network/PostDataPayloads';
 import RNPickerSelect from 'react-native-picker-select';
+import Geocoder from 'react-native-geocoder';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -159,6 +160,20 @@ export default class VenueSetUp extends Component {
             showToastMessage("Required", message)
         } else {
             this.setState({ isLoading: true })
+            let latitude = 0
+            let longitude = 0
+            try {
+              const address = `${this.state.streetNumber} ${this.state.streetName}, ${this.state.city}, ${this.state.country}`
+              const res = await Geocoder.geocodeAddress(address);
+              if (res && res.length > 0) {
+                const { lat, lng } = res[0].position
+                latitude = lat
+                longitude = lng
+              }
+            }
+            catch(err) {
+                console.log(err);
+            }
             const PAYLOAD = await createVenue(
               this.state.businessName,
               this.state.businessEmail,
@@ -175,7 +190,9 @@ export default class VenueSetUp extends Component {
               this.state.switchOn,
               _open_time,
               _close_time,
-              _day)
+              _day,
+              latitude,
+              longitude)
             PostRequest(CREATE_VENUE_PROFILE, PAYLOAD).then((jsonObject) => {
               console.log('jsonObject: ', jsonObject);
                 this.setState({ isLoading: false })

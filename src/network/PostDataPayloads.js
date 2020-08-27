@@ -196,7 +196,7 @@ export async function updateVenueProfile(id, businessEmail, streetAddress, stree
     })
 }
 
-export async function createVenue(businessName, businessEmail, businessPhone, type, city, streetNumber, streetName , province, country , zip_code, total_capacity, limit_group, switchOn, open_time, close_time, day) {
+export async function createVenue(businessName, businessEmail, businessPhone, type, city, streetNumber, streetName , province, country , zip_code, total_capacity, limit_group, switchOn, open_time, close_time, day, latitude, longitude) {
     let venueUser = await Helper.VenueSignUp
     return JSON.stringify({
       business_name: venueUser.name,
@@ -219,7 +219,9 @@ export async function createVenue(businessName, businessEmail, businessPhone, ty
       is_patio: switchOn,
       day: day,
       open_time: open_time,
-      close_time: close_time
+      close_time: close_time,
+      latitude: latitude,
+      longitude: longitude,
     })
 }
 
