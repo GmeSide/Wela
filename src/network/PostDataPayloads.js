@@ -193,6 +193,8 @@ export async function updateVenueProfile(id, businessEmail, streetAddress, stree
         open_time: open_time,
         close_time: close_time,
         day: day,
+        latitude: latitude,
+        longitude: longitude
     })
 }
 
@@ -221,7 +223,7 @@ export async function createVenue(businessName, businessEmail, businessPhone, ty
       open_time: open_time,
       close_time: close_time,
       latitude: latitude,
-      longitude: longitude,
+      longitude: longitude
     })
 }
 

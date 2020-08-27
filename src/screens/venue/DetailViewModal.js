@@ -25,6 +25,7 @@ import { updateVenueProfile } from '../../network/PostDataPayloads';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ifIphoneX } from 'react-native-iphone-x-helper';
+import Geocoder from 'react-native-geocoder';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -158,8 +159,8 @@ export default class DetailViewModal extends React.Component {
         const { latitude, longtitude, zip_code, total_capacity, limit_group } = this.state;
 
         var _id = loggedInVenue.id
-        var _latitude = ""
-        var _longitude = ""
+        var _latitude = 0
+        var _longitude = 0
         var _zip_code = zip_code
         var _total_capacity = total_capacity
         var _limit_group = limit_group
@@ -207,6 +208,18 @@ export default class DetailViewModal extends React.Component {
             showToastMessage("Required", message)
         } else {
             this.setState({ isLoading: true })
+            try {
+              const address = `${this.state.streetNumber} ${this.state.streetAddress}, ${this.state.city}, ${this.state.country}`
+              const res = await Geocoder.geocodeAddress(address);
+              if (res && res.length > 0) {
+                const { lat, lng } = res[0].position
+                _latitude = lat
+                _longitude = lng
+              }
+            }
+            catch(err) {
+                console.log(err);
+            }
 
             const PAYLOAD = await updateVenueProfile(
                 _id,
