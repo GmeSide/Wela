@@ -283,6 +283,20 @@ export default class LocationsMap extends Component {
       }
     })
 
+    let config = {
+      skipPermissionRequests: false,
+      authorizationLevel: 'always'
+    };
+    Geolocation.setRNConfiguration(config);
+
+    if (Platform.OS == 'android') {
+      if (!this.state.permissionGranted) {
+        this.requestCameraPermission()
+      }
+    } else {
+      Geolocation.requestAuthorization()
+    }
+
     await this.reloadCurrentLocation()
 
     await this.fetchData()
@@ -495,21 +509,7 @@ export default class LocationsMap extends Component {
   async fetchData() {
     this.getFavListIfEmpty()
     this.getWaitingListIfEmpty()
-    var config = {
-      skipPermissionRequests: false,
-      authorizationLevel: 'always'
-    };
-    Geolocation.setRNConfiguration(config);
 
-    if (Platform.OS == 'android') {
-      if (this.state.permissionGranted) {
-
-      } else {
-        this.requestCameraPermission()
-      }
-    } else {
-      Geolocation.requestAuthorization()
-    }
     if (Platform.OS == 'android') {
       Geocoder.fallbackToGoogle('AIzaSyCb3txixm6dLD7YTal0QsPEUV64XbxtXo0');
     } else {
