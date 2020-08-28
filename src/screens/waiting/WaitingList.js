@@ -437,6 +437,7 @@ export default class WaitingList extends Component {
 
         }
 
+        this.showLoader('Waiting..')
         this.setState({ dataCurrentlyWaiting: filteredData });
         const PAYLOAD = await updateVenueQueListByUser(removedItem.id, 'cancel', removedItem.venue[0].id)
         PostRequest(CANCEL_WAITING_LIST_BY_USER, PAYLOAD, true).then((jsonObject) => {
@@ -471,9 +472,10 @@ export default class WaitingList extends Component {
     }
     async loadDataFromServer() {
         let user = await Helper.getUser()
+        this.showLoader('Fetching..')
         const PAYLOAD = await getUserWaitingListWithHistory(user.id)
         PostRequest(GET_USER_WAITING_LIST, PAYLOAD).then((jsonObject) => {
-            //this.hideLoader()
+            this.hideLoader()
             var objForBothList = jsonObject.apiResponse
             if (jsonObject.success) {
                 Helper.updateUserQueList(objForBothList)

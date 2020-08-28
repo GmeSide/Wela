@@ -599,7 +599,7 @@ export default class VenueDashboard extends Component {
                     onAddManualQueueRequest={() => this.onAddManualQueueRequestComplete()}
                 />
 
-                <View style={{
+                {/* <View style={{
                     position: 'absolute',
                     top: Platform.OS == 'ios' ? 60 : 30,
                     right: 20
@@ -613,11 +613,11 @@ export default class VenueDashboard extends Component {
                             source={require('../images/ic_sync.png')}
                         />
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
                 <View style={{
                     position: 'absolute',
-                    top: Platform.OS == 'ios' ? 95 : 65,
+                    top: Platform.OS == 'ios' ? 60 : 30,
                     right: 20
                 }}>
                     <TouchableOpacity onPress={() => this.logout()}>
