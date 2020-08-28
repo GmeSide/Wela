@@ -66,20 +66,13 @@ export default class VenueDashboard extends Component {
 
         const unsubscribe = messaging().onMessage(async (remoteMessage) => {
             console.log('remoteMessage->', remoteMessage);
+            if (remoteMessage?.notification?.title == "New visitor join the waitlist" ||
+              remoteMessage?.notification?.title == "A group has just left the waitlist") {
+              this.reloadData()
+            }
             //alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
-            this.updateOnNotify(remoteMessage)
+            // this.updateOnNotify(remoteMessage)
             // alert('kuch our')
-
-            // if (remoteMessage.notification) {
-            //     if (remoteMessage.notification.data) {
-            //         if (remoteMessage.notification.data.type) {
-            //             if (remoteMessage.notification.data.type === 'notify') {
-            //                 this.FetchDataWhenNotified()
-
-            //             }
-            //         }
-            //     }
-            // }
         });
     }
 

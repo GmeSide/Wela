@@ -182,6 +182,14 @@ const customStyle = [
   }
 ]
 
+const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+  if (remoteMessage.notification.title) {
+    alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
+  } else {
+    alert(`${remoteMessage.notification.body}`);
+  }
+});
+
 export default class LocationsMap extends Component {
   constructor(props) {
     super(props);
@@ -274,6 +282,7 @@ export default class LocationsMap extends Component {
         let aindex = allVenues.findIndex(marker => marker.id === msgVenue.id);
         console.log('aindex: ', aindex);
         if (aindex > -1) {
+
           allVenues[aindex].toggle = msgVenue.toggle
           user.venue_type.venues = allVenues
           Helper.saveUser(user)
