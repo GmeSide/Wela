@@ -250,9 +250,11 @@ export default class LocationsMap extends Component {
         label: '6',
         value: '6',
       }
-      ]
+      ],
+      zoomLevel: 15,
     }
     this.zIndex = 1
+    this.timerForMap = null
     this.notif = new NotifService(
       this.onRegister.bind(this),
       // this.onNotif.bind(this),
@@ -673,80 +675,17 @@ export default class LocationsMap extends Component {
 
   customMarkerView = (marker) => {
     if (!this.state.detailView) {
-      if (marker.toggle) {
-        return (
-          <Card
-            elevation={24}
-            style={{ padding: 8, width: 200 }}>
-            <TouchableOpacity
-            // onPress={() => this.setState({ detailView: true })}
-            >
-              <View style={{
-                flexDirection: 'column',
-              }}>
-                <View style={{
-                  flexDirection: 'row',
-                  alignContent: 'center',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontFamily: 'Rubik-Light',
-                      color: colors.black,
-                      fontWeight: 'bold',
-                      paddingLeft: 4,
-                      flex: 1,
-                      alignContent: 'center',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      alignSelf: 'center',
-                    }}>
-                    {marker.business_name}
-                  </Text>
-                </View>
-                <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTimeByMarker(marker)}</Text>
-              </View>
-            </TouchableOpacity>
-          </Card>
-        );
-      } else {
-        return (
-          <Card
-            elevation={24}
-            style={{ padding: 8, width: 200 }}>
-            <TouchableOpacity>
-              <View style={{ flexDirection: 'column' }}>
-                <View style={{
-                  flexDirection: 'row',
-                  alignContent: 'center',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontFamily: 'Rubik-Light',
-                      color: colors.lightGray,
-                      fontWeight: 'bold',
-                      paddingLeft: 4,
-                      flex: 1,
-                      alignSelf: 'center',
-                    }}>
-                    {marker.business_name}
-                  </Text>
-                </View>
-                <Text style={{ fontFamily: 'Rubik-Light', fontSize: 11, color: colors.lightGray, paddingLeft: 4 }}>{'Not Available'}</Text>
-              </View>
-            </TouchableOpacity>
-          </Card>
-        );
-      }
+      const cetegoryItem = this.state.allCategories.find(res => res.name == marker.type)
+      const url = cetegoryItem?.url
+      return (
+        <TouchableOpacity disabled={true} style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <Image style={styles.markerIcon} source={{ uri: url }} />
+          {this.state.zoomLevel > 15 ? <Text style={styles.businessName}>{marker.business_name}</Text> : undefined}
+          {this.state.zoomLevel > 15 && !marker.toggle ? <Text style={styles.markerDescription}>{'Not Available'}</Text> : undefined}
+        </TouchableOpacity>
+      )
     }
-  };
+  }
 
   setIconColor(isFav) {
     //Helper.DEBUG_LOG(isFav)
@@ -1319,6 +1258,12 @@ export default class LocationsMap extends Component {
     await this.findNeares()
   }
 
+  showMarkers(region) {
+    let zoomLevel = Math.round(Math.log(360 / region.longitudeDelta) / Math.LN2)
+    this.setState({ zoomLevel: zoomLevel })
+    console.log("zoomLevel", zoomLevel);
+  }
+
   renderCluster = (cluster, onPress) => {
     const pointCount = cluster.pointCount,
       coordinate = cluster.coordinate,
@@ -1382,6 +1327,12 @@ export default class LocationsMap extends Component {
             longitude: this.state.currentLongt ? this.state.currentLongt : Helper.HARDCODED_LONGTS,
             latitudeDelta: 0.0100,
             longitudeDelta: 0.0100
+          }}
+          onRegionChange={region => {
+            clearTimeout(this.timerForMap)
+            this.timerForMap = setTimeout(() => {
+              this.showMarkers(region)
+            }, 100)
           }}
           zoomEnabled={true}
           minZoom={1}
@@ -1537,4 +1488,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  markerIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: 'contain'
+  },
+  businessName: {
+    fontSize: 14,
+    fontFamily: 'Rubik-Light',
+    color: colors.black,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 4
+  },
+  markerDescription: {
+    fontFamily: 'Rubik-Light',
+    fontSize: 12,
+    color: colors.darkGray,
+    marginTop: 3,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 4
+  }
 });
