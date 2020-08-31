@@ -30,7 +30,8 @@ const RootStack = createStackNavigator(
     CustomerLog: { screen: CustomerLog, navigationOptions: { header: null } },
     Home: { screen: TabNavigator,
       navigationOptions: {
-        header: null //this will hide the header
+        header: null, //this will hide the header
+        gesturesEnabled: false
       },
       initialRouteName: 'LocationsMap',
     },
