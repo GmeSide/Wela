@@ -257,12 +257,12 @@ export default class WaitingList extends Component {
         // Helper.DEBUG_LOG(this.state.statuses[index].isFav)
         if (this.state.statuses[index]) {
           if (this.state.statuses[index].isFav) {
-              return colors.black
+              return colors.red
           } else {
               return colors.lightGray
           }
         } else {
-          return colors.black
+          return colors.red
         }
     }
 

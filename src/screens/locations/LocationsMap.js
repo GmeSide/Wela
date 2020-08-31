@@ -751,7 +751,7 @@ export default class LocationsMap extends Component {
   setIconColor(isFav) {
     //Helper.DEBUG_LOG(isFav)
     if (isFav == true) {
-      this.setState({ faveIconColorCode: colors.black })
+      this.setState({ faveIconColorCode: colors.red })
     } else {
       this.setState({ faveIconColorCode: colors.lightGray })
     }
@@ -854,7 +854,7 @@ export default class LocationsMap extends Component {
   favIconColor = async (favourite) => {
     let status = await Helper.isVenueFavourited(id)
     //Helper.DEBUG_LOG(status)
-    this.setState({ faveIconColorCode: colors.black })
+    this.setState({ faveIconColorCode: colors.red })
   }
 
   fetchUserDistance = async (mMarker) => {

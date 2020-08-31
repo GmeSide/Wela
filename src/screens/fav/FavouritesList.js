@@ -144,7 +144,7 @@ export default class FavouritesList extends Component {
                                         alignSelf: 'center',
                                         height: 20,
                                         width: 20,
-                                        tintColor: colors.black
+                                        tintColor: colors.red
                                     }}
                                     source={require('../images/fav_heart.png')}
                                 />
