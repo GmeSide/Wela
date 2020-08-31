@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import GetLocation from 'react-native-get-location';
 import Constants from './Constants'
 import Geocoder from 'react-native-geocoder';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 
 class Helper {
     static DEBUG = __DEV__
@@ -577,6 +577,12 @@ class Helper {
         } catch (error) {
 
         }
+    }
+
+    static showAlertDialog = (title, message, button) => {
+      const defaultTitle = title ? title : 'Alert'
+      const defaultButton = button ? button : [{ text: 'OK' }]
+      Alert.alert(defaultTitle, message, defaultButton)
     }
 }
 export default Helper

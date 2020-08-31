@@ -184,9 +184,9 @@ const customStyle = [
 
 const unsubscribe = messaging().onMessage(async (remoteMessage) => {
   if (remoteMessage.notification.title) {
-    alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
+    Helper.showAlertDialog(remoteMessage.notification.title, remoteMessage.notification.body)
   } else {
-    alert(`${remoteMessage.notification.body}`);
+    Helper.showAlertDialog('', remoteMessage.notification.body)
   }
 });
 
