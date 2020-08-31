@@ -163,6 +163,7 @@ class Helper {
                     isVenue: true,
                     id: venueItem.id,
                     name: venueItem.name,
+                    businessName: venueItem.business_name,
                     url: "https://image.flaticon.com/icons/png/512/2702/2702342.png",
                     latitude: venueItem.latitude,
                     longitude: venueItem.longitude

@@ -1105,7 +1105,7 @@ export default class LocationsMap extends Component {
       return
     }
     const newData = this.state.allVenuesNames.filter(item => {
-      const itemData = item.name.toUpperCase();
+      const itemData = item.businessName.toUpperCase();
       const textData = text.toUpperCase();
       return itemData.indexOf(textData) > -1
     });
@@ -1206,7 +1206,7 @@ export default class LocationsMap extends Component {
             textAlignVertical: 'center',
             alignSelf: 'center'
           }}>
-            {item.name}
+            {item.businessName}
           </Text>
         </View>
       </TouchableOpacity>
