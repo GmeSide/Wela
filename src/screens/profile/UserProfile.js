@@ -269,7 +269,7 @@ export default class UserProfile extends Component {
                             </Text>
                             <Text style={{ fontFamily: 'Rubik-Light', color: colors.darkGray, marginTop: 10 }}>
                                 {this.state.waitingListSize?
-                                  "You are currently inline in "+this.state.waitingListSize+(this.state.waitingListSize>1?" waitinglists":" waitinglist")
+                                  "You are currently in line in "+this.state.waitingListSize+(this.state.waitingListSize>1?" waitinglists":" waitinglist")
                                   :
                                   "You are currently not in line"
                                 }
