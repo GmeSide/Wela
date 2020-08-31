@@ -292,6 +292,13 @@ export default class LocationsMap extends Component {
       }
     })
 
+    let user = await Helper.getUser()
+    const updatedVenues = await this.gettingVenues(user.id)
+    if (updatedVenues.data.success) {
+      user.venue_type.venues = updatedVenues.data.data.venues
+      await Helper.saveUser(user)
+    }
+
     let config = {
       skipPermissionRequests: false,
       authorizationLevel: 'always'
@@ -309,13 +316,6 @@ export default class LocationsMap extends Component {
     await this.reloadCurrentLocation()
 
     await this.fetchData()
-
-    let user = await Helper.getUser()
-    const updatedVenues = await this.gettingVenues(user.id)
-    if (updatedVenues.data.success) {
-      user.venue_type.venues = updatedVenues.data.data.venues
-      Helper.saveUser(user)
-    }
   }
 
   gettingVenues = async (userId) => {
@@ -996,7 +996,7 @@ export default class LocationsMap extends Component {
     const mMarker = this.state.markers[parseInt(this.state.selectedMarkerIndex)]
     // this.setState({ venuePersonsLimit: mMarker.limit_group })
     var enteredPersons = this.state.personsCount
-    if (this.state.personsCount < mMarker.limit_group) {
+    if (this.state.personsCount < Number(mMarker.limit_group)) {
       this.setState({ personsCount: enteredPersons + 1 })
     }
   }
