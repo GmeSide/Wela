@@ -20,6 +20,10 @@ import NotifService from '../venue/NotifService';
 import ContactsList from './ContactsList';
 
 const HIGHT_SCREEN = (Dimensions.get('window').height);
+const noImageUrl = 'https://feliz.realty/img/noimage.png'
+const activitiesUrl = 'https://res.cloudinary.com/duidyqsnz/image/upload/v1598929911/activities_cfjcvz.png'
+const restaurantUrl = 'https://res.cloudinary.com/duidyqsnz/image/upload/v1598929916/bars-resto_b12ta5.png'
+const retaillUrl = 'https://res.cloudinary.com/duidyqsnz/image/upload/v1598929897/retail_hs3qwp.png'
 
 const customStyle = [
   {
@@ -676,10 +680,15 @@ export default class LocationsMap extends Component {
   customMarkerView = (marker) => {
     if (!this.state.detailView) {
       const cetegoryItem = this.state.allCategories.find(res => res.name == marker.type)
-      const url = cetegoryItem?.url
+      let imgUrl = marker.type == 'Activities' ? activitiesUrl : marker.type == 'Retail' ? retaillUrl : restaurantUrl
+      fetch(cetegoryItem?.url).then(res => {
+        if (res.status !== 404) {
+          imgUrl = cetegoryItem.url
+        }
+      })
       return (
         <TouchableOpacity disabled={true} style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Image style={styles.markerIcon} source={{ uri: url }} />
+          <Image style={styles.markerIcon} source={{ uri: imgUrl }} />
           {this.state.zoomLevel > 15 ? <Text style={styles.businessName}>{marker.business_name}</Text> : undefined}
           {this.state.zoomLevel > 15 && !marker.toggle ? <Text style={styles.markerDescription}>{'Not Available'}</Text> : undefined}
         </TouchableOpacity>
@@ -1112,6 +1121,12 @@ export default class LocationsMap extends Component {
   }
 
   renderSearchListItem = ({ item, index }) => {
+    let imgUrl = item.name == 'Activities' ? activitiesUrl : item.name == 'Retail' ? retaillUrl : restaurantUrl
+    fetch(item.url).then(res => {
+      if (res.status != 404) {
+        imgUrl = item.url
+      }
+    })
     return (
       <TouchableOpacity key={index} onPress={() => this.onSelectCategory(item)}>
         <View style={{
@@ -1126,7 +1141,7 @@ export default class LocationsMap extends Component {
           width: '80%'
         }}>
           <Image
-            source={{ uri: item.url }}
+            source={{ uri: imgUrl }}
             style={{
               resizeMode: 'contain',
               width: 50, height: 50,
@@ -1145,7 +1160,7 @@ export default class LocationsMap extends Component {
             textAlignVertical: 'center',
             alignSelf: 'center'
           }}>
-            {item.businessName}
+            {item.businessName || item.name}
           </Text>
         </View>
       </TouchableOpacity>
