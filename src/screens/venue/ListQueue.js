@@ -10,12 +10,15 @@ import {
     TouchableOpacity
 } from "react-native";
 import { Card } from 'react-native-shadow-cards';
+import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
 import Helper from '../../utils/Helper';
 import Arrows from './Arrows'
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
+
+const DELETABLE_ITEM_STATUSES = ["Notified", "notified", "confirm", "Confirm"];
 
 var mFlatList = null
 
@@ -58,7 +61,7 @@ export default class ListQueue extends React.Component {
     }
 
     DELETE_ICON(item, index) {
-      if (item.status == "Notified" || item.status == "notified" || item.status == "confirm" || item.status == "Confirm") {
+      if (DELETABLE_ITEM_STATUSES.indexOf(item.status) >= 0) {
         return (
           <TouchableOpacity style={{
               position: 'absolute',
@@ -152,84 +155,87 @@ export default class ListQueue extends React.Component {
                     showsHorizontalScrollIndicator={false}
                     style={{ flexGrow: 0 }}
                     renderItem={({ item, index }) => (
-                        <View key={index} style={{ alignItems: 'center', justifyContent: 'center' }}>
-                            {item.status==='thatall'?
-                            <Card
-                              elevation={0}
-                              style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, justifyContent: 'center', height: 150 }}>
-                              <Image
-                                source={require('../../../assets/Group1.png')}
-                                style={{ height: 100, width: DEVICE_WIDTH / 2.7 }}
-                                resizeMode='contain'
-                              />
-                            </Card>
 
-                            :
-                            <Card
-                                elevation={4}
-                                style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10 }}>
-                                {this.DELETE_ICON(item, index)}
+                        <GestureRecognizer onSwipeUp={DELETABLE_ITEM_STATUSES.indexOf(item.status) >= 0 ? () => this.props.deleteNow(index, item) : undefined}>
+                            <View key={index} style={{ alignItems: 'center', justifyContent: 'center' }}>
+                                {item.status==='thatall'?
+                                <Card
+                                  elevation={0}
+                                  style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10, justifyContent: 'center', height: 150 }}>
+                                  <Image
+                                    source={require('../../../assets/Group1.png')}
+                                    style={{ height: 100, width: DEVICE_WIDTH / 2.7 }}
+                                    resizeMode='contain'
+                                  />
+                                </Card>
 
-                                <View style={{
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignContent: 'center',
-                                    alignItems: 'center',
-                                }}>
+                                :
+                                <Card
+                                    elevation={4}
+                                    style={{ width: DEVICE_WIDTH / 2.7, padding: 8, margin: 10 }}>
+                                    {this.DELETE_ICON(item, index)}
+
                                     <View style={{
-                                        height: 60,
-                                        width: 60,
-                                        backgroundColor: colors.input_box_grey,
-                                        borderRadius: Platform.OS === 'ios' ? 60 / 2 : 60
-                                    }}>
-                                        <Image
-                                            source={item.url? { uri: item.url }:require('../images/user_placeholder.png')}
-                                            style={{
-                                                height: 60,
-                                                width: 60,
-                                                borderRadius: Platform.OS === 'ios' ? 60 / 2 : 60
-                                            }}
-                                        />
-                                    </View>
-                                    <View style={{
-                                        height: 60,
+                                        flexDirection: 'column',
                                         justifyContent: 'center',
                                         alignContent: 'center',
-                                        alignItems: 'center'
+                                        alignItems: 'center',
                                     }}>
-                                        <Text
-                                            numberOfLines={2}
-                                            style={{
-                                                textAlign: 'center',
-                                                fontFamily: 'Rubik-Light',
-                                                justifyContent: 'center',
-                                                alignContent: 'center',
-                                                alignItems: 'center',
-                                                color: colors.black,
-                                                marginTop: 10,
-                                                fontSize: 16,
-                                            }}>
-                                            {this.getUserName(item)}
-                                        </Text>
-                                        <Text
-                                            numberOfLines={1}
-                                            style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 2, fontSize: 12, }}>
-                                            {`Group of ${item.persons}`}
-                                        </Text>
-                                    </View>
+                                        <View style={{
+                                            height: 60,
+                                            width: 60,
+                                            backgroundColor: colors.input_box_grey,
+                                            borderRadius: Platform.OS === 'ios' ? 60 / 2 : 60
+                                        }}>
+                                            <Image
+                                                source={item.url? { uri: item.url }:require('../images/user_placeholder.png')}
+                                                style={{
+                                                    height: 60,
+                                                    width: 60,
+                                                    borderRadius: Platform.OS === 'ios' ? 60 / 2 : 60
+                                                }}
+                                            />
+                                        </View>
+                                        <View style={{
+                                            height: 60,
+                                            justifyContent: 'center',
+                                            alignContent: 'center',
+                                            alignItems: 'center'
+                                        }}>
+                                            <Text
+                                                numberOfLines={2}
+                                                style={{
+                                                    textAlign: 'center',
+                                                    fontFamily: 'Rubik-Light',
+                                                    justifyContent: 'center',
+                                                    alignContent: 'center',
+                                                    alignItems: 'center',
+                                                    color: colors.black,
+                                                    marginTop: 10,
+                                                    fontSize: 16,
+                                                }}>
+                                                {this.getUserName(item)}
+                                            </Text>
+                                            <Text
+                                                numberOfLines={1}
+                                                style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 2, fontSize: 12, }}>
+                                                {`Group of ${item.persons}`}
+                                            </Text>
+                                        </View>
 
-                                    <Button
-                                        background={item.status == "waiting" ? '#000000' : '#8cb3e5'}
-                                        topMargin={15}
-                                        textSize={12}
-                                        height={40}
-                                        width={DEVICE_WIDTH / 3 - 30}
-                                        topMargin={10}
-                                        onButtonPress={() => this.props.notify(item, index)}
-                                        text={this.getButtonLabel(item.status)} />
-                                </View>
-                            </Card>}
-                        </View>
+                                        <Button
+                                            background={item.status == "waiting" ? '#000000' : '#8cb3e5'}
+                                            topMargin={15}
+                                            textSize={12}
+                                            height={40}
+                                            width={DEVICE_WIDTH / 3 - 30}
+                                            topMargin={10}
+                                            onButtonPress={() => this.props.notify(item, index)}
+                                            text={this.getButtonLabel(item.status)} />
+                                    </View>
+                                </Card>}
+                            </View>
+                        </GestureRecognizer>
                     )}
                 />
 

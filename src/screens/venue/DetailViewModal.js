@@ -841,7 +841,6 @@ export default class DetailViewModal extends React.Component {
                 {/* </Card> */}
 
             </Modal>
-
         )
     }
 } // end of class
