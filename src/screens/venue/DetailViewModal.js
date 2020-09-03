@@ -112,15 +112,16 @@ export default class DetailViewModal extends React.Component {
 
     handleConfirm = (date) => {
         this.hideDatePicker()
-        var time = date.toLocaleTimeString('en-US')
+        var time = date.toTimeString('en-US')
+
         var spilted = time.split(':')
         var hr = spilted[0]
         var minutes = spilted[1]
-        let am_pm = 'AM';
+        let am_pm = 'am';
         var hours = hr
 
         if(hr>11){
-          am_pm = 'PM';
+          am_pm = 'pm';
           if(hr>12){
             hours = hours - 12;
           }
@@ -242,7 +243,13 @@ export default class DetailViewModal extends React.Component {
 
                 if (jsonObject.success) {
                     Helper.venueProfiles = jsonObject.apiResponse.profile
-                    Helper.venueUserObject = jsonObject.apiResponse.data
+                    Helper.saveProfile(jsonObject.apiResponse.profile)
+                    const userObject = {
+                      ...Helper.venueUserObject,
+                      ...jsonObject.apiResponse.data
+                    }
+                    Helper.venueUserObject = userObject
+                    Helper.saveUser(userObject)
                     this.setState({ dataSource: jsonObject.apiResponse.profile })
                     this.loadUpdatedData()
                     this.cancelVenueDetailView()

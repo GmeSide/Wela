@@ -82,16 +82,16 @@ export default class VenueSetUp extends Component {
 
     handleConfirm = (date) => {
         this.setState({isDateTimeModalVisible: false})
-        var time = date.toLocaleTimeString('en-US')
+        var time = date.toTimeString('en-US')
 
         var spilted = time.split(':')
         var hr = spilted[0]
         var minutes = spilted[1]
-        let am_pm = 'AM';
+        let am_pm = 'am';
         var hours = hr
 
         if(hr>11){
-          am_pm = 'PM';
+          am_pm = 'pm';
           if(hr>12){
             hours = hours - 12;
           }
