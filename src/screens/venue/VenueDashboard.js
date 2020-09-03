@@ -409,6 +409,8 @@ export default class VenueDashboard extends Component {
 
         const PAYLOAD = await toggleVenue(this.state.loggedInVenue.id, toggle)
         PostRequest(TOGGLE_VENUE, PAYLOAD).then((jsonObject) => {
+            Helper.venueUserObject = {...Helper.venueUserObject, toggle}
+            Helper.saveUser(Helper.venueUserObject)
             if (jsonObject.success) {
               console.log('onWaitingToggle jsonObject: ', jsonObject);
             }
