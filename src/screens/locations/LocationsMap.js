@@ -677,20 +677,105 @@ export default class LocationsMap extends Component {
     }
   }
 
+  shouldClusterLocation = (marker, threshold) => {
+    const { markers } = this.state
+    let shouldClutster = false
+    for (i = 0; i < markers.length; i++) {
+      const item = markers[i]
+      const _distance = Helper.distance2(marker?.latitude, marker?.longitude, item?.latitude, item?.longitude)
+      shouldClutster = _distance <= threshold && marker?.id !== item?.id
+      if (shouldClutster) {
+        console.log("======= Marker _distance with: " + item.business_name + ' is ' + _distance);
+        break
+      }
+    }
+    return shouldClutster
+  }
+
+  shouldShowName = (marker) => {
+    console.log("======= Marker zoomLevel: " + this.state.zoomLevel);
+    let isShowName = false
+    if (this.shouldClusterLocation(marker, 0.1)) {
+      if (this.state.zoomLevel >= 16.5) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.2)) {
+      if (this.state.zoomLevel >= 16) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.3)) {
+      if (this.state.zoomLevel >= 15.5) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.4)) {
+      if (this.state.zoomLevel >= 15) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.5)) {
+      if (this.state.zoomLevel >= 14.5) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.6)) {
+      if (this.state.zoomLevel >= 14) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.7)) {
+      if (this.state.zoomLevel >= 13.5) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.8)) {
+      if (this.state.zoomLevel >= 13) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 0.9)) {
+      if (this.state.zoomLevel >= 12.5) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.shouldClusterLocation(marker, 1)) {
+      if (this.state.zoomLevel >= 12) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.state.zoomLevel >= 14) {
+      isShowName = true
+    }
+    return isShowName
+  }
+
   customMarkerView = (marker) => {
     if (!this.state.detailView) {
+      console.log("======= Marker name: " + marker.business_name);
+      const isShowName = this.shouldShowName(marker)
+      console.log("======= Marker isShowName: " + isShowName);
+      console.log("=======");
       const cetegoryItem = this.state.allCategories.find(res => res.name == marker.type)
-      let imgUrl = marker.type == 'Activities' ? activitiesUrl : marker.type == 'Retail' ? retaillUrl : restaurantUrl
-      fetch(cetegoryItem?.url).then(res => {
-        if (res.status !== 404) {
-          imgUrl = cetegoryItem.url
-        }
-      })
+      let imgUrl = marker.type == 'Activities' ? activitiesUrl
+        : marker.type == 'Retail' ? retaillUrl
+        : marker.type == 'Food & Drinks' ? restaurantUrl : cetegoryItem?.url
       return (
         <TouchableOpacity disabled={true} style={{ alignItems: 'center', justifyContent: 'center' }}>
           <Image style={styles.markerIcon} source={{ uri: imgUrl }} />
-          {this.state.zoomLevel > 15 ? <Text style={styles.businessName}>{marker.business_name}</Text> : undefined}
-          {this.state.zoomLevel > 15 && !marker.toggle ? <Text style={styles.markerDescription}>{'Not Available'}</Text> : undefined}
+          {isShowName ? <Text style={styles.businessName}>{marker.business_name}</Text> : undefined}
+          {isShowName && !marker.toggle ? <Text style={styles.markerDescription}>{'Not Available'}</Text> : undefined}
         </TouchableOpacity>
       )
     }
@@ -1121,12 +1206,9 @@ export default class LocationsMap extends Component {
   }
 
   renderSearchListItem = ({ item, index }) => {
-    let imgUrl = item.name == 'Activities' ? activitiesUrl : item.name == 'Retail' ? retaillUrl : restaurantUrl
-    fetch(item.url).then(res => {
-      if (res.status != 404) {
-        imgUrl = item.url
-      }
-    })
+    let imgUrl = item.name == 'Activities' ? activitiesUrl
+      : item.name == 'Retail' ? retaillUrl
+      : item.name == 'Food & Drinks' ? restaurantUrl : item.url
     return (
       <TouchableOpacity key={index} onPress={() => this.onSelectCategory(item)}>
         <View style={{
@@ -1273,8 +1355,12 @@ export default class LocationsMap extends Component {
     await this.findNeares()
   }
 
+  roundHalf = (num) => {
+    return Math.round(num * 2) / 2;
+  }
+
   showMarkers(region) {
-    let zoomLevel = Math.round(Math.log(360 / region.longitudeDelta) / Math.LN2)
+    let zoomLevel = this.roundHalf(Math.log(360 / region.longitudeDelta) / Math.LN2)
     this.setState({ zoomLevel: zoomLevel })
     console.log("zoomLevel", zoomLevel);
   }

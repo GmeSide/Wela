@@ -9,6 +9,7 @@ class Helper {
     static DEBUG = __DEV__
     static HARDCODED_LOCATION_SHOW = false
     static DISTANCE = 200
+    static SHOULD_CLUSTER = 1
     static UNIT = "K" // "K"|"M" K->kilo meters , M->For miles
     // static HARDCODED_LATS = 10.8009
     // static HARDCODED_LONGTS = 106.6503763
@@ -214,6 +215,21 @@ class Helper {
             if (unit == "N") { dist = dist * 0.8684 }
             return dist;
         }
+    }
+
+    static distance2 (lat1, lon1, lat2, lon2) {
+        const R = 6371; // km (change this constant to get miles)
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
+        return d.toFixed(2);
     }
 
     static async getFilteredVenues(venue_type) {
