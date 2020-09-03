@@ -1362,6 +1362,9 @@ export default class LocationsMap extends Component {
   }
 
   showMarkers(region) {
+    if (!region.longitudeDelta) {
+      return;
+    }
     let zoomLevel = this.roundHalf(Math.log(360 / region.longitudeDelta) / Math.LN2)
     this.setState({ zoomLevel: zoomLevel })
     console.log("zoomLevel", zoomLevel);
