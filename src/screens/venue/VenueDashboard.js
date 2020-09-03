@@ -44,7 +44,7 @@ export default class VenueDashboard extends Component {
             showVenueDetailView: false,
             usersQueueData: [],
             loggedInVenue: {},
-            averageWaitTime: 0,
+            averageWaitTime: 'N/A',
             currentIndexListFocus: 0,
             permissionGranted: false,
         }
@@ -472,7 +472,7 @@ export default class VenueDashboard extends Component {
                 } else {
                     this.setState({ currentIndexListFocus: 0 })
                 }
-                if (jsonObject.apiResponse.wait_time != null) {
+                if (jsonObject.apiResponse.wait_time !== null && jsonObject.apiResponse.wait_time !== undefined) {
                   this.setState({ averageWaitTime: jsonObject.apiResponse.wait_time })
                 }
             } else {

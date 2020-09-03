@@ -842,11 +842,13 @@ export default class LocationsMap extends Component {
 
   getAverageWaitTime() {
     let time = this.state.markers[parseInt(this.state.selectedMarkerIndex)].average_wait_time
+    if (time === null || time === undefined) { time = 'N/A'}
     return `${time} minute wait`
   }
 
   getAverageWaitTimeByMarker(marker) {
     let time = marker.average_wait_time
+    if (time === null || time === undefined) { time = 'N/A'}
     return `${time} minute wait`
   }
 

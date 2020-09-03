@@ -150,7 +150,7 @@ export default class FavouritesList extends Component {
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{item.average_wait_time} minute wait</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{(item.average_wait_time === null || time.average_wait_time === undefined ) ? 'N/A' : item.average_wait_time} minute wait</Text>
 
                         <View style={{ flexDirection: 'row', marginTop: 10 }}>
                             <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.black, paddingLeft: 4, maxWidth:'70%' }}>{item.business_address}</Text>
