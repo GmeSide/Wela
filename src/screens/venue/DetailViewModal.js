@@ -667,7 +667,7 @@ export default class DetailViewModal extends React.Component {
                                   ref="zip"
                                   style={[styles.inputStyle, {width: '32%', marginLeft: 10}]}
                                   keyboardType={'default'}
-                                  placeholder={"Zip"}
+                                  placeholder={"Postal"}
                                   autoCorrect={false}
                                   autoCapitalize={'none'}
                                   returnKeyType={'next'}

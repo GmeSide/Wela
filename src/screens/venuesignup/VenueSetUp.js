@@ -429,7 +429,7 @@ export default class VenueSetUp extends Component {
                       ref="five"
                       style={[styles.inputStyle, {width: '32%', marginLeft: 10}]}
                       keyboardType={'default'}
-                      placeholder={"Zip"}
+                      placeholder={"Postal"}
                       autoCorrect={false}
                       autoCapitalize={'none'}
                       returnKeyType={'next'}
