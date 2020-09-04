@@ -532,7 +532,7 @@ export default class DetailViewModal extends React.Component {
                                         alignSelf: 'center',
                                         textAlignVertical: 'center',
                                         color: colors.black,
-                                    }}>People Per Group</Text>
+                                    }}>Max People Per Group</Text>
                                     <View style={{
                                         width: '100%',
                                         borderRadius: 4,

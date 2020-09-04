@@ -146,7 +146,7 @@ export default class VenueSetUp extends Component {
             message = 'Please enter your business capacity.'
             error = true
         } else if (this.state.ppGroup.toString().trim() == '') {
-            message = 'Please enter people per group.'
+            message = 'Please enter max people per group.'
             error = true
         } else if (this.state.businessType == '') {
             message = 'Please enter your business category.'
@@ -493,7 +493,7 @@ export default class VenueSetUp extends Component {
                       ref="nine"
                       style={[styles.inputStyle, {width: '47%', marginLeft: 10}]}
                       keyboardType={'number-pad'}
-                      placeholder={"People Per Group"}
+                      placeholder={"Max People Per Group"}
                       autoCorrect={false}
                       autoCapitalize={'none'}
                       returnKeyType={'next'}
