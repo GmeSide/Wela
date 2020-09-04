@@ -152,10 +152,7 @@ export default class Login extends Component {
           PostRequest(SOCIAL_LOGIN, PAYLOAD, true).then((jsonObject) => {
             this.hideLoader()
             if (jsonObject.success) {
-                this.sendPermissions()
-                var user = jsonObject.apiResponse.data[0]
-                Helper.saveUser(user)
-                this.props.navigation.navigate('Home')
+                this.fetchFavourites(jsonObject.apiResponse.data[0])
             } else {
               showToastMessage("Login", "Login fail. Please try again")
             }
@@ -332,9 +329,6 @@ export default class Login extends Component {
                 Helper.updateFavoritesList(jsonObject.apiResponse.data)
             }
             this.fetchUserQues(user)
-            // Helper.saveUser(user)
-            // this.props.navigation.navigate('Home')
-            // this.setState({ isFavouritesFetched: true })
         })
     }
 

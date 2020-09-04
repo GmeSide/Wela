@@ -324,8 +324,8 @@ class Helper {
             timeout: 150000,
         })
             .then(location => {
-                //Helper.DEBUG_LOG(`currentLocation ->`)
-                //Helper.DEBUG_LOG(location)
+                Helper.DEBUG_LOG(`currentLocation ->`)
+                Helper.DEBUG_LOG(location)
                 // if (this.DEBUG) {
                 //   const _location = {
                 //     latitude: 43.6559534,

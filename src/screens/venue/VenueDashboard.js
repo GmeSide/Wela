@@ -471,6 +471,7 @@ export default class VenueDashboard extends Component {
         const PAYLOAD = await getVenueWaitingListWithHistory(this.state.loggedInVenue.id)
         PostRequest(GET_VENUE_WAITING_LIST, PAYLOAD).then((jsonObject) => {
             this.setState({ isLoading: false })
+            this.setState({ averageWaitTime: jsonObject?.apiResponse?.wait_time })
             if (jsonObject.success) {
                 this.updatingUsersQueueData(jsonObject.apiResponse.data)
                 Helper.venueQueueDataOfCustomers = jsonObject.apiResponse.data
@@ -479,7 +480,6 @@ export default class VenueDashboard extends Component {
                 } else {
                     this.setState({ currentIndexListFocus: 0 })
                 }
-                this.setState({ averageWaitTime: jsonObject.apiResponse.wait_time })
             } else {
               this.updatingUsersQueueData([])
             }
@@ -532,7 +532,7 @@ export default class VenueDashboard extends Component {
                         color: 'white',
                         fontFamily: 'Rubik-Light',
                         fontSize: 16,
-                    }}>{this.state.averageWaitTime !== null ? `${this.state.averageWaitTime} Minutes` : 'Closed'}</Text>
+                    }}>{(this.state.averageWaitTime !== null && this.state.averageWaitTime !== undefined) ? `${this.state.averageWaitTime} Minutes` : 'Closed'}</Text>
 
                     <VenueDetail
                       onVisible={() => this.venueDetailViewOpen()}
