@@ -139,7 +139,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "1.2"
+        versionName "1.3"
         multiDexEnabled true
     }
     splits {
