@@ -697,60 +697,60 @@ export default class LocationsMap extends Component {
         isShowName = false
       }
     } else if (this.shouldClusterLocation(marker, 0.2)) {
-      if (this.state.zoomLevel >= 16) {
-        isShowName = true
-      } else {
-        isShowName = false
-      }
-    } else if (this.shouldClusterLocation(marker, 0.3)) {
       if (this.state.zoomLevel >= 15.5) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 0.4)) {
+    } else if (this.shouldClusterLocation(marker, 0.3)) {
       if (this.state.zoomLevel >= 15) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 0.5)) {
+    } else if (this.shouldClusterLocation(marker, 0.4)) {
       if (this.state.zoomLevel >= 14.5) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 0.6)) {
+    } else if (this.shouldClusterLocation(marker, 0.5)) {
       if (this.state.zoomLevel >= 14) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 0.7)) {
+    } else if (this.shouldClusterLocation(marker, 0.6)) {
       if (this.state.zoomLevel >= 13.5) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 0.8)) {
+    } else if (this.shouldClusterLocation(marker, 0.7)) {
       if (this.state.zoomLevel >= 13) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 0.9)) {
+    } else if (this.shouldClusterLocation(marker, 0.8)) {
       if (this.state.zoomLevel >= 12.5) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.shouldClusterLocation(marker, 1)) {
+    } else if (this.shouldClusterLocation(marker, 0.9)) {
       if (this.state.zoomLevel >= 12) {
         isShowName = true
       } else {
         isShowName = false
       }
-    } else if (this.state.zoomLevel >= 14) {
+    } else if (this.shouldClusterLocation(marker, 1)) {
+      if (this.state.zoomLevel >= 11.5) {
+        isShowName = true
+      } else {
+        isShowName = false
+      }
+    } else if (this.state.zoomLevel >= 11) {
       isShowName = true
     }
     return isShowName
