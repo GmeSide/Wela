@@ -149,8 +149,11 @@ export default class WaitingList extends Component {
         }
     }
     getAverageWaitTime(average_wait_time) {
-        if (average_wait_time === null || average_wait_time === undefined) { average_wait_time = 'N/A'}
-        return `${average_wait_time} minute wait`
+        if (average_wait_time === null || average_wait_time === undefined) {
+          return 'Closed'
+        } else {
+          return `${average_wait_time} minutes wait`
+        }
     }
     //------------------------------------------------------------------
     //                      HISTORY WAITING LIST

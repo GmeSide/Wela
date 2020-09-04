@@ -770,7 +770,7 @@ export default class LocationsMap extends Component {
       const cetegoryItem = this.state.allCategories.find(res => res.name == marker.type)
       let imgUrl = marker.type == 'Activities' ? activitiesUrl
         : marker.type == 'Retail' ? retaillUrl
-        : marker.type == 'Food & Drinks' ? restaurantUrl : cetegoryItem?.url
+          : marker.type == 'Food & Drinks' ? restaurantUrl : cetegoryItem?.url
       return (
         <TouchableOpacity disabled={true} style={{ alignItems: 'center', justifyContent: 'center' }}>
           <Image style={styles.markerIcon} source={{ uri: imgUrl }} />
@@ -842,14 +842,20 @@ export default class LocationsMap extends Component {
 
   getAverageWaitTime() {
     let time = this.state.markers[parseInt(this.state.selectedMarkerIndex)].average_wait_time
-    if (time === null || time === undefined) { time = 'N/A'}
-    return `${time} minute wait`
+    if (time === null || time === undefined) {
+      return 'Closed'
+    } else {
+      return `${time} minutes wait`
+    }
   }
 
   getAverageWaitTimeByMarker(marker) {
     let time = marker.average_wait_time
-    if (time === null || time === undefined) { time = 'N/A'}
-    return `${time} minute wait`
+    if (time === null || time === undefined) {
+      return 'Closed'
+    } else {
+      return `${time} minutes wait`
+    }
   }
 
   async getFavStatus() {
@@ -994,10 +1000,12 @@ export default class LocationsMap extends Component {
     }
   }
 
-  getOpacity() {
+  getOpacity(isClosed) {
     if (this.state.isSelectedAlreadyQueued === true) {
       return 0.5
     } else if (Helper.totalInCurrentWaitingList() > 1) {
+      return 0.5
+    } else if (isClosed) {
       return 0.5
     } else {
       return 1
@@ -1006,15 +1014,18 @@ export default class LocationsMap extends Component {
 
   lineUpView(mMarker) {
     if (!this.state.confirm_view) {
+      let time = mMarker.average_wait_time
+      const isClosed = time === null || time === undefined
       return (
         <View style={{
-          opacity: this.getOpacity(),
+          opacity: this.getOpacity(isClosed),
           flex: 1,
           flexDirection: 'row',
           marginTop: 20,
           marginRight: 2
         }}>
           <Button
+            disabled={isClosed}
             width={'100%'}
             onButtonPress={() => this.requestToLineUp(mMarker)}
             text={'Line Up'} />
@@ -1210,7 +1221,7 @@ export default class LocationsMap extends Component {
   renderSearchListItem = ({ item, index }) => {
     let imgUrl = item.name == 'Activities' ? activitiesUrl
       : item.name == 'Retail' ? retaillUrl
-      : item.name == 'Food & Drinks' ? restaurantUrl : item.url
+        : item.name == 'Food & Drinks' ? restaurantUrl : item.url
     return (
       <TouchableOpacity key={index} onPress={() => this.onSelectCategory(item)}>
         <View style={{
