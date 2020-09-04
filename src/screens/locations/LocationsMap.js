@@ -187,9 +187,9 @@ const customStyle = [
 ]
 
 const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-  if (remoteMessage.notification.title) {
+  if (remoteMessage?.notification?.title) {
     Helper.showAlertDialog(remoteMessage.notification.title, remoteMessage.notification.body)
-  } else {
+  } else if (remoteMessage?.notification?.body) {
     Helper.showAlertDialog('', remoteMessage.notification.body)
   }
 });
@@ -271,25 +271,20 @@ export default class LocationsMap extends Component {
     this.messageListener = firebase.messaging().onMessage(async (message) => {
       // Process your message as required
       console.log('Notification onMessage: ', message)
-      if (message.data.type === 'toggle') {
+      const data = message?.data
+      if (data?.type === 'toggle') {
         let user = await Helper.getUser()
         let stateVenues = this.state.markers
-        let msgVenue = JSON.parse(message.data.moredata)
-        let index = stateVenues.findIndex(marker => marker.id === msgVenue.id);
-        console.log('index: ', index);
-        console.log('message.data.moredata.id: ', msgVenue.id);
-        console.log('stateVenues: ', stateVenues);
+        let index = stateVenues.findIndex(marker => marker.id === Number(data.venue_id));
         if (index > -1) {
-          stateVenues[index].toggle = msgVenue.toggle
+          stateVenues[index].toggle = Number(data.toggle)
           console.log('Marker State Updated.');
         }
 
         let allVenues = user.venue_type.venues
-        let aindex = allVenues.findIndex(marker => marker.id === msgVenue.id);
-        console.log('aindex: ', aindex);
+        let aindex = allVenues.findIndex(marker => marker.id === Number(data.venue_id));
         if (aindex > -1) {
-
-          allVenues[aindex].toggle = msgVenue.toggle
+          allVenues[aindex].toggle = Number(data.toggle)
           user.venue_type.venues = allVenues
           Helper.saveUser(user)
           console.log('Marker State Updated.');
