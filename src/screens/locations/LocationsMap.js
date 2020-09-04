@@ -805,7 +805,7 @@ export default class LocationsMap extends Component {
       if (currentMarker && currentMarker.toggle) {
         this.fetchUserDistance(currentMarker)
         this.setState({
-          openedVenueMarkerName: currentMarker.name,
+          openedVenueMarkerName: currentMarker.business_name,
           detailView: true,
           selectedMarkerIndex: index,
           confirm_view: false,
