@@ -71,13 +71,13 @@ export default class ManuallyAddQueue extends React.Component {
             })
             this.setState({ isLoading: true })
             const PAYLOAD = await addUserToQueueManually(_persons, _person_details)
-            PostRequest(MANUAL_ADD, PAYLOAD).then((jsonObject) => {
-                this.setState({ isLoading: false })
+            PostRequest(MANUAL_ADD, PAYLOAD, true).then((jsonObject) => {
+                this.setState({ isLoading: false, contact: [{ name: '', phone: '' }], personsCount: 1 })
                 if (jsonObject.success) {
-                    this.setState({ contact: [{ name: '', phone: '' }], personsCount: 1 })
                     showToastMessage("Create Account", jsonObject.apiResponse.message)
-                    // this.props.navigation.navigate('VerifyOTP', { user: jsonObject.apiResponse })
                     this.props.onAddManualQueueRequest()
+                } else {
+                    this.props.onAddManualQueueRequest(true)
                 }
             })
         }

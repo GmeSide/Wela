@@ -417,10 +417,14 @@ export default class VenueDashboard extends Component {
         })
     }
 
-    onAddManualQueueRequestComplete = async () => {
-        this.setState({ showAddQueueView: false }, () => {
-          setTimeout(async () => { await this.reloadData() }, 200);
-        })
+    onAddManualQueueRequestComplete = async (isClosed) => {
+        if (isClosed) {
+          this.setState({ showAddQueueView: false })
+        } else {
+          this.setState({ showAddQueueView: false }, () => {
+            setTimeout(async () => { await this.reloadData() }, 200);
+          })
+        }
     }
 
     cancelVenueDetailView() {
@@ -592,7 +596,7 @@ export default class VenueDashboard extends Component {
 
                 <ManuallyAddQueue
                     showAddQueueView={this.state.showAddQueueView}
-                    onAddManualQueueRequest={() => this.onAddManualQueueRequestComplete()}
+                    onAddManualQueueRequest={(isClosed) => this.onAddManualQueueRequestComplete(isClosed)}
                 />
 
                 <DetailViewModal
