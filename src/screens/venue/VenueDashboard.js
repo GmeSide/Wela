@@ -484,8 +484,14 @@ export default class VenueDashboard extends Component {
     }
 
     logout = async () => {
-      await Helper.clearAsyncStorage()
-      this.props.navigation.navigate('VenueLogin')
+      const PAYLOAD = await toggleVenue(this.state.loggedInVenue.id, 0)
+      PostRequest(TOGGLE_VENUE, PAYLOAD).then(async (jsonObject) => {
+          if (jsonObject.success) {
+            console.log('onWaitingToggle jsonObject: ', jsonObject)
+          }
+          await Helper.clearAsyncStorage()
+          this.props.navigation.navigate('VenueLogin')
+        })
     }
 
     render() {
