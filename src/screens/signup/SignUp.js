@@ -119,7 +119,6 @@ export default class SignUp extends Component {
                     this.sendPermissions()
                     showToastMessage("Create Account", jsonObject.apiResponse.message)
                     this.props.navigation.navigate('VerifyOTP', { user: jsonObject.apiResponse })
-
                 }
             })
         }

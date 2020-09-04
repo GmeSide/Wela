@@ -306,6 +306,17 @@ export default class Login extends Component {
                 this.hideLoader()
                 if (jsonObject.success) {
                     this.fetchFavourites(jsonObject.apiResponse.data[0])
+                } else {
+                  const isVerified = jsonObject.apiResponse?.data?.isVerified
+                  if (isVerified !== undefined && !isVerified) {
+                    this.props.navigation.navigate('VerifyOTP', {
+                      user: {
+                        data: {
+                          email: this.state.email
+                        }
+                      }
+                    })
+                  }
                 }
             })
         }
