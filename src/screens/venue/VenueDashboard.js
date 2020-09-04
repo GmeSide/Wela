@@ -44,7 +44,7 @@ export default class VenueDashboard extends Component {
             showVenueDetailView: false,
             usersQueueData: [],
             loggedInVenue: {},
-            averageWaitTime: 'N/A',
+            averageWaitTime: null,
             currentIndexListFocus: 0,
             permissionGranted: false,
         }
@@ -427,9 +427,10 @@ export default class VenueDashboard extends Component {
         }
     }
 
-    cancelVenueDetailView() {
-        this.onLoadData()
-        this.setState({ showVenueDetailView: false })
+    cancelVenueDetailView  = async () => {
+      await this.setState({ showVenueDetailView: false })
+      await this.onLoadData()
+      await this.reloadData()
     }
 
     venueDetailViewOpen() {
@@ -478,9 +479,7 @@ export default class VenueDashboard extends Component {
                 } else {
                     this.setState({ currentIndexListFocus: 0 })
                 }
-                if (jsonObject.apiResponse.wait_time !== null && jsonObject.apiResponse.wait_time !== undefined) {
-                  this.setState({ averageWaitTime: jsonObject.apiResponse.wait_time })
-                }
+                this.setState({ averageWaitTime: jsonObject.apiResponse.wait_time })
             } else {
               this.updatingUsersQueueData([])
             }
@@ -533,7 +532,7 @@ export default class VenueDashboard extends Component {
                         color: 'white',
                         fontFamily: 'Rubik-Light',
                         fontSize: 16,
-                    }}>{`${this.state.averageWaitTime} Minutes`}</Text>
+                    }}>{this.state.averageWaitTime !== null ? `${this.state.averageWaitTime} Minutes` : 'Closed'}</Text>
 
                     <VenueDetail
                       onVisible={() => this.venueDetailViewOpen()}
@@ -601,7 +600,7 @@ export default class VenueDashboard extends Component {
 
                 <DetailViewModal
                     visible={this.state.showVenueDetailView}
-                    cancelVenueDetailView={() => { this.cancelVenueDetailView() }}
+                    cancelVenueDetailView={() => this.cancelVenueDetailView()}
                     onAddManualQueueRequest={() => this.onAddManualQueueRequestComplete()}
                 />
 

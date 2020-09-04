@@ -86,6 +86,7 @@ export default class DetailViewModal extends React.Component {
             province: user.province,
             country: user.country,
         })
+        this.state.timesToEdit = []
         this.state.dataSource.forEach(profile => {
             var data = {
                 id: profile.id,
