@@ -196,7 +196,7 @@ class Helper {
     }
 
     static async distance(lat1, lon1, lat2, lon2, unit) {
-        if (!lat1 || !lat2 || !lon1 || !lon2 || ((lat1 == lat2) && (lon1 == lon2))) {
+        if ((lat1 == lat2) && (lon1 == lon2)) {
             return 0;
         }
         else {
@@ -218,10 +218,6 @@ class Helper {
     }
 
     static distance2 (lat1, lon1, lat2, lon2) {
-        if (!lat1 || !lat2 || !lon1 || !lon2) {
-            return 0;
-        }
-
         const R = 6371; // km (change this constant to get miles)
         const dLat = ((lat2 - lat1) * Math.PI) / 180;
         const dLon = ((lon2 - lon1) * Math.PI) / 180;
