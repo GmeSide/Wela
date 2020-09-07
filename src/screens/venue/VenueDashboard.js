@@ -67,9 +67,6 @@ export default class VenueDashboard extends Component {
         const unsubscribe = messaging().onMessage(async (remoteMessage) => {
             console.log('remoteMessage->', remoteMessage);
               this.reloadData()
-            //alert(`${remoteMessage.notification.title} \n ${remoteMessage.notification.body}`);
-            // this.updateOnNotify(remoteMessage)
-            // alert('kuch our')
         });
     }
 
@@ -155,71 +152,6 @@ export default class VenueDashboard extends Component {
     handleBackButton() {
         BackHandler.exitApp();
     }
-
-    updateOnNotify = (notif) => {
-        if (notif) {
-            if (notif.data) {
-                console.log('data->',notif.data)
-                if (notif.data.moredata) {
-                    var data = notif.data.moredata
-                    try {
-                        let obj = JSON.parse(data);
-                        //--Add
-                        if (notif.data.type === 'add') {
-                            this.addQueue(obj)
-                            if (notif.title && notif.message) {
-                                alert(`${notif.title} \n ${notif.message}`);
-                            }
-                        }
-                        // //     //--Cancel
-                        if (notif.data.type === 'cancel') {
-                            let index = this.state.usersQueueData.findIndex(item => item.id === obj.queue_id);
-                            let itemsArr = this.state.usersQueueData
-                            itemsArr[index]['status'] = "cancel"
-                            this.updatingUsersQueueData(itemsArr)
-                            if (notif.title && notif.message) {
-                                alert(`${notif.title} \n ${notif.message}`);
-                            }
-                        }
-                    } catch (ex) {
-                        console.error(ex);
-                    }
-                }
-            }
-        }
-    }
-
-    // onNotif(notif) {
-    //     if (notif) {
-    //         if (notif.data) {
-    //             if (notif.data.moredata) {
-    //                 var data = notif.data.moredata
-    //                 try {
-    //                     let obj = JSON.parse(data);
-    //                     //--Add
-    //                     if (notif.data.type === 'add') {
-    //                         this.addQueue(obj)
-    //                         if (notif.title && notif.message) {
-    //                             alert(`${notif.title} \n ${notif.message}`);
-    //                         }
-    //                     }
-    //                     // //     //--Cancel
-    //                     if (notif.data.type === 'cancel') {
-    //                         let index = this.state.usersQueueData.findIndex(item => item.id === obj.queue_id);
-    //                         let itemsArr = this.state.usersQueueData
-    //                         itemsArr[index]['status'] = "cancel"
-    //                         this.updatingUsersQueueData(itemsArr)
-    //                         if (notif.title && notif.message) {
-    //                             alert(`${notif.title} \n ${notif.message}`);
-    //                         }
-    //                     }
-    //                 } catch (ex) {
-    //                     console.error(ex);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 
     updatingUsersQueueData = (data) => {
       // console.log('usersQueueData: ', data);
@@ -361,14 +293,9 @@ export default class VenueDashboard extends Component {
         try {
             const PAYLOAD = await updateQueueByVenue(item.id, 'notify', item.user_id, item.venue_id)
             PostRequest(CANCEL_WAITING_LIST_BY_USER, PAYLOAD).then((jsonObject) => {
-                // if (jsonObject.success) {
-
-                // } else {
-                //     let itemsArr = this.state.usersQueueData
-                //     itemsArr[index]['status'] = "waiting"
-                //     this.setState({ usersQueueData: itemsArr })
-                /// DEV CAUTION: Use updatingUsersQueueData to update usersQueueData
-                // }
+                if (jsonObject.success) {
+                  this.reloadData()
+                }
             })
         } catch (error) {
             console.log('UpdateWhenNotify error.', error);
