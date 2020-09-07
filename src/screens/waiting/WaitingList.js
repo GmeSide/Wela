@@ -1,37 +1,16 @@
 /* @flow */
 import React, { Component } from 'react';
-
-import {
-    StyleSheet,
-    Text,
-    View,
-    FlatList,
-    TouchableOpacity,
-    Platform,
-    Dimensions,
-    Image,
-    ImageBackground,
-    RefreshControl,
-    Share,
-    BackHandler
-} from 'react-native';
+import { BackHandler, Dimensions, FlatList, Image, ImageBackground, RefreshControl, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { Card } from 'react-native-shadow-cards';
+import { NavigationEvents } from "react-navigation";
 import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
-import { NavigationEvents } from "react-navigation";
+import { PostRequest } from '../../network/ApiRequest.js';
+import { ADD_TO_FAVOUITE, CANCEL_WAITING_LIST_BY_USER, GET_USER_WAITING_LIST } from '../../network/EndPoints';
+import { addToFavourite, getUserWaitingListWithHistory, removeFavourite, updateVenueQueListByUser } from '../../network/PostDataPayloads';
 import Helper from '../../utils/Helper';
-
 import ProgressDialog from '../../utils/ProgressDialog';
-
-import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
-import { CANCEL_WAITING_LIST_BY_USER, GET_USER_WAITING_LIST, ADD_TO_FAVOUITE } from '../../network/EndPoints';
-import { updateVenueQueListByUser, getUserWaitingListWithHistory, addToFavourite, removeFavourite } from '../../network/PostDataPayloads';
-import { ScrollView } from 'react-native-gesture-handler';
-
-import NotifService from '../venue/NotifService';
-
-const WIDTH_HALF_SCREEN = (Dimensions.get('window').width / 4) * 3;
-const HIGHT_HALF_SCREEN = (Dimensions.get('window').height / 4) * 2;
 
 export default class WaitingList extends Component {
     constructor(props) {
@@ -62,8 +41,7 @@ export default class WaitingList extends Component {
         this.updateSyncedData(Helper.userQueList)
     }
 
-    componentDidMount = async () => {
-      await this.fetchData()
+    componentDidMount () {
       BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
     }
 
@@ -112,6 +90,7 @@ export default class WaitingList extends Component {
 
 
                         <View style={{
+
                             height: 50,
                             width: 80,
                             marginLeft: 2,
@@ -449,7 +428,6 @@ export default class WaitingList extends Component {
             if (jsonObject.success) {
                 Helper.DEBUG_LOG(jsonObject.apiResponse)
                 Helper.updateUserQueList(jsonObject.apiResponse)
-                // this.fetchData()
             }
         })
     }
@@ -689,7 +667,7 @@ export default class WaitingList extends Component {
                                 // renderItem={this.renderItem}
                             />
                         </View>
-                        <NavigationEvents onWillFocus={() => this.fetchData()} />
+                        <NavigationEvents onDidFocus={() => this.fetchData()} />
                     </View>
                 </ScrollView>
             </ImageBackground>
