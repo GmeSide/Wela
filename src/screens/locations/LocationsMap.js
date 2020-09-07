@@ -680,7 +680,7 @@ export default class LocationsMap extends Component {
       const _distance = Helper.distance2(marker?.latitude, marker?.longitude, item?.latitude, item?.longitude)
       shouldClutster = _distance <= threshold && marker?.id !== item?.id
       if (shouldClutster) {
-        console.log("======= Marker _distance with: " + item.business_name + ' is ' + _distance);
+        // console.log("======= Marker _distance with: " + item.business_name + ' is ' + _distance);
         break
       }
     }
@@ -688,7 +688,7 @@ export default class LocationsMap extends Component {
   }
 
   shouldShowName = (marker) => {
-    console.log("======= Marker zoomLevel: " + this.state.zoomLevel);
+    // console.log("======= Marker zoomLevel: " + this.state.zoomLevel);
     let isShowName = false
     if (this.shouldClusterLocation(marker, 0.1)) {
       if (this.state.zoomLevel >= 16.5) {
@@ -758,10 +758,10 @@ export default class LocationsMap extends Component {
 
   customMarkerView = (marker) => {
     // if (!this.state.detailView) {
-      console.log("======= Marker name: " + marker.business_name);
+      // console.log("======= Marker name: " + marker.business_name);
       const isShowName = this.shouldShowName(marker)
-      console.log("======= Marker isShowName: " + isShowName);
-      console.log("=======");
+      // console.log("======= Marker isShowName: " + isShowName);
+      // console.log("=======");
       const cetegoryItem = this.state.allCategories.find(res => res.name == marker.type)
       let imgUrl = marker.type == 'Activities' ? activitiesUrl
         : marker.type == 'Retail' ? retaillUrl

@@ -128,18 +128,19 @@ export default class ListQueue extends React.Component {
 
     onSwipeUp(gestureState, item, index) {
       if (DELETABLE_ITEM_STATUSES.indexOf(item.status) >= 0) {
-        Alert.alert('Delete Group', 'Do you want to delete this group?',
-          [
-            {
-              text: 'NO'
-            },
-            {
-              text: 'YES',
-              onPress: () => {
-                this.props.deleteNow(index, item)
-              }
-            }
-          ])
+        this.props.deleteNow(index, item)
+      //   Alert.alert('Delete Group', 'Do you want to delete this group?',
+      //     [
+      //       {
+      //         text: 'No'
+      //       },
+      //       {
+      //         text: 'Yes',
+      //         onPress: () => {
+      //           this.props.deleteNow(index, item)
+      //         }
+      //       }
+      //     ])
       }
     }
 

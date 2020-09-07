@@ -23,7 +23,8 @@ const DEVICE_WIDTH = Dimensions.get('window').width;
 const options = {
   title: 'Select Your Profile Pic',
   customButtons: [],
-  storageOptions: { privateDirectory: true }
+  storageOptions: { privateDirectory: true },
+  maxWidth: 500,
 };
 
 export default class UserProfile extends Component {
