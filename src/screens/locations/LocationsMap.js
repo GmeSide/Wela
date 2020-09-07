@@ -757,7 +757,7 @@ export default class LocationsMap extends Component {
   }
 
   customMarkerView = (marker) => {
-    if (!this.state.detailView) {
+    // if (!this.state.detailView) {
       console.log("======= Marker name: " + marker.business_name);
       const isShowName = this.shouldShowName(marker)
       console.log("======= Marker isShowName: " + isShowName);
@@ -773,7 +773,7 @@ export default class LocationsMap extends Component {
           {isShowName && !marker.toggle ? <Text style={styles.markerDescription}>{'Not Available'}</Text> : undefined}
         </TouchableOpacity>
       )
-    }
+    // }
   }
 
   setIconColor(isFav) {
