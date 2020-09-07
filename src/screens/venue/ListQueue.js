@@ -7,7 +7,8 @@ import {
     FlatList,
     Image,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from "react-native";
 import { Card } from 'react-native-shadow-cards';
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
@@ -125,6 +126,23 @@ export default class ListQueue extends React.Component {
         }
     }
 
+    onSwipeUp(gestureState, item, index) {
+      if (DELETABLE_ITEM_STATUSES.indexOf(item.status) >= 0) {
+        Alert.alert('Delete Group', 'Do you want to delete this group?',
+          [
+            {
+              text: 'NO'
+            },
+            {
+              text: 'YES',
+              onPress: () => {
+                this.props.deleteNow(index, item)
+              }
+            }
+          ])
+      }
+    }
+
     render() {
         const { dataSource } = this.props
         return (
@@ -156,7 +174,14 @@ export default class ListQueue extends React.Component {
                     style={{ flexGrow: 0 }}
                     renderItem={({ item, index }) => (
 
-                        <GestureRecognizer onSwipeUp={DELETABLE_ITEM_STATUSES.indexOf(item.status) >= 0 ? () => this.props.deleteNow(index, item) : undefined}>
+                        // <GestureRecognizer onSwipeUp={DELETABLE_ITEM_STATUSES.indexOf(item.status) >= 0 ? () => this.props.deleteNow(index, item) : undefined}>
+                        <GestureRecognizer
+                          onSwipeUp={(state) => this.onSwipeUp(state, item, index)}
+                          // config={config}
+                          style={{
+                            flex: 1,
+                            borderColor: colors.white
+                          }}>
                             <View key={index} style={{ alignItems: 'center', justifyContent: 'center' }}>
                                 {item.status==='thatall'?
                                 <Card
