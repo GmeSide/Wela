@@ -24,11 +24,14 @@ class BlackButton extends React.Component {
     // }
     render() {
         return (
-            <TouchableOpacity style={{
+            <TouchableOpacity
+            disabled={this.props.disabled}
+            style={[{
                 height: this.props.height ? this.props.height : 50,
                 flexDirection: 'row',
                 width: this.props.width ? this.props.width : DEVICE_WIDTH - 40,
                 marginTop: this.props.topMargin,
+                marginBottom: this.props.bottomMargin,
                 borderRadius: 4,
                 alignSelf: 'center',
                 borderColor: colors.themeDark,
@@ -36,11 +39,10 @@ class BlackButton extends React.Component {
                 justifyContent: "center",
                 fontWeight: 'bold',
                 alignContent: 'center',
-                textAlignVertical: 'center',
                 textAlign: 'center',
                 alignItems: "center",
                 marginHorizontal:this.props.marginHorizontaly?this.props.marginHorizontaly:0
-            }}
+            }, this.props.style]}
                 onPress={this.props.onButtonPress}>
                 {/* {this.IMAGEVIEW()} */}
                 <Text style={{
@@ -55,6 +57,7 @@ class BlackButton extends React.Component {
                     alignItems: "center",
                     color: this.props.textColor ? this.props.textColor:colors.white,
                     fontSize: this.props.textSize ? this.props.textSize : 16,
+                    fontFamily: 'Rubik-Light'
                 }} >{this.props.text ? this.props.text : 'Save'}</Text>
             </TouchableOpacity>
         );
@@ -62,8 +65,6 @@ class BlackButton extends React.Component {
 } // end of class
 
 export default BlackButton;
-
-
 
 const styles = StyleSheet.create({
     listItem: {

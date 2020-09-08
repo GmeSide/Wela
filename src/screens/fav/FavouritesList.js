@@ -10,11 +10,11 @@ import {
     Dimensions,
     Image,
     ImageBackground,
-    RefreshControl
+    RefreshControl,
+    BackHandler
 } from 'react-native';
 import { Card } from 'react-native-shadow-cards';
 import { colors } from '../../common/AppColors';
-import { NavigationEvents } from "react-navigation";
 import ProgressDialog from '../../utils/ProgressDialog';
 
 import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
@@ -36,9 +36,21 @@ export default class FavouritesList extends Component {
             password: '',
             dataSource: []
         }
-
+        this.props.navigation.addListener('willFocus', this.componentWillFocus)
     }
 
+    componentWillFocus = async() => {
+      console.log('FavouritesList FOCUSED');
+      await this.fetchData()
+    }
+
+    componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    }
+    handleBackButton() {
+        console.log('handleBackButton IN.');
+          BackHandler.exitApp();
+      }
     showLoader(message) { this.setState({ isLoading: true, loaderMessage: message }) }
     hideLoader() { this.setState({ isLoading: false }) }
 
@@ -82,13 +94,13 @@ export default class FavouritesList extends Component {
     }
     async fetchData() {
         this.setState({ dataSource: Helper.userFavouritesVenue })
-
     }
 
-    renderItem = ({ item }) => {
+    renderItem = ({ item, index }) => {
         return (
 
             <Card
+                _key={index}
                 elevation={4}
                 style={{ padding: 20, margin: 10, }}>
                 <TouchableOpacity >
@@ -109,7 +121,6 @@ export default class FavouritesList extends Component {
                                 style={{
                                     fontSize: 16,
                                     color: colors.black,
-                                    fontFamily: "Verdana",
                                     fontWeight: 'bold',
                                     paddingLeft: 4,
                                     flex: 1,
@@ -117,8 +128,9 @@ export default class FavouritesList extends Component {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     alignSelf: 'center',
+                                    fontFamily: 'Rubik-Light'
                                 }}>
-                                {item.name}
+                                {item.business_name}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => this.onRemoveFavourite(item.venue_id)}
@@ -131,17 +143,17 @@ export default class FavouritesList extends Component {
                                         alignSelf: 'center',
                                         height: 20,
                                         width: 20,
-                                        tintColor: colors.black
+                                        tintColor: colors.red
                                     }}
                                     source={require('../images/fav_heart.png')}
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Text style={{ fontSize: 12, color: colors.darkGray, fontFamily: "Verdana", paddingLeft: 4 }}>{item.average_wait_time} minute wait</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{(item.average_wait_time === null || item.average_wait_time === undefined ) ? 'Closed' : `${item.average_wait_time} minutes wait`} </Text>
 
                         <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                            <Text style={{ flex: 1, fontSize: 12, color: colors.black, fontFamily: "Verdana", paddingLeft: 4 }}>{item.business_address}</Text>
-                            <Text style={{ fontSize: 12, color: colors.lightGray, fontFamily: "Verdana", paddingLeft: 4 }}>1 k away</Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.black, paddingLeft: 4, maxWidth:'70%' }}>{item.business_address}</Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 4 }}>1 k away</Text>
                         </View>
 
                     </View>
@@ -158,7 +170,7 @@ export default class FavouritesList extends Component {
                     alignContent: 'center', alignItems: 'center',
                     backgroundColor: 'rgba(0, 0, 0, 0)'
                 }}>
-                    <Text style={{ color: colors.lightGray }}>No content. Pull to refresh.</Text>
+                    <Text style={{ fontFamily: 'Rubik-Light', color: colors.lightGray }}>No content. Pull to refresh.</Text>
                 </View>
             )
         }
@@ -185,8 +197,9 @@ export default class FavouritesList extends Component {
                         backgroundColor: 'transparent'
                     }}>
                         <Text style={{
-                            alignSelf: 'center',
-                            alignContent: 'center', color: colors.white, paddingLeft: 10, fontFamily: 'Verdana', fontSize: 22, fontWeight: 'bold'
+                            fontFamily: 'Rubik-Light',
+                            alignSelf: 'flex-start',
+                            alignContent: 'flex-start', color: colors.white, paddingLeft: 10, fontSize: 22, fontWeight: 'bold'
                         }}>Favourites</Text>
                         <FlatList
                             scrollEnabled={true}
@@ -198,18 +211,17 @@ export default class FavouritesList extends Component {
                             renderItem={this.renderItem}
                             data={this.state.dataSource}
                             refreshControl={<RefreshControl
-                                colors={["#9Bd35A", "#689F38"]}
-                                refreshing={this.state.isRefreshing}
-                                onRefresh={() => this.onRefresh()} />}
-                            keyExtractor={item => `${item}`}
+                            colors={["#9Bd35A", "#689F38"]}
+                            refreshing={this.state.isRefreshing}
+                            onRefresh={() => this.onRefresh()} />}
+                            keyExtractor={(item, index) => index + ""}
                         />
 
 
                     </View>
                     {this.showNoDataError()}
                 </ImageBackground>
-                <NavigationEvents onDidFocus={() => this.fetchData()} />
-            </View >
+            </View>
 
         );
     }

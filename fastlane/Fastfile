@@ -1,0 +1,105 @@
+fastlane_version '2.149.1'
+
+generic_appcenter_info = {
+  api_token: ENV['APP_CENTER_TOKEN'],
+  owner_name: ENV['APP_CENTER_OWNER_NAME'],
+  release_notes: Time.now.strftime('%Y%m%d %H:%M:%S'),
+  destinations: ENV['APP_CENTER_GROUP'],
+  destination_type: "group"
+}
+
+before_all do
+  prepare_all
+end
+
+desc 'Prepare for the builds'
+private_lane :prepare_all do
+  Dir.chdir('../') do
+    sh 'npm install'
+  end
+end
+
+platform :ios do
+  desc 'Prepare for iOS'
+  private_lane :prepare do
+    increment_build_number(xcodeproj: './ios/WELA.xcodeproj')
+    Dir.chdir('../ios') do
+      sh 'pod install'
+    end
+  end
+
+  desc 'Build the iOS application.'
+  private_lane :build_adhoc do
+    prepare
+    build_app(
+      silent: true,
+      scheme: 'WELA',
+      export_method: 'ad-hoc',
+      workspace: './ios/WELA.xcworkspace',
+      clean: true,
+      output_directory: './ios/build/',
+      output_name: 'wela.ipa',
+      export_options: {
+        provisioningProfiles: {
+          'com.wela.app' => 'Wela_Adhoc'
+        }
+      }
+    )
+  end
+
+  desc 'Build and ship the iOS app to App Center'
+  lane :beta do
+    build_adhoc
+    appcenter_upload(
+      generic_appcenter_info.merge(
+        app_name: ENV['APP_CENTER_APP_NAME_IOS'],
+        ipa: './ios/build/wela.ipa'
+      )
+    )
+    git_commit(path: ['./ios/WELA.xcodeproj', './ios/WELA/Info.plist'], message: 'iOS Bump versionCode')
+    push_to_git_remote
+  end
+end
+
+
+platform :android do
+  desc 'Build the Android application.'
+  private_lane :build do
+    prepare
+    gradle(
+      task: 'assemble',
+      build_type: 'Release',
+      project_dir: 'android/',
+      properties: {
+        'android.injected.signing.store.file' => File.expand_path(File.dirname(__FILE__), 'wela.keystore'),
+        'android.injected.signing.store.password' => ENV['ANDROID_KEYSTORE_PASSWORD'],
+        'android.injected.signing.key.alias' => ENV['ANDROID_KEY_ALIAS'],
+        'android.injected.signing.key.password' => ENV['ANDROID_KEYSTORE_PASSWORD'],
+      }
+    )
+  end
+
+  desc 'Build and ship the Android app to App Center'
+  lane :beta do
+    build
+    appcenter_upload(
+      generic_appcenter_info.merge(
+        app_name: ENV['APP_CENTER_APP_NAME_ANDROID'],
+        apk: './android/app/build/outputs/apk/release/app-release.apk'
+      )
+    )
+    git_commit(path: ['./android/gradle.properties'], message: 'Android Bump versionCode')
+    push_to_git_remote
+  end
+
+  private_lane :prepare do
+    gradle(task: 'incrementVersionCode', project_dir: 'android/')
+    gradle(task: 'clean', project_dir: 'android/')
+
+    Dir.chdir('../') do
+      sh 'rm -rf android/app/build'
+      sh 'react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res'
+      sh 'npx jetify'
+    end
+  end
+end

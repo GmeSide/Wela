@@ -60,7 +60,8 @@ export default class IHAKPicker extends Component<Props> {
                 <Text
                     style={[
                         styles.placeholderText,
-                        customStyles.placeholderText
+                        customStyles.placeholderText,
+                        {fontFamily: 'Rubik-Light'}
                     ]}
                 >
                     {placeholder}
@@ -68,7 +69,7 @@ export default class IHAKPicker extends Component<Props> {
             );
         }
         return (
-            <Text style={[styles.titleText, customStyles.titleText]}>
+            <Text style={[styles.titleText, customStyles.titleText, {fontFamily: 'Rubik-Light'}]}>
                 {pickerTitle}
             </Text>
         );
@@ -169,7 +170,7 @@ export default class IHAKPicker extends Component<Props> {
                 />
             );
         }
-       
+
 
         return (
             <View style={[styles.container, customStyles.container]}>
@@ -209,7 +210,8 @@ export default class IHAKPicker extends Component<Props> {
                                                         <Text
                                                             style={[
                                                                 styles.cancelButtonText,
-                                                                customStyles.cancelButtonText
+                                                                customStyles.cancelButtonText,
+                                                                {fontFamily: 'Rubik-Light'}
                                                             ]}
                                                         >
                                                             {cancelButtonTitle}
@@ -227,7 +229,8 @@ export default class IHAKPicker extends Component<Props> {
                                                         <Text
                                                             style={[
                                                                 styles.confirmButtonText,
-                                                                customStyles.confirmButtonText
+                                                                customStyles.confirmButtonText,
+                                                                {fontFamily: 'Rubik-Light'}
                                                             ]}
                                                         >
                                                             {confirmButtonTitle}

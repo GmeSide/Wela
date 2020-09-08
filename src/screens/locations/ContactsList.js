@@ -47,7 +47,7 @@ class ContactsList extends React.Component {
 
     // Header = (props) => (
     //     <View style={styles.searchContainer}>
-    //         <TextInput 
+    //         <TextInput
     //         style={styles.input}
     //          placeholder="Search..."
     //          onChangeText={text => this.updateSearchText(text)} />
@@ -65,7 +65,7 @@ class ContactsList extends React.Component {
     };
     press = (hey) => {
 
-        
+
         this.state.allContacts.map((item) => {
             if (item.recordID === hey.recordID) {
                 Helper.DEBUG_LOG(item.check)
@@ -89,7 +89,7 @@ class ContactsList extends React.Component {
                     }
                 } else {
                     if (this.state.enteredLimit != this.state.limit) {
-                       
+
                         item.check = !item.check
                         if (item.check === true) {
                             this.state.SelectedContactList.push(item);
@@ -180,17 +180,17 @@ class ContactsList extends React.Component {
                         <View style={{ flexDirection: 'row', marginHorizontal: 20, paddingBottom: 10 }}>
                             <TouchableOpacity onPress={() => this.hideContacts()}>
 
-                                <Text style={{ flex: 1 }}>CANCEL</Text>
+                                <Text style={{ flex: 1, fontFamily: 'Rubik-Light' }}>CANCEL</Text>
 
                             </TouchableOpacity>
 
-                            <Text style={{ flex: 1, textAlign: 'right' }}>{`${this.state.SelectedContactList.length}/${this.state.allContacts.length}`}</Text>
+                            <Text style={{ flex: 1, textAlign: 'right', fontFamily: 'Rubik-Light' }}>{`${this.state.SelectedContactList.length}/${this.state.allContacts.length}`}</Text>
 
                             <TouchableOpacity
                                 style={{ flex: 1, textAlign: 'right' }}
                                 onPress={() => this.onSelectionComplete()}>
 
-                                <Text style={{ flex: 1, textAlign: 'right' }}>DONE</Text>
+                                <Text style={{ flex: 1, textAlign: 'right', fontFamily: 'Rubik-Light' }}>DONE</Text>
 
                             </TouchableOpacity>
 
@@ -203,8 +203,9 @@ class ContactsList extends React.Component {
                                 keyExtractor={item => item.recordID}
                                 extraData={this.state}
                                 ListHeaderComponent={this.renderHeader}
-                                renderItem={({ item }) => {
-                                    return <TouchableOpacity style={{
+                                renderItem={({ item, index }) => {
+                                    return <TouchableOpacity key={index}
+                                    style={{
                                         flexDirection: 'row',
                                         padding: 10,
                                         borderBottomWidth: 1,
@@ -221,6 +222,7 @@ class ContactsList extends React.Component {
                                             {item.check
                                                 ? (
                                                     <Text style={{
+                                                        fontFamily: 'Rubik-Light',
                                                         fontWeight: 'bold'
                                                     }}>{`${item.givenName} ${item.familyName}`}</Text>
                                                 )

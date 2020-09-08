@@ -1,14 +1,11 @@
 import Helper from '../utils/Helper'
 
-
-
 ///--------------------------------------------------------------------------------------
 //                      POST PARAS OBJECTS
 //--------------------------------------------------------------------------------------
 /**
- * LOGIN & REGISTER SCREENS 
+ * LOGIN & REGISTER SCREENS
  */
-
 export async function login(email, password, type) {
     return JSON.stringify({
         email: email,
@@ -16,6 +13,7 @@ export async function login(email, password, type) {
         type: type
     })
 }
+
 export function register(name, email, password, phone) {
     return JSON.stringify({
         name: name,
@@ -25,9 +23,7 @@ export function register(name, email, password, phone) {
     })
 }
 
-
-export async function socialLogin(email, social_type, id, name, phone) {
-    
+export async function socialLogin(email, social_type, id, name, phone, picUrl) {
     return JSON.stringify({
         email: email,
         type: 2,
@@ -36,17 +32,17 @@ export async function socialLogin(email, social_type, id, name, phone) {
         name: name,
         phone: phone,
         latitude: "",
-        longitude: ""
+        longitude: "",
+        profile_picture: picUrl
     })
 }
 
-
-
-export async function updateProfile(name, phone) {
+export async function updateProfile(name, phone, picture) {
     let user = await Helper.getUser()
     return JSON.stringify({
         name: name,
         email: user.email,
+        profile_picture: picture,
         password: user.password,
         phone: phone,
         id: user.id,
@@ -70,17 +66,21 @@ export function resendCode(userEmail) {
     return JSON.stringify({
         email: userEmail
     })
-
 }
 
-
+export function changePassword(email, currentPassword, newPassword, confirmNewPassword) {
+    return JSON.stringify({
+        email: email,
+        current_password: currentPassword,
+        password: newPassword,
+        password_confirmation: confirmNewPassword
+    })
+}
 
 /**
  * Favourite
- * 
+ *
  */
-
-
 export async function addToFavourite(venuID) {
     let user = await Helper.getUser()
     return JSON.stringify({
@@ -96,9 +96,7 @@ export async function removeFavourite(venuID) {
         venue_id: venuID,
         is_remove: 1
     })
-
 }
-
 
 export async function getAllFavourite(_id) {
     let user = await Helper.getUser()
@@ -109,17 +107,13 @@ export async function getAllFavourite(_id) {
     return JSON.stringify({
         user_id: userID
     })
-
 }
 
 export async function getVenuesByCategory(category) {
     return JSON.stringify({
         type: category
     })
-
 }
-
-
 
 //---Waiting List Queue....
 export async function addVenueToQueueList(venue_id, persons) {
@@ -135,7 +129,6 @@ export async function addVenueToQueueList(venue_id, persons) {
         persons: persons,
         location: locationLatLng
     })
-
 }
 
 export async function getUserWaitingListWithHistory(id) {
@@ -154,10 +147,7 @@ export async function updateVenueQueListByUser(queueID, status, venue_id) {
         status: status,
         venue_id: venue_id
     })
-
 }
-
-
 
 //----------VENUE
 export async function getVenueWaitingListWithHistory(venue_id) {
@@ -187,15 +177,15 @@ export async function addUserToQueueManually(persons, person_details) {
 
 }
 
-
-
-export async function updateVenueProfile(id, location, latitude, longitude, zip_code, total_capacity, limit_group, ids, open_time, close_time, day) {
-
-    // latitude: latitude,
-    // longitude: longitude,
+export async function updateVenueProfile(id, businessEmail, streetAddress, streetNumber, city, province, country, latitude, longitude, zip_code, total_capacity, limit_group, ids, open_time, close_time, day) {
     return JSON.stringify({
         id: id,
-        location: location,
+        business_email: businessEmail,
+        street_name: streetAddress,
+        street_number: streetNumber,
+        city: city,
+        province: province,
+        country: country,
         zip_code: zip_code,
         total_capacity: total_capacity,
         limit_group: limit_group,
@@ -203,8 +193,38 @@ export async function updateVenueProfile(id, location, latitude, longitude, zip_
         open_time: open_time,
         close_time: close_time,
         day: day,
+        latitude: latitude,
+        longitude: longitude
     })
+}
 
+export async function createVenue(businessName, businessEmail, businessPhone, type, city, streetNumber, streetName , province, country , zip_code, total_capacity, limit_group, switchOn, open_time, close_time, day, latitude, longitude) {
+    let venueUser = await Helper.VenueSignUp
+    return JSON.stringify({
+      business_name: venueUser.name,
+      email: venueUser.email,
+      password: venueUser.password,
+      phone: venueUser.phone,
+      name: businessName,
+      business_email: businessEmail,
+      business_phone: businessPhone,
+      type: type,
+      city: city,
+      street_number: streetNumber,
+      street_name: streetName,
+    	province: province,
+    	country: country,
+    	zip_code: zip_code,
+      total_capacity: total_capacity,
+      limit_group: limit_group,
+      average_wait_time: '15',
+      is_patio: switchOn,
+      day: day,
+      open_time: open_time,
+      close_time: close_time,
+      latitude: latitude,
+      longitude: longitude
+    })
 }
 
 export async function toggleVenue(venue_id, toggle) {
@@ -213,7 +233,6 @@ export async function toggleVenue(venue_id, toggle) {
         toggle: toggle
     })
 }
-
 
 export async function registerDeviceToken(user_id, fcm_token, platform, type) {
     return JSON.stringify({
@@ -224,6 +243,8 @@ export async function registerDeviceToken(user_id, fcm_token, platform, type) {
     })
 }
 
-
-
-
+export async function deleteQueue(id) {
+    return JSON.stringify({
+        id: id
+    })
+}

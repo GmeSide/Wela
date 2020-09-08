@@ -1,13 +1,7 @@
+/* @flow */
 import React, { Component } from 'react';
 
-import {
-    StyleSheet,
-    Dimensions,
-    View,
-    Text,
-    Animated,
-    Image,
-} from 'react-native';
+import { StyleSheet, Dimensions, View, Text, Animated, Image } from 'react-native';
 import UserInput from '../../common/UserInput';
 import Button from '../../common/BlackButton';
 import { colors } from '../../common/AppColors';
@@ -38,8 +32,8 @@ export default class SignUp extends Component {
             selectedType: '',
             userData: {}
         }
-
     }
+
     sendPermissions() {
         var config = {
             skipPermissionRequests: false,
@@ -53,12 +47,11 @@ export default class SignUp extends Component {
             } else {
                 this.requestCameraPermission()
             }
-
         } else {
             Geolocation.requestAuthorization()
-
         }
     }
+
     requestCameraPermission = async () => {
         try {
             const granted = await PermissionsAndroid.request(
@@ -74,7 +67,6 @@ export default class SignUp extends Component {
             );
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 this.setState({ permissionGranted: true })
-                
             } else {
                 this.setState({ permissionGranted: false })
                 this.requestCameraPermission()
@@ -83,6 +75,7 @@ export default class SignUp extends Component {
             console.warn(err);
         }
     };
+
     WelaSignup() {
         var message
         var error = false
@@ -126,14 +119,11 @@ export default class SignUp extends Component {
                     this.sendPermissions()
                     showToastMessage("Create Account", jsonObject.apiResponse.message)
                     this.props.navigation.navigate('VerifyOTP', { user: jsonObject.apiResponse })
-
                 }
             })
-
         }
-
-
     }
+
     objToQueryString(obj) {
         const keyValuePairs = [];
         for (const key in obj) {
@@ -141,14 +131,14 @@ export default class SignUp extends Component {
         }
         return keyValuePairs.join('&');
     }
+
     updateUsername = (text) => {
         this.setState({ email: text })
     }
+
     updatePassword = (text) => {
         this.setState({ password: text })
     }
-
-
 
     showHorizontalLine() {
         return (
@@ -162,7 +152,7 @@ export default class SignUp extends Component {
                         alignSelf: 'center',
                     }}
                 />
-                <Text style={{ color: colors.black }}> OR </Text>
+                <Text style={{ fontFamily: 'Rubik-Light', color: colors.black }}> OR </Text>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -175,6 +165,7 @@ export default class SignUp extends Component {
             </View>
         )
     }
+
     render() {
         return (
             <Animated.View style={{
@@ -211,27 +202,24 @@ export default class SignUp extends Component {
                                 style={{ height: 50, width: 200 }}
                                 source={require('../images/logo.png')}
                             />
-                            <Text style={{ color: colors.black, marginTop: 4 }}>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>
                                 Wait Conveniently
-                        </Text>
-
+                            </Text>
                         </View>
+
                         <View style={{
                             flexDirection: 'column',
                         }}>
-
-
                             <UserInput
                                 placeholderTextColor={colors.black}
                                 placeholder="Your Name"
                                 autoCapitalize={'none'}
                                 returnKeyType={'next'}
-                                keyboardType='email-address'
+                                keyboardType='default'
                                 autoCorrect={false}
                                 value={this.state.name}
                                 onChangeText={text => this.setState({ name: text })}
                             />
-
                             <UserInput
                                 placeholderTextColor={colors.black}
                                 placeholder="Your Email"
@@ -246,7 +234,7 @@ export default class SignUp extends Component {
                                 placeholderTextColor={colors.black}
                                 secureTextEntry={false}
                                 placeholder="Phone Number"
-                                keyboardType='default'
+                                keyboardType='number-pad'
                                 returnKeyType={'done'}
                                 autoCapitalize={'none'}
                                 value={this.state.phone}
@@ -266,7 +254,6 @@ export default class SignUp extends Component {
                                 autoCorrect={false}
                                 onChangeText={text => this.setState({ password: text })}
                             />
-
                             <UserInput
                                 placeholderTextColor={colors.black}
                                 secureTextEntry={true}
@@ -286,7 +273,7 @@ export default class SignUp extends Component {
                                 onButtonPress={() => this.WelaSignup()}
                                 text={'Sign Up'} />
 
-                            {/* <Text style={{ alignSelf: 'center', marginTop: 20, marginBottom: 20 }}>NOT USING WELA? REGISTER NOW</Text> */}
+                            {/* <Text style={{ fontFamily: 'Rubik-Light', alignSelf: 'center', marginTop: 20, marginBottom: 20 }}>NOT USING WELA? REGISTER NOW</Text> */}
 
                             {/* <Button
                                 topMargin={10}

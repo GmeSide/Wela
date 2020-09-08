@@ -1,32 +1,19 @@
+/* @flow */
 import React, { Component } from 'react';
 
-import {
-    StyleSheet,
-    Dimensions,
-    View,
-    Text,
-    Animated,
-    Image,
-    TouchableOpacity
-} from 'react-native';
+import { StyleSheet, Dimensions, View, Text, Animated, Image, TouchableOpacity } from 'react-native';
 import UserInput from '../../common/UserInput';
 import Button from '../../common/BlackButton';
 import { colors } from '../../common/AppColors';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
-
 import Helper from '../../utils/Helper.js'
-
 import ProgressDialog from '../../utils/ProgressDialog';
 
 import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
 import { LOGIN } from '../../network/EndPoints';
 import { login } from '../../network/PostDataPayloads';
-
-
-
-
-
+import LoadingView from '../../common/LoadingView';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -40,37 +27,33 @@ export default class VenueLogin extends Component {
             showPass: true,
             press: false,
             isLoading: false,
-            // email: '',
-            // password: '',
+            email: '',
+            password: '',
             selectedType: '',
             isFavouritesFetched: false
         }
-
     }
-    componentDidMount() {
-        if (Helper.DEBUG == true) {
-            this.setState({ email: 'moonbucks@gmail.com', password: 'pass1234' })
-            this.setState({ email: 'faxpho5@gmail.com', password: 'pass1234' })
-            // this.setState({ email: 'faxpho6@gmail.com', password: 'pass1234' })
-        }
 
+    componentDidMount() {
+        if (Helper.DEBUG === true) {
+           // this.setState({ email: 'elvyflo@gmail.com', password: 'pass1234' })
+            this.setState({ email: 'maddog@gmail.com', password: 'pass1234' })
+            // this.setState({ email: 'roostercoffee@gmail.com', password: 'pass1234' })
+            // this.setState({ email: 'wynona@gmail.com', password: 'pass1234' })
+        }
     }
 
     showLoader(message) { this.setState({ isLoading: true, loaderMessage: message }) }
     hideLoader() { this.setState({ isLoading: false }) }
 
     async WelaLogin() {
-
         var message
         var error = false
         var email = this.state.email
         var password = this.state.password
-
-
         // var email = "majid.khuhro@gmail.com"
         // var password = "we123"
         var type = 1
-
 
         if (email.trim() == '') {
             message = 'Please enter email!'
@@ -96,33 +79,30 @@ export default class VenueLogin extends Component {
             PostRequest(LOGIN, PAYLOAD, true).then((jsonObject) => {
                 this.hideLoader()
                 if (jsonObject.success) {
-                    
 
                     let userObject = jsonObject.apiResponse.data[0]
+                    let profileObject = jsonObject.apiResponse.profile
 
-                    Helper.venueProfiles = jsonObject.apiResponse.profile
+                    Helper.venueProfiles = profileObject
                     Helper.venueUserObject = userObject
                     Helper.venueQueueDataOfCustomers = userObject.venue_type.queue
-                    
+                    Helper.saveUser(userObject)
+                    Helper.saveProfile(profileObject)
 
+                    this.setState({ email: '', password: '' })
                     this.props.navigation.navigate('VenueDashboard')
-                    
                 }
             })
-
         }
-
-
     }
-
 
     updateUsername = (text) => {
         this.setState({ email: text })
     }
+
     updatePassword = (text) => {
         this.setState({ password: text })
     }
-
 
     render() {
         return (
@@ -138,11 +118,6 @@ export default class VenueLogin extends Component {
                     contentContainerStyle={styles.container}
                     scrollEnabled={true}
                 >
-
-                    {
-                        this.state.isLoading ? <ProgressDialog title='Please wait' message={this.state.loaderMessage} /> : null
-                    }
-
                     <Animated.View style={{
                         flex: 1,
                         flexDirection: 'column',
@@ -162,16 +137,12 @@ export default class VenueLogin extends Component {
                                 style={{ height: 50, width: 200 }}
                                 source={require('../images/logo.png')}
                             />
-                            <Text style={{ color: colors.black, marginTop: 4 }}>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>
                                 Wait Conveniently
                         </Text>
 
                         </View>
-                        <View style={{
-                            flexDirection: 'column',
-                        }}>
-
-
+                        <View style={{ flexDirection: 'column' }}>
 
                             <UserInput
                                 placeholderTextColor={colors.black}
@@ -199,17 +170,28 @@ export default class VenueLogin extends Component {
                             <Button
                                 topMargin={10}
                                 onButtonPress={() => this.WelaLogin()}
-                                text={'Login'} />
+                                text={'Login'}
+                            />
 
+                            <TouchableOpacity
+                                onPress={() => this.props.navigation.navigate('VenueSignUp')}
+                                style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 0 }}
+                            >
+                                <Text style={{fontFamily: 'Rubik-Light'}}>NOT USING WELA? </Text>
+                                <Text style={{ fontFamily: 'Rubik-Light', borderBottomWidth: 1 }}>REGISTER NOW</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => this.props.navigation.navigate('VenueResetPassword')}
+                                style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10, marginBottom: 20 }}
+                            >
+                                <Text style={{ fontFamily: 'Rubik-Light', borderBottomWidth: 1 }}>RESET PASSWORD</Text>
+                            </TouchableOpacity>
                         </View>
-
-
 
                     </Animated.View>
                 </KeyboardAwareScrollView>
-
-
-            </Animated.View >
+                {this.state.isLoading ? <LoadingView message={this.state.loaderMessage} /> : undefined}
+            </Animated.View>
 
         );
     }

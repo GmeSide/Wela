@@ -2,28 +2,40 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import GetLocation from 'react-native-get-location';
 import Constants from './Constants'
-
+import Geocoder from 'react-native-geocoder';
+import { Platform, Alert } from 'react-native';
 
 class Helper {
-    static DEBUG = false
+    static DEBUG = __DEV__
     static HARDCODED_LOCATION_SHOW = false
     static DISTANCE = 200
+    static SHOULD_CLUSTER = 1
     static UNIT = "K" // "K"|"M" K->kilo meters , M->For miles
+    // static HARDCODED_LATS = 10.8009
+    // static HARDCODED_LONGTS = 106.6503763
     static HARDCODED_LATS = 43.6559534
     static HARDCODED_LONGTS = -79.3660584
 
+
     static user
     static userFavouritesVenue
-    static userQueList
+    static userQueList = { data: [] }
+
+    static VenueSignUp
 
     static venueQueueDataOfCustomers
     static venueUserObject
     static venueProfiles
+    static locationAlert = false
+
+    static isIOS() {
+      return Platform.OS === 'ios'
+    }
 
     static DEVICE_TOKEN
     /**
      * Log only when app is in debug mode
-     * @param {*} message 
+     * @param {*} message
      */
     static DEBUG_LOG(message) {
         if (this.DEBUG) {
@@ -33,7 +45,7 @@ class Helper {
 
     /**
      * Email validation
-     * @param {*} text 
+     * @param {*} text
      */
     static isValidEmail(text) {
         let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -62,8 +74,8 @@ class Helper {
     ////////////////////////////////////////////////////////////////////
 
     /**
-     * 
-     * @param {*} data 
+     *
+     * @param {*} data
      */
     static async saveUser(data) {
         this.storeData(Constants.KEY_USER, data)
@@ -78,6 +90,22 @@ class Helper {
         // }
         this.user = await this.getSroedData(Constants.KEY_USER)
         return this.user
+    }
+
+    /**
+     *
+     * @param {*} data
+     */
+    static async saveProfile(data) {
+        this.storeData(Constants.KEY_PROFILE, data)
+    }
+
+    /**
+     * GET USER PROFILE
+     */
+    static async getProfile() {
+        this.venueProfiles = await this.getSroedData(Constants.KEY_PROFILE)
+        return this.venueProfiles
     }
 
     /**
@@ -107,6 +135,7 @@ class Helper {
      * GET CATEGORIES
      */
     static async getVenueCategories() {
+        console.log('Helper getVenueCategories IN.');
         let user = await this.getUser()
         var types = user.venue_type.type
         var venues = user.venue_type.venues
@@ -115,57 +144,34 @@ class Helper {
 
         types.map((category, index) => {
             var data = {
-                isVenue:false,
+                isVenue: false,
                 id: index,
                 name: category,
                 url: icons[index]
             }
             categories.push(data)
         })
-
-        // venues.map((venueItem, index) => {
-        //     var data = {
-        //         isVenue:true,
-        //         id: venueItem.id,
-        //         name: venueItem.name,
-        //         url: "https://image.flaticon.com/icons/png/512/2702/2702342.png"
-        //     }
-        //     categories.push(data)
-        // })
-
         return categories
     }
 
     static async getVenueCategoriesByLocation(nearestVenues) {
-       // let user = await this.getUser()
-        //var types = user.venue_type.type
-        // var venues = user.venue_type.venues
-        //var icons = user.venue_type.icons
+        // console.log('Helper getVenueCategoriesByLocation IN.');
         var categories = []
-
-        // types.map((category, index) => {
-        //     var data = {
-        //         isVenue:false,
-        //         id: index,s
-        //         name: category,
-        //         url: icons[index]
-        //     }
-        //     categories.push(data)
-        // })
-
-        if(nearestVenues){
+        if (nearestVenues) {
+            // console.log('Helper getVenueCategoriesByLocation nearestVenues: ', nearestVenues);
             nearestVenues.map((venueItem, index) => {
                 var data = {
-                    isVenue:true,
+                    isVenue: true,
                     id: venueItem.id,
                     name: venueItem.name,
-                    url: "https://image.flaticon.com/icons/png/512/2702/2702342.png"
+                    businessName: venueItem.business_name,
+                    url: "https://image.flaticon.com/icons/png/512/2702/2702342.png",
+                    latitude: venueItem.latitude,
+                    longitude: venueItem.longitude
                 }
                 categories.push(data)
             })
         }
-       
-
         return categories
     }
 
@@ -211,56 +217,104 @@ class Helper {
         }
     }
 
+    static distance2 (lat1, lon1, lat2, lon2) {
+        const R = 6371; // km (change this constant to get miles)
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
+        return d.toFixed(2);
+    }
+
     static async getFilteredVenues(venue_type) {
         let location = await this.getUserCurrentLocation()
         let nearestVenues = await Helper.getNearestVenues(location)
-        this.DEBUG_LOG(nearestVenues)
+        //this.DEBUG_LOG(nearestVenues)
         let filtered = await nearestVenues.filter(data => data.type.toUpperCase() === venue_type.toUpperCase());
-        this.DEBUG_LOG('---------')
-        this.DEBUG_LOG(nearestVenues)
+        // this.DEBUG_LOG('---------')
+        // this.DEBUG_LOG(nearestVenues)
         return filtered
     }
 
+    // static async getNearestVenues(location) {
+    //     let user = await this.getUser()
+    //     let allVenues = user.venue_type.venues
+    //     let nearestVenues = []
+
+    //     if (allVenues && allVenues.length > 0) {
+    //       nearestVenues = Promise.all(allVenues.map(venue => this.filterVenues(venue, location)))
+    //     }
+
+    //     return nearestVenues
+    // }
+
     static async getNearestVenues(location) {
-        let user = await this.getUser()
-        let allVenues = user.venue_type.venues
-        var nearestVenues = []
-        if (allVenues && allVenues.length > 0) {
+      let user = await this.getUser()
+      let allVenues = user.venue_type.venues
+      let nearestVenues = []
 
-
-
-            allVenues.forEach(async venue => {
-                var locDistance
-
-                if (this.HARDCODED_LOCATION_SHOW == true) {
-                    locDistance = await this.distance(this.HARDCODED_LATS, this.HARDCODED_LONGTS, venue.latitude, venue.longitude, this.UNIT)
-                } else {
-                    locDistance = await this.distance(
-                        location.latitude,
-                        location.longitude,
-                        venue.latitude,
-                        venue.longitude,
-                        this.UNIT
-                    )
-
-                }
-
-
-
-                // this.DEBUG_LOG(locDistance)
-                if (locDistance <= this.DISTANCE) {
-                    //this.DEBUG_LOG(venue.name)
-                    nearestVenues.push(venue)
-                }
-            });
-
-
+      if (allVenues && allVenues.length > 0) {
+        for (const venue of allVenues) {
+          const res = await this.filterVenues(venue, location)
+          if (res == null) continue
+          nearestVenues.push(res)
         }
-        return nearestVenues
+      }
 
+      return nearestVenues
+    }
+
+    static async filterVenues(venue, location) {
+        var locDistance
+        let latitude = 0
+        let longitude = 0
+
+        // update location base on address
+        const address = `${venue.street_number} ${venue.street_name}, ${venue.city}, ${venue.country}`
+        try {
+          const res = await Geocoder.geocodeAddress(address);
+          if (res && res.length > 0) {
+            const { lat, lng } = res[0].position
+            latitude = lat
+            longitude = lng
+          }
+        }
+        catch(err) {
+            console.log(err);
+        }
+
+        if (this.HARDCODED_LOCATION_SHOW == true) {
+            locDistance = await this.distance(this.HARDCODED_LATS, this.HARDCODED_LONGTS, latitude, longitude, this.UNIT)
+        } else {
+            locDistance = await this.distance(
+                location.latitude,
+                location.longitude,
+                latitude,
+                longitude,
+                this.UNIT
+            )
+        }
+
+        return {
+          ...venue,
+          location: {
+            latitude,
+            longitude
+          },
+          latitude,
+          longitude,
+          locDistance
+        }
     }
 
     static async getUserCurrentLocation() {
+      console.log('getUserCurrentLocation');
         return GetLocation.getCurrentPosition({
             enableHighAccuracy: true,
             timeout: 150000,
@@ -268,31 +322,44 @@ class Helper {
             .then(location => {
                 Helper.DEBUG_LOG(`currentLocation ->`)
                 Helper.DEBUG_LOG(location)
+                // if (this.DEBUG) {
+                //   const _location = {
+                //     latitude: 43.6559534,
+                //     longitude: -79.3660584
+                //   }
+                //   return _location
+                // }
                 return location
             })
             .catch(ex => {
+              console.log('Helper getUserCurrentLocation: ', ex);
                 const { code, message } = ex;
-                Helper.DEBUG_LOG('currentLocation' + message)
+                //Helper.DEBUG_LOG('currentLocation' + message)
                 if (code === 'CANCELLED') {
                     //alert('Location cancelled by user or by another request');
                 }
-                if (code === 'UNAVAILABLE') {
-                    alert('Location service is disabled or unavailable');
+                if (code === 'UNAVAILABLE' || code === 'UNAUTHORIZED') {
+                    if (!this.locationAlert) {
+                      this.locationAlert = true
+                      alert('Location service is disabled or unavailable');
+                    }
                 }
                 if (code === 'TIMEOUT') {
-                    alert('Location request timed out');
+                  if (!this.locationAlert) {
+                    this.locationAlert = true
+                      alert('Location request timed out');
+                    }
                 }
-                if (code === 'UNAUTHORIZED') {
-                    alert('Authorization denied');
-                }
+                // if (code === 'UNAUTHORIZED') {
+                //     alert('Authorization denied');
+                // }
                 return null
             });
-
     }
 
 
     static async isVenueFavourited(venue_id) {
-        Helper.DEBUG_LOG(venue_id)
+        //Helper.DEBUG_LOG(venue_id)
 
         if (Array.isArray(this.userFavouritesVenue)) {
             if (this.userFavouritesVenue.length < 1) {
@@ -311,10 +378,9 @@ class Helper {
         } else {
             return false
         }
-
     }
-    static async isAlreadyInQueue(venue_id) {
 
+    static async isAlreadyInQueue(venue_id) {
         if (this.userQueList) {
             if (this.userQueList.data) {
 
@@ -342,9 +408,6 @@ class Helper {
         } else {
             return false
         }
-
-
-
     }
 
     static async calculateSingleVenueDistance(venue_latitude, venue_longitude) {
@@ -358,6 +421,7 @@ class Helper {
         )
         return distance
     }
+
     static async getFavSatutsesForWaitingList() {
         var favStatuses = []
         if (this.waitingsAvailable() == true) {
@@ -376,13 +440,13 @@ class Helper {
                         this.UNIT
                     )
 
-                    this.DEBUG_LOG('<------------------>')
-                    this.DEBUG_LOG(location.latitude)
-                    this.DEBUG_LOG(location.longitude)
-                    this.DEBUG_LOG(queue.venue[0].latitude)
-                    this.DEBUG_LOG(queue.venue[0].longitude)
-                    this.DEBUG_LOG(distance)
-                    this.DEBUG_LOG('<-------------------->')
+                    // this.DEBUG_LOG('<------------------>')
+                    // this.DEBUG_LOG(location.latitude)
+                    // this.DEBUG_LOG(location.longitude)
+                    // this.DEBUG_LOG(queue.venue[0].latitude)
+                    // this.DEBUG_LOG(queue.venue[0].longitude)
+                    // this.DEBUG_LOG(distance)
+                    // this.DEBUG_LOG('<-------------------->')
                 } catch (error) {
 
                 }
@@ -460,7 +524,7 @@ class Helper {
         }
 
     }
-    
+
 
 
     static favouritesAvailable() {
@@ -483,9 +547,9 @@ class Helper {
     ////////////////////////////////////////////////////////////////////
 
     /**
-     * SAVING TO CACHE 
-     * @param {*} key 
-     * @param {*} value 
+     * SAVING TO CACHE
+     * @param {*} key
+     * @param {*} value
      */
     static storeData = async (key, value) => {
         try {
@@ -497,8 +561,8 @@ class Helper {
     }
 
     /**
-     * FETCHING DATA FROM CACHE 
-     * @param {*} key 
+     * FETCHING DATA FROM CACHE
+     * @param {*} key
      */
     static getSroedData = async (key) => {
         try {
@@ -529,6 +593,12 @@ class Helper {
         } catch (error) {
 
         }
+    }
+
+    static showAlertDialog = (title, message, button) => {
+      const defaultTitle = title ? title : 'Alert'
+      const defaultButton = button ? button : [{ text: 'OK' }]
+      Alert.alert(defaultTitle, message, defaultButton)
     }
 }
 export default Helper

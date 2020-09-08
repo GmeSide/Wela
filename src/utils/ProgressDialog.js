@@ -1,10 +1,12 @@
+/* @flow */
 import React from 'react';
 import {
     Modal,
     View,
     StyleSheet,
     Text,
-    ActivityIndicator
+    ActivityIndicator,
+    Image
 } from 'react-native';
 
 const ProgressDialog = ({ visible, title, message }) => (
@@ -15,21 +17,12 @@ const ProgressDialog = ({ visible, title, message }) => (
     >
         <View style={styles.container}>
             <View style={styles.content}>
-                <View style={styles.loader}>
-                    <ActivityIndicator size="large" />
+                <View style={{ alignItems: 'center', justifyContent: 'center', alignSelf:'center' }}>
+                    <Image style={{width: 50, height: 50}} source={require('../../assets/wela2.gif')} />
                 </View>
                 <View style={styles.loadingContent}>
                     <Text style={styles.message}>{message}</Text>
                 </View>
-                {/* <Text style={styles.title}>{title}</Text>
-                <View style={styles.loading}>
-                    <View style={styles.loader}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                    <View style={styles.loadingContent}>
-                        <Text style={styles.message}>{message}</Text>
-                    </View>
-                </View> */}
             </View>
         </View>
     </Modal>
@@ -54,7 +47,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf:'center',
         padding: 10,
-        backgroundColor: 'rgba(0,0,0,0)',
+        backgroundColor: 'rgba(255,255,255,0.7)',
+        width: '100%'
     }, containerwithoutmessage: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -65,15 +59,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf:'center',
         borderRadius: 10,
-        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     title: {
         fontSize: 18,
+        fontFamily: 'Rubik-Light',
         fontWeight: 'bold',
-        color: 'white'
+        color: 'black'
     }, message: {
         fontSize: 12,
-        color: 'white'
+        fontFamily: 'Rubik-Light',
+        color: 'black'
     },
     loading: {
         flexDirection: 'row',

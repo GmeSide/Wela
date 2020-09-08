@@ -15,7 +15,7 @@ class Arrows extends React.Component {
 
     render() {
         return (
-            <View style={{ flexDirection: 'row' , marginTop:20}}>
+            <View style={{ flexDirection: 'row'}}>
 
                 <TouchableOpacity
                     onPress={() => { this.props.onBackSlider() }}
@@ -31,7 +31,7 @@ class Arrows extends React.Component {
                 <View style={{height:1, width:40}}/>
 
                 <TouchableOpacity
-                    
+
                     onPress={() => { this.props.onNextSlider() }}
                 >
                     <Image

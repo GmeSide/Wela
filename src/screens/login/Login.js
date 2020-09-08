@@ -1,48 +1,33 @@
+/* @flow */
+import appleAuth, { AppleAuthError, AppleAuthRealUserStatus, AppleAuthRequestOperation, AppleAuthRequestScope } from '@invertase/react-native-apple-authentication';
+import Geolocation from '@react-native-community/geolocation';
+import { GoogleSignin } from '@react-native-community/google-signin';
+import auth from '@react-native-firebase/auth';
 import React, { Component } from 'react';
-
-import {
-    StyleSheet,
-    Dimensions,
-    View,
-    Text,
-    Animated,
-    Image,
-    TouchableOpacity,
-    Platform,
-    PermissionsAndroid
-} from 'react-native';
-import UserInput from '../../common/UserInput';
+import { Animated, Dimensions, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AccessToken, LoginManager } from 'react-native-fbsdk';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { colors } from '../../common/AppColors';
 import Button from '../../common/BlackButton';
 import ImageButton from '../../common/ImageButton';
-import { colors } from '../../common/AppColors';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import auth from '@react-native-firebase/auth';
-import { GoogleSignin, GoogleSigninButton } from '@react-native-community/google-signin';
-import Helper from '../../utils/Helper.js'
-import Geolocation from '@react-native-community/geolocation';
+import UserInput from '../../common/UserInput';
+import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
+import { GET_FAVOURITE, GET_USER_WAITING_LIST, LOGIN, SOCIAL_LOGIN } from '../../network/EndPoints';
+import { getAllFavourite, getUserWaitingListWithHistory, login, socialLogin } from '../../network/PostDataPayloads';
+import Helper from '../../utils/Helper.js';
 import ProgressDialog from '../../utils/ProgressDialog';
 
-import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
-import { LOGIN, GET_FAVOURITE, GET_USER_WAITING_LIST, SOCIAL_LOGIN } from '../../network/EndPoints';
-import { login, getAllFavourite, getUserWaitingListWithHistory, socialLogin } from '../../network/PostDataPayloads';
-
-import { LoginManager, AccessToken } from 'react-native-fbsdk';
 
 var imageGoogle = require('../images/ic_google.png')
 var imageApple = require('../images/ic_apple.png')
 
-
-// import { LoginManager, AccessToken } from 'react-native-fbsdk';
-
-
-
-
 const DEVICE_WIDTH = Dimensions.get('window').width;
-
-
 
 async function onFacebookButtonPress() {
     // Attempt login with permissions
+    if (AccessToken.getCurrentAccessToken() != null) {
+      LoginManager.logOut();
+    }
     const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
 
     if (result.isCancelled) {
@@ -56,6 +41,8 @@ async function onFacebookButtonPress() {
         throw 'Something went wrong obtaining access token';
     }
 
+    console.log('FB data: ', data);
+
     // Create a Firebase credential with the AccessToken
     const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
 
@@ -66,6 +53,7 @@ async function onFacebookButtonPress() {
 export default class Login extends Component {
     constructor(props) {
         super(props);
+        this.authCredentialListener = null;
         this.state = {
             loaderMessage: 'Wait..',
             longitude: '',
@@ -73,20 +61,12 @@ export default class Login extends Component {
             showPass: true,
             press: false,
             isLoading: false,
-            // email: '',
-            // password: '',
+            email: '',
+            password: '',
             selectedType: '',
-            isFavouritesFetched: false
+            isFavouritesFetched: false,
         }
 
-    }
-    async onFacebookLogin() {
-
-        let fbData = await onFacebookButtonPress()
-        var profile = fbData.additionalUserInfo.profile
-        alert(`${profile.name} \n ${profile.email} `)
-
-        // Helper.DEBUG_LOG(fbData)
     }
 
     async componentDidMount() {
@@ -98,12 +78,23 @@ export default class Login extends Component {
                 // iosClientId: '112823672001-tg0ock0hqhl599ev3140u07abo9k33v6.apps.googleusercontent.com',
                 scopes: ['profile', 'email']
             });
-        if (Helper.DEBUG == true) {
-            this.setState({ email: 'm@gnt.com', password: 'we123' })
+        if (Helper.DEBUG === true) {
+            this.setState({ email: 'abc@gmail.com', password: 'pass1234' })
         }
 
+        // Apple SignIn
+        this.authCredentialListener = appleAuth.onCredentialRevoked(async () => {
+          console.warn('Credential Revoked');
+        })
 
     }
+
+    componentWillUnmount() {
+      if (this.authCredentialListener) {
+        this.authCredentialListener();
+      }
+    }
+
     sendPermissions() {
         var config = {
             skipPermissionRequests: false,
@@ -123,6 +114,7 @@ export default class Login extends Component {
 
         }
     }
+
     requestCameraPermission = async () => {
         try {
             const granted = await PermissionsAndroid.request(
@@ -138,7 +130,7 @@ export default class Login extends Component {
             );
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 this.setState({ permissionGranted: true })
-                
+
             } else {
                 this.setState({ permissionGranted: false })
                 this.requestCameraPermission()
@@ -148,82 +140,129 @@ export default class Login extends Component {
         }
     };
 
+    async onSignIn(user, social_type) {
+      if (user) {
+        const { email, id, name, phone, picUrl } = user
+        if (!email || email.trim() == '') {
+          showToastMessage("Login", "Email not found")
+        } else {
+          this.showLoader("Logging..")
+          const PAYLOAD = await socialLogin(email, social_type, id, name, phone, picUrl)
+          Helper.DEBUG_LOG(PAYLOAD)
+          PostRequest(SOCIAL_LOGIN, PAYLOAD, true).then((jsonObject) => {
+            this.hideLoader()
+            if (jsonObject.success) {
+                this.fetchFavourites(jsonObject.apiResponse.data[0])
+            } else {
+              showToastMessage("Login", "Login fail. Please try again")
+            }
+          })
+        }
+      }
+    }
+
     async onGoogleSignIn() {
-
         try {
-
             await GoogleSignin.hasPlayServices();
             console.log("reached google sign in");
             //const info = await GoogleSignin.signIn();
             const userInfo = await this.onGoogleButtonPress();
-            let user = userInfo.user
+            console.log('onGoogleSignIn UserInfo ', userInfo);
+            const _user = userInfo.user
 
-            var email = ""
-            var social_type = 2
-            var id = ""
-            var name = ""
-            var phone = ""
-
-            if (user) {
-                if (user.displayName) {
-                    name = user.displayName
-                }
-                if (user.email) {
-                    email = user.email
-                }
-                if (user.phoneNumber) {
-                    phone = user.phoneNumber
-                }
-                if (user.uid) {
-                    id = user.uid
-                }
-
-                if (email.trim() == '') {
-                    showToastMessage("Login", "Email not found")
-                } else {
-                    this.showLoader("Logging..")
-                    const PAYLOAD = await socialLogin(email, social_type, id, name, phone)
-                    Helper.DEBUG_LOG(PAYLOAD)
-                    PostRequest(SOCIAL_LOGIN, PAYLOAD,true).then((jsonObject) => {
-                        this.hideLoader()
-                        if (jsonObject.success) {
-                            this.sendPermissions()
-                            var user = jsonObject.apiResponse.data[0]
-                            Helper.saveUser(user)
-                            this.props.navigation.navigate('Home')
-                            //this.fetchFavourites(jsonObject.apiResponse.data[0])
-                        }
-                    })
-                }
+            let social_type = 2
+            let user = {
+              email: _user.email ? _user.email : '',
+              id: _user.uid ? _user.uid : '',
+              name: _user.displayName ? _user.displayName : '',
+              phone: _user.phoneNumber ? _user.phoneNumber : '',
+              picUrl: userInfo.additionalUserInfo.profile.picture,
             }
 
-            Helper.DEBUG_LOG(userInfo)
+            this.onSignIn(user, social_type)
         } catch (error) {
             Helper.DEBUG_LOG(error)
-            // if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-            //     console.log("error occured SIGN_IN_CANCELLED");
-            //     // user cancelled the login flow
-            // } else if (error.code === statusCodes.IN_PROGRESS) {
-            //     console.log("error occured IN_PROGRESS");
-            //     // operation (f.e. sign in) is in progress already
-            // } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-            //     console.log("error occured PLAY_SERVICES_NOT_AVAILABLE");
-            // } else {
-            //     console.log(error)
-            //     console.log("error occured unknow error");
-            // }
+            console.log('onGoogleSignIn Error ', error);
+        }
+    }
+
+    async onFacebookLogin() {
+      try {
+        let fbData = await onFacebookButtonPress()
+        let profile = fbData.additionalUserInfo.profile
+        let userInfo = fbData.user
+
+        let social_type = 1
+        let user = {
+          email: userInfo.email ? userInfo.email : '',
+          id: profile.id ? profile.id : '',
+          name: profile.name ? profile.name : '',
+          phone: userInfo.phoneNumber ? userInfo.phoneNumber : '',
+          picUrl: userInfo.photoURL ? userInfo.photoURL : "",
         }
 
-        Helper.DEBUG_LOG(user)
+        this.onSignIn(user, social_type)
+
+      } catch (error) {
+        let msg = 'An account already exists with the same email address but different sign-in credentials.'+
+        ' Sign in using a provider associated with this email address.'
+        showToastMessage("Firebase Duplicate Record.", msg)
+        console.log('ERROR onFacebookLogin: ', error);
+      }
     }
+
+    async onAppleSignIn() {
+      try {
+        const appleAuthRequestResponse = await appleAuth.performRequest({
+          requestedOperation: AppleAuthRequestOperation.LOGIN,
+          requestedScopes: [AppleAuthRequestScope.EMAIL, AppleAuthRequestScope.FULL_NAME ]
+        })
+
+        console.log('appleAuthRequestResponse', appleAuthRequestResponse);
+
+        const {
+          user,
+          email,
+          fullName,
+          phoneNumber,
+          photoURL,
+        } = appleAuthRequestResponse;
+
+        let social_type = 3
+        let fullNames = []
+        if (fullName.givenName != null) {
+          fullNames.push(fullName.givenName)
+        }
+        if (fullName.middleName != null) {
+          fullNames.push(fullName.middleName)
+        }
+        if (fullName.familyName != null) {
+          fullNames.push(fullName.familyName)
+        }
+        const name = fullNames.join(' ')
+        let userInfo = {
+          email: email ? email : '',
+          id: user ? user : '',
+          name: name,
+          phone: phoneNumber ? phoneNumber : '',
+          picUrl: photoURL ? photoURL : "",
+        }
+
+        this.onSignIn(userInfo, social_type)
+      } catch (error) {
+        if (error.code === AppleAuthError.CANCELED) {
+          console.warn('User canceled Apple Sign in.');
+        } else {
+          console.error(error);
+        }
+      }
+    };
 
     async onGoogleButtonPress() {
         // Get the users ID token
         const { idToken } = await GoogleSignin.signIn();
-
         // Create a Google credential with the token
         const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
         // Sign-in the user with the credential
         return auth().signInWithCredential(googleCredential);
     }
@@ -232,17 +271,13 @@ export default class Login extends Component {
     hideLoader() { this.setState({ isLoading: false }) }
 
     async WelaLogin() {
-
         var message
         var error = false
         var email = this.state.email
         var password = this.state.password
-
-
         // var email = "majid.khuhro@gmail.com"
         // var password = "we123"
         var type = 2
-
 
         if (email.trim() == '') {
             message = 'Please enter email!'
@@ -267,15 +302,23 @@ export default class Login extends Component {
             PostRequest(LOGIN, PAYLOAD, true).then((jsonObject) => {
                 this.hideLoader()
                 if (jsonObject.success) {
-
                     this.fetchFavourites(jsonObject.apiResponse.data[0])
+                } else {
+                  const isVerified = jsonObject.apiResponse?.data?.isVerified
+                  if (isVerified !== undefined && !isVerified) {
+                    this.props.navigation.navigate('VerifyOTP', {
+                      user: {
+                        data: {
+                          email: this.state.email
+                        }
+                      }
+                    })
+                  }
                 }
             })
-
         }
-
-
     }
+
     async fetchFavourites(user) {
         await Helper.saveUserType(2)
         this.showLoader("Fetching..")
@@ -286,11 +329,9 @@ export default class Login extends Component {
                 Helper.updateFavoritesList(jsonObject.apiResponse.data)
             }
             this.fetchUserQues(user)
-            // Helper.saveUser(user)
-            // this.props.navigation.navigate('Home')
-            // this.setState({ isFavouritesFetched: true })
         })
     }
+
     async fetchUserQues(user) {
         //this.showLoader("Fetching..")
         const PAYLOAD = await getUserWaitingListWithHistory(user.id)
@@ -314,14 +355,14 @@ export default class Login extends Component {
         }
         return keyValuePairs.join('&');
     }
+
     updateUsername = (text) => {
         this.setState({ email: text })
     }
+
     updatePassword = (text) => {
         this.setState({ password: text })
     }
-
-
 
     showHorizontalLine() {
         return (
@@ -335,7 +376,7 @@ export default class Login extends Component {
                         alignSelf: 'center',
                     }}
                 />
-                <Text style={{ color: colors.black }}> OR </Text>
+                <Text style={{ fontFamily: 'Rubik-Light', color: colors.black }}> OR </Text>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -348,6 +389,7 @@ export default class Login extends Component {
             </View>
         )
     }
+
     render() {
         return (
             <Animated.View style={{
@@ -386,7 +428,7 @@ export default class Login extends Component {
                                 style={{ height: 50, width: 200 }}
                                 source={require('../images/logo.png')}
                             />
-                            <Text style={{ color: colors.black, marginTop: 4 }}>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>
                                 Wait Conveniently
                         </Text>
 
@@ -399,7 +441,8 @@ export default class Login extends Component {
                                 background={'#4267B2'}
                                 topMargin={10}
                                 onButtonPress={() => this.onFacebookLogin()}
-                                text={'Sign in with Facebook'} />
+                                text={'Sign in with Facebook'}
+                            />
 
                             <ImageButton
                                 image={imageGoogle}
@@ -410,14 +453,14 @@ export default class Login extends Component {
                                 onButtonPress={() => this.onGoogleSignIn()}
                                 text={'Sign in with Google'} />
 
-                            {/* <ImageButton
+                            {appleAuth.isSupported && <ImageButton
                                 image={imageApple}
                                 imageStyle={style = { width: 22, height: 22, alignSelf: 'center', marginRight: 10 }}
                                 textColor={colors.white}
                                 background={colors.black}
                                 topMargin={10}
-                                onButtonPress={this.signIn}
-                                text={'Sign in with Apple'} /> */}
+                                onButtonPress={() => this.onAppleSignIn()}
+                                text={'Sign in with Apple'} />}
 
                             {this.showHorizontalLine()}
 
@@ -453,7 +496,7 @@ export default class Login extends Component {
                                 onPress={() => this.props.navigation.navigate('SignUp')}
                             >
 
-                                <Text style={{ alignSelf: 'center', marginTop: 20, marginBottom: 20 }}>NOT USING WELA? REGISTER NOW</Text>
+                                <Text style={{ fontFamily: 'Rubik-Light', alignSelf: 'center', marginTop: 20, marginBottom: 20 }}>NOT USING WELA? REGISTER NOW</Text>
                             </TouchableOpacity>
                             {/* <Button
                                 topMargin={10}
@@ -461,14 +504,10 @@ export default class Login extends Component {
                                 text={'Venu Login'} /> */}
                         </View>
 
-
-
                     </Animated.View>
                 </KeyboardAwareScrollView>
 
-
-            </Animated.View >
-
+            </Animated.View>
         );
     }
 }

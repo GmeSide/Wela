@@ -1,3 +1,4 @@
+/* @flow */
 import React from "react";
 import {
     StyleSheet,
@@ -12,10 +13,7 @@ import { colors } from "../../common/AppColors";
 import FlipToggle from 'react-native-flip-toggle-button'
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
-
-
-class ToggleWaiting extends React.Component {
-
+export default class ToggleWaiting extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -31,22 +29,21 @@ class ToggleWaiting extends React.Component {
     render() {
         return (
             <View style={{
-                flexDirection: 'row', marginTop: 20,
+                flexDirection: 'row',
+                marginTop: 15,
                 alignItems: 'center',
                 alignContent: 'center',
                 justifyContent: 'center',
                 alignSelf: 'center'
-
             }}>
 
                 <Text style={{
                     color: colors.black,
-                    fontFamily: "Verdana",
+                    fontFamily: 'Rubik-Light',
                     fontSize: 14
                 }}>Toggle waitlist on/off</Text>
 
                 <View style={{ height: 1, width: 40 }} />
-
 
                 {/* disabledButtonOnColor: PropTypes.string,
                 disabledButtonOffColor: PropTypes.string, */}
@@ -69,15 +66,10 @@ class ToggleWaiting extends React.Component {
                 // onToggleLongPress={() => console.log('toggle long pressed!')}
                 />
 
-
             </View>
         );
     }
 } // end of class
-
-export default ToggleWaiting;
-
-
 
 const styles = StyleSheet.create({
     listItem: {

@@ -59,8 +59,8 @@ export default class VerifyOTP extends Component {
 
         const { code } = this.state;
         var email = this.state.userData.data.email
-        var codeDigits = code.length 
-        
+        var codeDigits = code.length
+
         console.log(codeDigits)
         if (codeDigits<6) {
             message = 'Verification code must be 6 digits.'
@@ -146,7 +146,7 @@ export default class VerifyOTP extends Component {
                                     alignContent: 'center',
                                     marginTop: 40
                                 }}>
-                                <Text style={{ color: colors.black }}>Enter your verification code</Text>
+                                <Text style={{ fontFamily: 'Rubik-Light', color: colors.black }}>Enter your verification code</Text>
                                 <TouchableOpacity
                                     style={{
                                         justifyContent: 'center',
@@ -160,6 +160,7 @@ export default class VerifyOTP extends Component {
 
                                     <Text style={{
                                         color: colors.black,
+                                        fontFamily: 'Rubik-Light',
                                         fontWeight: 'bold',
                                         marginLeft: 5,
                                         textDecorationLine: 'underline',

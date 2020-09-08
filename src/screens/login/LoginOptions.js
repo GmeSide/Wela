@@ -1,17 +1,8 @@
+/* @flow */
 import React, { Component } from 'react';
-
-import {
-    StyleSheet,
-    Dimensions,
-    View,
-    Text,
-    Animated,
-    Image,
-} from 'react-native';
+import { StyleSheet, Dimensions, View, Text, Animated, Image, BackHandler } from 'react-native';
 import Button from '../../common/BlackButton';
 import { colors } from '../../common/AppColors';
-
-
 
 export default class LoginOptions extends Component {
     constructor(props) {
@@ -20,7 +11,25 @@ export default class LoginOptions extends Component {
             email: '',
             password: ''
         }
+        this.props.navigation.addListener('willFocus', this.componentWillFocus)
+        this.props.navigation.addListener('willBlur', this.componentwillBlur)
+    }
 
+    componentWillFocus = () => {
+      console.log('LoginOptions FOCUSED');
+      BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
+    }
+
+    componentwillBlur = () => {
+      console.log('LoginOptions BLURRED');
+      BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton)
+    }
+
+    componentDidMount() {}
+
+    handleBackButton = () => {
+        console.log('handleBackButton IN.');
+        BackHandler.exitApp();
     }
 
     resendCodePayload() {
@@ -31,6 +40,7 @@ export default class LoginOptions extends Component {
         //alert('Test')
         this.props.navigation.navigate('Login')
     }
+
     onLoginBusiness() {
         this.props.navigation.navigate('VenueLogin')
     }
@@ -66,7 +76,7 @@ export default class LoginOptions extends Component {
                             style={{ height: 50, width: 200 }}
                             source={require('../images/logo.png')}
                         />
-                        <Text style={{ color: colors.black, marginTop: 4 }}>
+                        <Text style={{ fontFamily: 'Rubik-Light', color: colors.black, marginTop: 4 }}>
                             Wait Conveniently
                         </Text>
 
@@ -97,7 +107,7 @@ export default class LoginOptions extends Component {
                                     alignSelf: 'center',
                                 }}
                             />
-                            <Text style={{ color: colors.black }}> OR </Text>
+                            <Text style={{ fontFamily: 'Rubik-Light', color: colors.black }}> OR </Text>
                             <View
                                 style={{
                                     flexDirection: 'row',
