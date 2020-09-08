@@ -534,7 +534,7 @@ export default class WaitingList extends Component {
                                 }}
                                 renderItem={({ item, index }) => (
                                   <Card
-                                    key={index}
+                                    _key={index}
                                     elevation={4}
                                     style={{ padding: 8, margin: 10, width: '90%' }}>
                                     <TouchableOpacity
@@ -564,7 +564,7 @@ export default class WaitingList extends Component {
                                                             justifyContent: 'flex-start',
                                                             alignSelf: 'flex-start',
                                                         }}>
-                                                        {item.venue[0].business_name}
+                                                        {item.venue && item.venue.length > 0 ? item.venue[0].business_name : ''}
                                                     </Text>
 
 
@@ -606,7 +606,7 @@ export default class WaitingList extends Component {
                                 style={{alignContent: 'center', backgroundColor: 'transparent'}}
                                 renderItem={({ item, index }) => (
                                   <Card
-                                    key={index}
+                                    _key={index}
                                     elevation={4}
                                     style={{ padding: 8, margin: 10, width: '90%' }}>
                                     <TouchableOpacity
@@ -637,7 +637,7 @@ export default class WaitingList extends Component {
                                                             justifyContent: 'flex-start',
                                                             alignSelf: 'flex-start',
                                                         }}>
-                                                        {item.venue[0].business_name}
+                                                        {item.venue && item.venue.length > 0 ? item.venue[0].business_name : ''}
                                                     </Text>
 
                                                 </View>
@@ -658,7 +658,7 @@ export default class WaitingList extends Component {
                                                 {item.created_at}
                                             </Text>
                                             {/* <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTime(item.venue[0].average_wait_time)}</Text> */}
-                                            {this.innerViewOfRow(item, item.venue[0])}
+                                            {this.innerViewOfRow(item, item.venue && item.venue.length > 0 ? item.venue[0] : -1)}
                                         </View>
                                     </TouchableOpacity>
                                 </Card>)}

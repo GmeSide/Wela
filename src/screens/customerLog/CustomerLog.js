@@ -133,7 +133,7 @@ export default class CustomerLog extends Component {
             ListEmptyComponent={this.renderEmptyItem}
             renderItem={({ item, index }) => (
               <Card
-                key={index}
+                _key={index}
                 elevation={4}
                 style={{ padding: 8, margin: 10, width: '90%', justifyContent: 'space-between', flexDirection: 'row' }}>
                 <View style={{ flexDirection: 'column' }}>

@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-shadow-cards/lib/Card.js b/node_modules/react-native-shadow-cards/lib/Card.js
+index 69f6b91..f45e65e 100644
+--- a/node_modules/react-native-shadow-cards/lib/Card.js
++++ b/node_modules/react-native-shadow-cards/lib/Card.js
+@@ -34,7 +34,7 @@ const Card = props => {
+   })();
+ 
+   return(
+-    <View style={[cardStyle.container, props.style]}>
++    <View key={props._key} style={[cardStyle.container, props.style]}>
+       {children}
+     </View>
+   )

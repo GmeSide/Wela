@@ -100,7 +100,7 @@ export default class FavouritesList extends Component {
         return (
 
             <Card
-                key={index}
+                _key={index}
                 elevation={4}
                 style={{ padding: 20, margin: 10, }}>
                 <TouchableOpacity >
