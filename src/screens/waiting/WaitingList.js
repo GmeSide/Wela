@@ -61,13 +61,17 @@ export default class WaitingList extends Component {
 
     updateCurrentlyWaitingList = (id) => {
         let itemsArr = this.state.dataCurrentlyWaiting
-        var itemIndex = itemsArr.findIndex(item => id === item.id);
-        itemsArr[itemIndex]['expanded'] = !itemsArr[itemIndex]['expanded'];
-        this.setState({ dataCurrentlyWaiting: itemsArr })
+        if (itemsArr && Array.isArray(itemsArr)) {
+          var itemIndex = itemsArr.findIndex(item => id === item.id);
+          if (itemIndex != -1) {
+            itemsArr[itemIndex]['expanded'] = !itemsArr[itemIndex]['expanded'];
+            this.setState({ dataCurrentlyWaiting: itemsArr })
+          }
+        }
     }
 
     innerViewOfRowWaitingList(item, index) {
-        var statusObject = this.state.statuses[index]
+        var statusObject = (this.state.statuses && this.state.statuses.length > 0) ? this.state.statuses[index] : {}
         Helper.DEBUG_LOG(statusObject)
         if (item.expanded) {
             return (
@@ -76,7 +80,7 @@ export default class WaitingList extends Component {
                     marginTop: 10
                 }}>
                     <View style={{ flexDirection: 'row', flex: 1 }}>
-                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.black, paddingLeft: 4, maxWidth: '70%' }}>{item.venue[0].business_address}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.black, paddingLeft: 4, maxWidth: '70%' }}>{(item.venue && item.venue.length) ? item.venue[0].business_address : ''}</Text>
                         <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 10 }}>{`${Number(statusObject.distance).toFixed(2)} km away`}</Text>
                     </View>
 
@@ -140,9 +144,13 @@ export default class WaitingList extends Component {
 
     updateList = (id) => {
         let itemsArr = this.state.dataLastThirtyDays
-        var itemIndex = itemsArr.findIndex(item => id === item.id);
-        itemsArr[itemIndex]['expanded'] = !itemsArr[itemIndex]['expanded'];
-        this.setState({ dataLastThirtyDays: itemsArr })
+        if (itemsArr && Array.isArray(itemsArr)) {
+          var itemIndex = itemsArr.findIndex(item => id === item.id);
+          if (itemIndex != -1) {
+            itemsArr[itemIndex]['expanded'] = !itemsArr[itemIndex]['expanded'];
+            this.setState({ dataLastThirtyDays: itemsArr })
+          }
+        }
     }
 
     innerViewOfRow(item, index) {
@@ -153,7 +161,7 @@ export default class WaitingList extends Component {
                     marginTop: 10
                 }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{item.venue[0].business_address}</Text>
+                        <Text style={{ fontFamily: 'Rubik-Light', flex: 1, fontSize: 12, color: colors.black, paddingLeft: 4 }}>{(item.venue && item.venue.length) ? item.venue[0].business_address : ''}</Text>
                         {/* <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.lightGray, paddingLeft: 4 }}>1 km away</Text> */}
                     </View>
 
@@ -234,11 +242,9 @@ export default class WaitingList extends Component {
     }
 
     getColor(index) {
-        // let venue = item.venue[0]
-        //let isFav = await Helper.isVenueFavourited(venue.id)
         // Helper.DEBUG_LOG(this.state.statuses)
         // Helper.DEBUG_LOG(this.state.statuses[index].isFav)
-        if (this.state.statuses[index]) {
+        if (this.state.statuses && this.state.statuses.length > 0 && this.state.statuses[index]) {
           if (this.state.statuses[index].isFav) {
               return colors.red
           } else {
@@ -250,7 +256,7 @@ export default class WaitingList extends Component {
     }
 
     changeStatus(index) {
-        if (this.state.statuses[index].isFav == true) {
+        if (this.state.statuses[index]?.isFav == true) {
             let itemsArr = this.state.statuses
             itemsArr[index]['isFav'] = false
             this.setState({ statuses: itemsArr })
@@ -267,24 +273,26 @@ export default class WaitingList extends Component {
         let nextStatus = await this.changeStatus(index)
 
         var PAYLOAD
-        if (nextStatus == true) {
-            PAYLOAD = await addToFavourite(item.venue[0].id)
-        } else {
-            PAYLOAD = await removeFavourite(item.venue[0].id)
+        if (item.venue && item.venue.length > 0) {
+          if (nextStatus == true) {
+              PAYLOAD = await addToFavourite(item.venue[0].id)
+          } else {
+              PAYLOAD = await removeFavourite(item.venue[0].id)
+          }
+          PostRequest(ADD_TO_FAVOUITE, PAYLOAD).then((jsonObject) => {
+              if (jsonObject.success) {
+                  Helper.userFavouritesVenue = jsonObject.apiResponse.data
+              }
+          })
         }
-        PostRequest(ADD_TO_FAVOUITE, PAYLOAD).then((jsonObject) => {
-            if (jsonObject.success) {
-                Helper.userFavouritesVenue = jsonObject.apiResponse.data
-            }
-        })
     }
 
     onShare = async (item) => {
         try {
-            var url = `https://www.google.com/maps/search/?api=1&query=${item.venue[0].latitude},${item.venue[0].longitude}`
+            var url = `https://www.google.com/maps/search/?api=1&query=${(item.venue && item.venue.length) ? item.venue[0].latitude : 0},${(item.venue && item.venue.length) ? item.venue[0].longitude : 0}`
 
-            var name = item.venue[0].business_name
-            var location = item.venue[0].location
+            var name = (item.venue && item.venue.length) ? item.venue[0].business_name : ''
+            var location = (item.venue && item.venue.length) ? item.venue[0].location : ''
             var mMesage = `${name}, ${location} \n ${url}`
             const result = await Share.share({
                 title: name,
@@ -422,14 +430,16 @@ export default class WaitingList extends Component {
 
         this.showLoader('Waiting..')
         this.setState({ dataCurrentlyWaiting: filteredData });
-        const PAYLOAD = await updateVenueQueListByUser(removedItem.id, 'cancel', removedItem.venue[0].id)
-        PostRequest(CANCEL_WAITING_LIST_BY_USER, PAYLOAD, true).then((jsonObject) => {
-            this.hideLoader()
-            if (jsonObject.success) {
-                Helper.DEBUG_LOG(jsonObject.apiResponse)
-                Helper.updateUserQueList(jsonObject.apiResponse)
-            }
-        })
+        if (removedItem?.venue && removedItem?.venue?.length > 0) {
+          const PAYLOAD = await updateVenueQueListByUser(removedItem.id, 'cancel', removedItem.venue[0].id)
+          PostRequest(CANCEL_WAITING_LIST_BY_USER, PAYLOAD, true).then((jsonObject) => {
+              this.hideLoader()
+              if (jsonObject.success) {
+                  Helper.DEBUG_LOG(jsonObject.apiResponse)
+                  Helper.updateUserQueList(jsonObject.apiResponse)
+              }
+          })
+        }
     }
 
     //-- SYNC PRE-LOADED DATA
@@ -657,7 +667,7 @@ export default class WaitingList extends Component {
                                                 }}>
                                                 {item.created_at}
                                             </Text>
-                                            {/* <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTime(item.venue[0].average_wait_time)}</Text> */}
+                                            {/* <Text style={{ fontFamily: 'Rubik-Light', fontSize: 12, color: colors.darkGray, paddingLeft: 4 }}>{this.getAverageWaitTime((item.venue && item.venue.length) ? item.venue[0].average_wait_time : '')}</Text> */}
                                             {this.innerViewOfRow(item, item.venue && item.venue.length > 0 ? item.venue[0] : -1)}
                                         </View>
                                     </TouchableOpacity>
