@@ -62,7 +62,7 @@ export default class ManuallyAddQueue extends React.Component {
         this.setState({ isLoading: false, contact: [{ name: '', phone: '' }], personsCount: 1 })
         if (jsonObject.success) {
           showToastMessage("Create Account", jsonObject.apiResponse.message)
-          this.props.onAddManualQueueRequest()
+          this.props.onAddManualQueueRequest(isAddLog)
         } else {
           this.props.onAddManualQueueRequest(true)
         }

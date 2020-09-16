@@ -45,7 +45,10 @@ export default class CustomerLog extends Component {
     if (status == "confirm" || status == "Confirm") {
       return "Notified"
     } else {
-      return status.length ? status.charAt(0).toUpperCase() + status.slice(1) : status
+      if (status == null) {
+        return "N/A"
+      }
+      return status?.length ? status.charAt(0).toUpperCase() + status.slice(1) : status
     }
   }
 
@@ -145,7 +148,7 @@ export default class CustomerLog extends Component {
                       fontWeight: 'bold',
                       paddingLeft: 4,
                     }}>
-                    {item.user}
+                    {item.user ? item.user : 'N/A'}
                   </Text>
                   <Text
                     style={{
