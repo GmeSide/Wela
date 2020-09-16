@@ -1,6 +1,6 @@
 /* @flow */
 import React from "react";
-import { FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from "react-native";
 import { Card } from 'react-native-shadow-cards';
 import { colors } from "../../common/AppColors";
 import LoadingView from "../../common/LoadingView";
@@ -8,6 +8,8 @@ import { PostRequest, showToastMessage } from '../../network/ApiRequest.js';
 import { MANUAL_ADD, MANUAL_ADD_LOG } from '../../network/EndPoints';
 import { addUserToQueueManually } from '../../network/PostDataPayloads';
 import Helper from '../../utils/Helper.js';
+
+const DEVICE_WIDTH = Dimensions.get('window').width;
 
 
 export default class ManuallyAddQueue extends React.Component {
@@ -145,10 +147,9 @@ export default class ManuallyAddQueue extends React.Component {
                   flexDirection: 'column',
                 }}>
                   <View style={{
-                    width: '100%',
+                    width: DEVICE_WIDTH - 40,
                     borderRadius: 4,
                     backgroundColor: colors.input_box_grey,
-                    marginLeft: 5,
                     height: 40,
                     flexDirection: 'row',
                     justifyContent: 'center',
@@ -182,30 +183,28 @@ export default class ManuallyAddQueue extends React.Component {
                   </View>
 
                   <View style={{
-                    width: '100%',
+                    width: DEVICE_WIDTH - 40,
                     borderRadius: 4,
-                    backgroundColor: colors.input_box_grey,
-                    marginLeft: 5,
+                    backgroundColor: colors.white,
                     marginTop: 10,
                     height: 40,
                     flexDirection: 'row',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     alignContent: 'center',
-                    alignSelf: 'center',
                     textAlignVertical: 'center',
                   }}>
                     <TextInput
                       ref={'contact' + index + 'phone'}
                       style={{
-                        width: '100%',
+                        height: 40,
                         color: colors.black,
                         justifyContent: 'center',
                         textAlignVertical: 'center',
-                        alignSelf: 'center',
-                        alignContent: 'center',
                         alignItems: 'center',
                         textAlign: 'left',
                         flex: 0.7,
+                        backgroundColor: colors.input_box_grey,
+                        borderRadius: 4,
                       }}
                       placeholder={'Customer Phone Number'}
                       autoCorrect={false}
@@ -220,15 +219,14 @@ export default class ManuallyAddQueue extends React.Component {
                     />
 
                     <View style={{
+                      marginLeft: 8,
                       flexDirection: 'row',
                       flex: 0.3,
                       height: '100%',
-                      alignContent: 'center',
                       alignItems: 'center',
                       borderRadius: 4,
                       justifyContent: 'center',
                       backgroundColor: colors.input_box_grey,
-                      marginRight: Helper.isIOS() ? 0 : 10
                     }}>
                       <TouchableOpacity
                         onPress={() => this.decreaseCount()}
@@ -281,7 +279,7 @@ export default class ManuallyAddQueue extends React.Component {
 
             <View style={{
               height: 50,
-              width: '100%',
+              width: DEVICE_WIDTH - 40,
               marginTop: 10,
               flexDirection: 'row',
               alignItems: 'center',
