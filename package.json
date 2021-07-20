@@ -27,7 +27,7 @@
     "moment": "^2.27.0",
     "patch-package": "^6.2.2",
     "react": "16.11.0",
-    "react-native": "0.62.2",
+    "react-native": "0.62.3",
     "react-native-contacts": "^5.2.3",
     "react-native-fbsdk": "^2.0.0",
     "react-native-flip-toggle-button": "^1.0.8",
